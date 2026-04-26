@@ -1,0 +1,281 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/idle_left/camiel_idle_left_01.png" id="1_vpfck"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/idle_left/camiel_idle_left_02.png" id="2_kdhen"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/idle_left/camiel_idle_left_03.png" id="3_rritt"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/idle_left/camiel_idle_left_04.png" id="4_v8kd5"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/idle_right/camiel_idle_right_01.png" id="5_ep82u"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/idle_right/camiel_idle_right_02.png" id="6_1pcvy"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/idle_right/camiel_idle_right_03.png" id="7_y1dw3"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/idle_right/camiel_idle_right_04.png" id="8_8wt8o"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/jump_left/camiel_jump_left_01.png" id="9_esvcc"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/jump_left/camiel_jump_left_02.png" id="10_pnb01"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/jump_left/camiel_jump_left_03.png" id="11_a040f"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/jump_left/camiel_jump_left_04.png" id="12_wl2uj"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/jump_right/camiel_jump_right_01.png" id="13_n702d"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/jump_right/camiel_jump_right_02.png" id="14_sa1l5"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/jump_right/camiel_jump_right_03.png" id="15_hpeix"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/jump_right/camiel_jump_right_04.png" id="16_32lfe"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_left/camiel_run_left_01.png" id="17_bsdtf"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_left/camiel_run_left_02.png" id="18_v4kpc"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_left/camiel_run_left_03.png" id="19_50ahn"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_left/camiel_run_left_04.png" id="20_w75fx"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_left/camiel_run_left_05.png" id="21_8br7s"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_left/camiel_run_left_06.png" id="22_5q51c"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_right/camiel_run_right_01.png" id="23_tcqct"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_right/camiel_run_right_02.png" id="24_nfqt3"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_right/camiel_run_right_03.png" id="25_ui8bn"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_right/camiel_run_right_04.png" id="26_7etft"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_right/camiel_run_right_05.png" id="27_6o8sn"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/run_right/camiel_run_right_06.png" id="28_03xec"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sit_left/camiel_sit_left_01.png" id="29_1bdda"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sit_left/camiel_sit_left_02.png" id="30_drjdr"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sit_left/camiel_sit_left_03.png" id="31_1gdok"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sit_left/camiel_sit_left_04.png" id="32_8x1jq"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sit_right/camiel_sit_right_01.png" id="33_sehot"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sit_right/camiel_sit_right_02.png" id="34_3bhp1"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sit_right/camiel_sit_right_03.png" id="35_ihbkl"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sit_right/camiel_sit_right_04.png" id="36_is6re"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sleep_left/camiel_sleep_left_01.png" id="37_ijk6x"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sleep_left/camiel_sleep_left_02.png" id="38_2j88n"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sleep_left/camiel_sleep_left_03.png" id="39_a2p6j"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sleep_right/camiel_sleep_right_01.png" id="40_wl2m0"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sleep_right/camiel_sleep_right_02.png" id="41_vu8fb"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/sleep_right/camiel_sleep_right_03.png" id="42_mhyky"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_left/camiel_walk_left_01.png" id="43_nmfgs"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_left/camiel_walk_left_02.png" id="44_twxby"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_left/camiel_walk_left_03.png" id="45_8bh8d"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_left/camiel_walk_left_04.png" id="46_y135l"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_left/camiel_walk_left_05.png" id="47_5f05m"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_left/camiel_walk_left_06.png" id="48_pcor6"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_right/camiel_walk_right_01.png" id="49_3hgeh"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_right/camiel_walk_right_02.png" id="50_3ijt5"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_right/camiel_walk_right_03.png" id="51_weu1l"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_right/camiel_walk_right_04.png" id="52_vjvdh"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_right/camiel_walk_right_05.png" id="53_thwxg"]
+[ext_resource type="Texture2D" path="res://assets/camiel/animations/walk_right/camiel_walk_right_06.png" id="54_qpr8a"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_vpfck")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_kdhen")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_rritt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_v8kd5")
+}],
+"loop": true,
+"name": &"idle_left",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_ep82u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_1pcvy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_y1dw3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_8wt8o")
+}],
+"loop": true,
+"name": &"idle_right",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_esvcc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_pnb01")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_a040f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_wl2uj")
+}],
+"loop": false,
+"name": &"jump_left",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_n702d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_sa1l5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_hpeix")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_32lfe")
+}],
+"loop": false,
+"name": &"jump_right",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_bsdtf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_v4kpc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_50ahn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_w75fx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_8br7s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_5q51c")
+}],
+"loop": true,
+"name": &"run_left",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("23_tcqct")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_nfqt3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_ui8bn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_7etft")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_6o8sn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_03xec")
+}],
+"loop": true,
+"name": &"run_right",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("29_1bdda")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_drjdr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_1gdok")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_8x1jq")
+}],
+"loop": false,
+"name": &"sit_left",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("33_sehot")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_3bhp1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35_ihbkl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_is6re")
+}],
+"loop": false,
+"name": &"sit_right",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("37_ijk6x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_2j88n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39_a2p6j")
+}],
+"loop": true,
+"name": &"sleep_left",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("40_wl2m0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41_vu8fb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("42_mhyky")
+}],
+"loop": true,
+"name": &"sleep_right",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("43_nmfgs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("44_twxby")
+}, {
+"duration": 1.0,
+"texture": ExtResource("45_8bh8d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("46_y135l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("47_5f05m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("48_pcor6")
+}],
+"loop": true,
+"name": &"walk_left",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("49_3hgeh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("50_3ijt5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("51_weu1l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("52_vjvdh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("53_thwxg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("54_qpr8a")
+}],
+"loop": true,
+"name": &"walk_right",
+"speed": 8.0
+}]

@@ -1,0 +1,14 @@
+# Godot local/editor cache
+.godot/
+
+# Temporary/generated working files
+tmp/
+
+# Exported binaries are attached to GitHub Releases instead of committed.
+builds/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+

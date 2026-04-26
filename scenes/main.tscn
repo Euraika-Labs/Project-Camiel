@@ -1,0 +1,182 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/camiel.tscn" id="1_o5qli"]
+[ext_resource type="Script" path="res://scripts/intro_scene.gd" id="2_m1n7v"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(1600, 90)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(260, 36)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(40, 420)
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font_size = 44
+font_color = Color(0.0941176, 0.0784314, 0.0627451, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_message"]
+font_size = 26
+font_color = Color(0.0941176, 0.0784314, 0.0627451, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_small"]
+font_size = 22
+font_color = Color(1, 1, 1, 1)
+
+[node name="Main" type="Node2D" unique_id=310573785]
+script = ExtResource("2_m1n7v")
+
+[node name="Sky" type="ColorRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.6, 0.84, 1, 1)
+
+[node name="CloudA" type="ColorRect" parent="."]
+offset_left = 110.0
+offset_top = 92.0
+offset_right = 300.0
+offset_bottom = 132.0
+color = Color(1, 1, 1, 0.78)
+
+[node name="CloudB" type="ColorRect" parent="."]
+offset_left = 850.0
+offset_top = 118.0
+offset_right = 1120.0
+offset_bottom = 158.0
+color = Color(1, 1, 1, 0.72)
+
+[node name="GroundVisual" type="ColorRect" parent="."]
+offset_top = 590.0
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.43, 0.74, 0.31, 1)
+
+[node name="GroundTop" type="ColorRect" parent="."]
+offset_top = 590.0
+offset_right = 1280.0
+offset_bottom = 606.0
+color = Color(0.75, 0.93, 0.43, 1)
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(640, 635)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="PlatformVisual" type="ColorRect" parent="."]
+offset_left = 810.0
+offset_top = 500.0
+offset_right = 1070.0
+offset_bottom = 536.0
+color = Color(0.91, 0.67, 0.29, 1)
+
+[node name="PlatformTop" type="ColorRect" parent="."]
+offset_left = 810.0
+offset_top = 500.0
+offset_right = 1070.0
+offset_bottom = 510.0
+color = Color(1, 0.84, 0.42, 1)
+
+[node name="Platform" type="StaticBody2D" parent="."]
+position = Vector2(940, 518)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform"]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(-20, 390)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(1300, 390)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="RedBlock" type="ColorRect" parent="."]
+offset_left = 270.0
+offset_top = 490.0
+offset_right = 370.0
+offset_bottom = 590.0
+color = Color(0.9, 0.11, 0.13, 1)
+
+[node name="Label" type="Label" parent="RedBlock"]
+offset_right = 100.0
+offset_bottom = 100.0
+text = "rood"
+label_settings = SubResource("LabelSettings_small")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="YellowBlock" type="ColorRect" parent="."]
+offset_left = 410.0
+offset_top = 490.0
+offset_right = 510.0
+offset_bottom = 590.0
+color = Color(0.95, 0.75, 0.12, 1)
+
+[node name="Label" type="Label" parent="YellowBlock"]
+offset_right = 100.0
+offset_bottom = 100.0
+text = "geel"
+label_settings = SubResource("LabelSettings_small")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BlueBlock" type="ColorRect" parent="."]
+offset_left = 550.0
+offset_top = 490.0
+offset_right = 650.0
+offset_bottom = 590.0
+color = Color(0.08, 0.35, 0.95, 1)
+
+[node name="Label" type="Label" parent="BlueBlock"]
+offset_right = 100.0
+offset_bottom = 100.0
+text = "blauw"
+label_settings = SubResource("LabelSettings_small")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Camiel" parent="." instance=ExtResource("1_o5qli")]
+position = Vector2(160, 590)
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1870331745]
+position = Vector2(640, 360)
+enabled = true
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Title" type="Label" parent="UI"]
+offset_left = 42.0
+offset_top = 26.0
+offset_right = 760.0
+offset_bottom = 88.0
+text = "Camiel zegt hallo!"
+label_settings = SubResource("LabelSettings_title")
+
+[node name="MessagePanel" type="ColorRect" parent="UI"]
+offset_left = 42.0
+offset_top = 96.0
+offset_right = 560.0
+offset_bottom = 150.0
+color = Color(1, 1, 1, 0.78)
+
+[node name="Message" type="Label" parent="UI/MessagePanel"]
+offset_left = 18.0
+offset_top = 8.0
+offset_right = 500.0
+offset_bottom = 48.0
+text = "Hallo! Help Camiel op ontdekking."
+label_settings = SubResource("LabelSettings_message")
+
+[node name="Controls" type="Label" parent="UI"]
+offset_left = 42.0
+offset_top = 164.0
+offset_right = 900.0
+offset_bottom = 205.0
+text = "Links/rechts = wandelen    Spatie = springen    S = zitten    X = slapen"
+label_settings = SubResource("LabelSettings_message")
