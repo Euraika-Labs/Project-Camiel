@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "alpha-v*"
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to create or update"
+        required: true
+        default: "alpha-v0.0.1"
+
+permissions:
+  contents: write
+
+env:
+  GODOT_VERSION: 4.6.2
+  GODOT_STATUS: stable
+  GODOT_TEMPLATE_VERSION: 4.6.2.stable
+  GODOT_BIN: Godot_v4.6.2-stable_linux.x86_64
+
+jobs:
+  release-windows:
+    name: Build and publish Windows release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve release tag
+        id: release
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install system dependencies
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip zip
+
+      - name: Download Godot
+        shell: bash
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/godot.zip" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/${GODOT_BIN}"
+
+      - name: Install export templates
+        shell: bash
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/export_templates.tpz" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
+          unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}"
+          cp -R "$RUNNER_TEMP/export_templates/templates/." "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/"
+
+      - name: Verify project
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --editor --path . --quit
+          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --path . --script "res://scripts/tools/verify_camiel_resources.gd"
+
+      - name: Build Windows release
+        shell: bash
+        run: |
+          mkdir -p dist/windows
+          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --path . \
+            --export-release "Windows Desktop" \
+            "dist/windows/Camiel-${{ steps.release.outputs.tag }}.exe"
+          zip -j "dist/windows/Camiel-${{ steps.release.outputs.tag }}-windows.zip" "dist/windows/Camiel-${{ steps.release.outputs.tag }}.exe"
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --title "Camiel ${RELEASE_TAG}" --notes-file ALPHA_V0_0_1_NOTES.md
+          fi
+          gh release upload "$RELEASE_TAG" dist/windows/* --clobber

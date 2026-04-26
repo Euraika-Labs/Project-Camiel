@@ -1,0 +1,62 @@
+name: CodeQL
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: "21 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze GitHub Actions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check code scanning availability
+        id: code-security
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          visibility="$(gh api "repos/${GITHUB_REPOSITORY}" --jq '.visibility')"
+          code_security="$(gh api "repos/${GITHUB_REPOSITORY}" --jq '.security_and_analysis.advanced_security.status // .security_and_analysis.code_security.status')"
+          if [ -z "$code_security" ]; then
+            code_security="unavailable"
+          fi
+
+          if [ "$visibility" = "public" ] || [ "$code_security" = "enabled" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::CodeQL is configured, but code scanning for private repositories requires GitHub Code Security or Advanced Security."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Initialize CodeQL
+        if: steps.code-security.outputs.enabled == 'true'
+        uses: github/codeql-action/init@v4
+        with:
+          languages: actions
+          config-file: ./.github/codeql/codeql-config.yml
+
+      - name: Perform CodeQL analysis
+        if: steps.code-security.outputs.enabled == 'true'
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:actions"

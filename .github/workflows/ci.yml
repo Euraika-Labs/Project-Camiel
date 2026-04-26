@@ -1,0 +1,163 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.6.2
+  GODOT_STATUS: stable
+  GODOT_TEMPLATE_VERSION: 4.6.2.stable
+  GODOT_BIN: Godot_v4.6.2-stable_linux.x86_64
+
+jobs:
+  repository-hygiene:
+    name: Repository hygiene
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check tracked file sizes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+          import sys
+
+          limit = 95 * 1024 * 1024
+          files = subprocess.check_output(["git", "ls-files"], text=True).splitlines()
+          too_large = []
+          for path in files:
+              if os.path.isfile(path):
+                  size = os.path.getsize(path)
+                  if size > limit:
+                      too_large.append((path, size))
+
+          for path, size in too_large:
+              print(f"::error file={path}::Tracked file is {size} bytes; keep binaries in GitHub Releases.")
+
+          if too_large:
+              sys.exit(1)
+          PY
+
+      - name: Check for conflict markers
+        shell: bash
+        run: |
+          if git grep -n -E '^(<<<<<<<|=======|>>>>>>>)' -- . ':!.godot' ':!tmp' ':!builds'; then
+            echo "::error::Conflict markers found."
+            exit 1
+          fi
+
+  verify-godot:
+    name: Verify Godot project
+    runs-on: ubuntu-latest
+    needs:
+      - repository-hygiene
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+
+      - name: Download Godot
+        shell: bash
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/godot.zip" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/${GODOT_BIN}"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+
+      - name: Import project
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --editor --path . --quit
+
+      - name: Verify resources
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --path . --script "res://scripts/tools/verify_camiel_resources.gd"
+
+      - name: Smoke test main scene
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --path . --quit-after 2
+
+  export-windows:
+    name: Export Windows build
+    runs-on: ubuntu-latest
+    needs:
+      - verify-godot
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip zip
+
+      - name: Download Godot
+        shell: bash
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/godot.zip" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/${GODOT_BIN}"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+
+      - name: Install export templates
+        shell: bash
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/export_templates.tpz" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
+          unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}"
+          cp -R "$RUNNER_TEMP/export_templates/templates/." "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/"
+
+      - name: Import project
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --editor --path . --quit
+
+      - name: Export Windows release
+        shell: bash
+        run: |
+          mkdir -p dist/windows
+          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --path . \
+            --export-release "Windows Desktop" \
+            "dist/windows/Camiel-alpha-v0.0.1.exe"
+          zip -j "dist/windows/Camiel-alpha-v0.0.1-windows.zip" "dist/windows/Camiel-alpha-v0.0.1.exe"
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Camiel-alpha-v0.0.1-windows
+          path: dist/windows/*
+          if-no-files-found: error
+          retention-days: 14

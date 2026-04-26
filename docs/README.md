@@ -9,6 +9,7 @@ This folder documents what is known and what has been done so far for Project Ca
 - [Godot Setup](godot-setup.md)
 - [Assets And Animations](assets-and-animations.md)
 - [Build And Release](build-and-release.md)
+- [CI And Community Standards](ci-and-community-standards.md)
 - [Roadmap](roadmap.md)
 
 ## Current Status

@@ -1,5 +1,8 @@
 # Project Camiel
 
+[![CI](https://github.com/Euraika-Labs/Project-Camiel/actions/workflows/ci.yml/badge.svg)](https://github.com/Euraika-Labs/Project-Camiel/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Euraika-Labs/Project-Camiel/actions/workflows/codeql.yml/badge.svg)](https://github.com/Euraika-Labs/Project-Camiel/actions/workflows/codeql.yml)
+
 Project Camiel is a small Godot 4 intro game for young children.
 
 ## Alpha v0.0.1
@@ -24,3 +27,7 @@ The Windows alpha build is published as a GitHub Release asset for `alpha-v0.0.1
 ## Documentation
 
 See the `docs/` folder for project history, setup, asset structure, Godot implementation details, build/release steps, and roadmap notes.
+
+## Community And Security
+
+This repository includes CI, CodeQL workflow scanning where GitHub Code Security is available, Dependabot for GitHub Actions, issue templates, a pull request template, contributing guidelines, security policy, support notes, and a project license.

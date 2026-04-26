@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest a small improvement or new learning idea.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep suggestions gentle, simple, and age-appropriate for young children.
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: What should be added or improved?
+    validations:
+      required: true
+  - type: textarea
+    id: child_value
+    attributes:
+      label: Value for children
+      description: How does this help the target audience?
+    validations:
+      required: false
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Very small
+        - Small
+        - Medium
+        - Not sure
+    validations:
+      required: true
