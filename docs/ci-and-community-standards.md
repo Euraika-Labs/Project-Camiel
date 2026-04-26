@@ -17,6 +17,8 @@ CodeQL is still configured for GitHub Actions workflow analysis. If supported la
 
 The GitHub repository is currently private. GitHub requires GitHub Code Security or Advanced Security before code scanning results can be uploaded for private repositories. The workflow detects that condition and leaves a notice instead of failing the whole pipeline when code scanning is not available.
 
+At setup time on 2026-04-26, GitHub reported that Advanced Security has not been purchased for this private repository. CodeQL is therefore configured and ready, but it will only run analysis once GitHub Code Security or Advanced Security is enabled for the repository or organization.
+
 ## Community Health Files
 
 The repository includes:
