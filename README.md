@@ -30,4 +30,4 @@ See the `docs/` folder for project history, setup, asset structure, Godot implem
 
 ## Community And Security
 
-This repository includes CI, CodeQL workflow scanning where GitHub Code Security is available, Dependabot for GitHub Actions, issue templates, a pull request template, contributing guidelines, security policy, support notes, and a project license.
+This repository includes CI, an AI-slop quality gate, CodeQL workflow scanning where GitHub Code Security is available, Dependabot for GitHub Actions, issue templates, a pull request template, contributing guidelines, security policy, support notes, and a project license.

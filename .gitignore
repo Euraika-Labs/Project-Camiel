@@ -12,3 +12,6 @@ builds/
 Thumbs.db
 desktop.ini
 
+# Python local test cache
+__pycache__/
+*.pyc

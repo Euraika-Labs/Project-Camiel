@@ -31,6 +31,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Test quality gate
+        shell: bash
+        run: |
+          python3 -m unittest tests.test_quality_gate
+
+      - name: Run AI quality gate
+        shell: bash
+        run: |
+          python3 scripts/tools/quality_gate.py --root .
+
       - name: Check tracked file sizes
         shell: bash
         run: |

@@ -9,6 +9,24 @@ The repository includes these workflows:
 - `Dependency Review`: checks dependency changes in pull requests.
 - `Release`: builds Windows release artifacts and uploads them to a GitHub Release for matching tags.
 
+## AI Quality Gate
+
+The CI workflow includes a Project Camiel quality gate at `scripts/tools/quality_gate.py`.
+
+It blocks common AI-slop and AI-error patterns:
+
+- Assistant self-disclaimer text.
+- Unfinished future-work markers.
+- Filler copy, replace-me copy, and unsupported future promises.
+- Broken local Markdown links.
+- Local Markdown links that point outside the repository.
+- Missing Godot `res://` resource paths in `.gd`, `.godot`, `.tscn`, `.tres`, and export config files.
+- Empty tracked files.
+- PNG assets under `assets/` without matching Godot `.import` metadata.
+- Accidental removal of required community, security, and CI files.
+
+The quality gate has its own unittest coverage in `tests/test_quality_gate.py`.
+
 ## CodeQL Notes
 
 Project Camiel is primarily written in GDScript. CodeQL does not currently support GDScript as a CodeQL language.
