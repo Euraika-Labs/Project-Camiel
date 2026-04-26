@@ -155,7 +155,7 @@ jobs:
           zip -j "dist/windows/Camiel-alpha-v0.0.1-windows.zip" "dist/windows/Camiel-alpha-v0.0.1.exe"
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Camiel-alpha-v0.0.1-windows
           path: dist/windows/*
