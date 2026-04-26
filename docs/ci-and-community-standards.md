@@ -53,15 +53,45 @@ The repository includes:
 
 The repository has these GitHub settings configured:
 
+- Repository visibility is public.
 - Issues enabled.
 - Wiki disabled.
+- Discussions enabled.
 - Projects enabled.
+- Merge commits disabled.
+- Squash merging enabled.
+- Rebase merging enabled.
+- Auto-merge enabled.
+- Always suggest updating pull request branches enabled.
 - Delete branch on merge enabled.
+- Web-based commit signoff enabled.
 - Dependabot alerts enabled.
 - Dependabot automated security fixes enabled.
 - Private vulnerability reporting enabled.
 - Secret scanning enabled.
 - Secret scanning push protection enabled.
+
+## Main Branch Protection
+
+The `main` branch is protected.
+
+Required checks:
+
+- `Repository hygiene`
+- `Verify Godot project`
+- `Export Windows build`
+- `Analyze GitHub Actions`
+
+Protection rules:
+
+- Pull request required before merging.
+- One approving review required.
+- Stale approvals are dismissed when new commits are pushed.
+- Branch must be up to date before merge.
+- Conversation resolution required before merge.
+- Linear history required.
+- Force pushes disabled.
+- Branch deletion disabled.
 
 ## Binary Policy
 
