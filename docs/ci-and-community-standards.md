@@ -86,10 +86,13 @@ Protection rules:
 
 - Pull request required before merging.
 - One approving review required.
+- Approval from someone other than the last pusher required.
 - Stale approvals are dismissed when new commits are pushed.
 - Branch must be up to date before merge.
 - Conversation resolution required before merge.
 - Linear history required.
+- Signed commits required.
+- Protection applies to administrators.
 - Force pushes disabled.
 - Branch deletion disabled.
 
