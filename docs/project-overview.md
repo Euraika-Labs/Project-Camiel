@@ -39,7 +39,7 @@ GitHub repository:
 
 https://github.com/Euraika-Labs/Project-Camiel
 
-The repository is private at the time of writing.
+The repository is public as of 2026-04-26.
 
 ## Release
 

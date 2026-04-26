@@ -104,10 +104,12 @@ These build files are ignored by git and uploaded to GitHub Releases instead.
 
 ## GitHub
 
-A private GitHub repository was created:
+A GitHub repository was created:
 
 `Euraika-Labs/Project-Camiel`
 
 The source project was committed and pushed to `main`.
 
 Release `alpha-v0.0.1` was created with the Windows `.exe` and `.zip` as release assets.
+
+On 2026-04-26, the repository was made public. CodeQL code scanning, secret scanning, secret scanning push protection, Dependabot alerts, Dependabot security updates, and private vulnerability reporting were configured for the public repository.

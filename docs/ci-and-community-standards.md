@@ -31,11 +31,9 @@ The quality gate has its own unittest coverage in `tests/test_quality_gate.py`.
 
 Project Camiel is primarily written in GDScript. CodeQL does not currently support GDScript as a CodeQL language.
 
-CodeQL is still configured for GitHub Actions workflow analysis. If supported languages are added later, the CodeQL setup can be expanded.
+CodeQL is configured for GitHub Actions workflow analysis. The repository is public as of 2026-04-26, so GitHub code scanning can upload CodeQL results without requiring a private-repository Code Security purchase.
 
-The GitHub repository is currently private. GitHub requires GitHub Code Security or Advanced Security before code scanning results can be uploaded for private repositories. The workflow detects that condition and leaves a notice instead of failing the whole pipeline when code scanning is not available.
-
-At setup time on 2026-04-26, GitHub reported that Advanced Security has not been purchased for this private repository. CodeQL is therefore configured and ready, but it will only run analysis once GitHub Code Security or Advanced Security is enabled for the repository or organization.
+If supported source languages are added later, the CodeQL setup can be expanded.
 
 ## Community Health Files
 
@@ -61,8 +59,9 @@ The repository has these GitHub settings configured:
 - Delete branch on merge enabled.
 - Dependabot alerts enabled.
 - Dependabot automated security fixes enabled.
-
-Secret scanning and push protection are not available on the current private repository plan unless GitHub Secret Protection is enabled for the organization.
+- Private vulnerability reporting enabled.
+- Secret scanning enabled.
+- Secret scanning push protection enabled.
 
 ## Binary Policy
 
