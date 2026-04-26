@@ -20,3 +20,7 @@ Project Camiel is a small Godot 4 intro game for young children.
 ## Build
 
 The Windows alpha build is published as a GitHub Release asset for `alpha-v0.0.1`.
+
+## Documentation
+
+See the `docs/` folder for project history, setup, asset structure, Godot implementation details, build/release steps, and roadmap notes.

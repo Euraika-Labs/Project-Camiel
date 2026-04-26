@@ -11,6 +11,8 @@ This alpha is a small playable intro for very young children.
 - Simple intro level with a grass floor and a small platform.
 - Large child-friendly intro text.
 - Basic color blocks: rood, geel, blauw.
+- Windows export preset.
+- Windows alpha build published as a GitHub Release asset.
 
 ## Controls
 
@@ -26,4 +28,4 @@ This alpha is a small playable intro for very young children.
 - Save system.
 - Audio.
 - Score or collectible flow.
-- Exported Windows build.
+- Code signing.
