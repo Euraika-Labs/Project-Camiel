@@ -17,3 +17,7 @@ This folder documents what is known and what has been done so far for Project Ca
 Project Camiel is currently at `alpha-v0.0.1`.
 
 The alpha is a small Godot 4 intro experience for children from around 3 years old. It focuses on a friendly character, simple movement, clear colors, and a gentle first interaction.
+
+For the broader product vision, safety model, character bible, and long-term architecture notes, see the GitHub Wiki:
+
+https://github.com/Euraika-Labs/Project-Camiel/wiki
