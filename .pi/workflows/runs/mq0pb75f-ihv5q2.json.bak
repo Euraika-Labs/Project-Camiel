@@ -1,0 +1,50 @@
+{
+  "runId": "mq0pb75f-ihv5q2",
+  "workflowName": "camiel-roadmap",
+  "script": "export const meta = { name: 'camiel-roadmap', description: 'Get roadmap status', phases: [{ title: 'Find' }] };\n\nconst r = await agent(`In /Volumes/T9/Code/projects/Project-Camiel: run git branch -a && git tag -l && git log --oneline -15 && cat package.json && find . -maxdepth 2 -iname \"roadmap*\" -o -iname \"changelog*\" -o -iname \"todo*\" 2>/dev/null | head -20 && ls .claude/ 2>/dev/null && cat .claude/CLAUDE.md 2>/dev/null | grep -i -A3 \"roadmap\\|planned\\|TODO\\|next\\|release\\|milestone\"`, { label: 'roadmap', tier: 'small', cwd: '/Volumes/T9/Code/projects/Project-Camiel' });\n\nreturn { ok: true, result: r };",
+  "sessionId": "019e96fe-9bb9-74e7-8536-0ddc4bea7482",
+  "journal": [
+    {
+      "index": 0,
+      "hash": "0cb4233428e4e7242bec704233627842d77b5552120c1c9c40be6df94a90e48f",
+      "result": "## Project-Camiel Overview\n\n**Type:** Godot 2D game project (child-friendly educational game)\n\n### Git State\n| Item | Value |\n|------|-------|\n| Branch | `main` (protected) |\n| Remote | `origin/main` + 2 dependabot/feature branches |\n| Tags | `alpha-v0.0.1` |\n| Last commits | Main protection docs, CI quality gate, CodeQL docs, Node 24 update, community standards |\n\n### Project Structure\n- **Engine:** Godot (`project.godot`)\n- **No npm/Node.js** — not a JS project\n- **Docs:** `docs/roadmap.md` (comprehensive), `docs/project-overview.md`, `docs/development-log.md`, etc.\n- **Alpha notes:** `ALPHA_V0_0_1_NOTES.md`\n\n### Roadmap Summary\n\n**Alpha v0.0.1** ✅ Done — playable intro scene, Camiel character, basic animations, Windows export\n\n**Alpha v0.0.2** (planned):\n- Simple main menu with big Start button\n- Background music + soft sound effects\n- One collectible (star/biscuit)\n- Short spoken/written instruction\n- Finish marker\n\n**Alpha v0.0.3** (planned):\n- First educational micro-tasks (touch red block, find blue, count 1-2-3)\n- Parent/teacher notes\n- Accessibility checks\n\n**Design principles:** One idea at a time, large UI, no time pressure, no punishment-heavy failures, minimal controls.\n\n**Known technical improvements:** Code signing, GitHub Actions automated exports, title screen, version label in-game."
+    }
+  ],
+  "status": "completed",
+  "phases": [
+    "Find"
+  ],
+  "agents": [
+    {
+      "id": 1,
+      "label": "roadmap",
+      "phase": "Find",
+      "prompt": "In /Volumes/T9/Code/projects/Project-Camiel: run git branch -a && git tag -l && git log --oneline -15 && cat package.json && find . -maxdepth 2 -iname \"roadmap*\" -o -iname \"changelog*\" -o -iname \"todo*\" 2>/dev/null | head -20 && ls .claude/ 2>/dev/null && cat .claude/CLAUDE.md 2>/dev/null | grep -i -A3 \"roadmap|planned|TODO|next|release|milestone\"",
+      "status": "done",
+      "model": "minimax/MiniMax-M2.7",
+      "resultPreview": "## Project-Camiel Overview\n\n**Type:** Godot 2D game project (child-friendly edu…",
+      "tokens": 163324,
+      "startedAt": "2026-06-05T09:07:43.731Z",
+      "endedAt": "2026-06-05T09:08:18.775Z"
+    }
+  ],
+  "logs": [
+    "Logs persisted to /Volumes/T9/Code/projects/Project-Camiel/.pi/workflows/runs/run-mq0pb75g.log"
+  ],
+  "result": {
+    "ok": true,
+    "result": "## Project-Camiel Overview\n\n**Type:** Godot 2D game project (child-friendly educational game)\n\n### Git State\n| Item | Value |\n|------|-------|\n| Branch | `main` (protected) |\n| Remote | `origin/main` + 2 dependabot/feature branches |\n| Tags | `alpha-v0.0.1` |\n| Last commits | Main protection docs, CI quality gate, CodeQL docs, Node 24 update, community standards |\n\n### Project Structure\n- **Engine:** Godot (`project.godot`)\n- **No npm/Node.js** — not a JS project\n- **Docs:** `docs/roadmap.md` (comprehensive), `docs/project-overview.md`, `docs/development-log.md`, etc.\n- **Alpha notes:** `ALPHA_V0_0_1_NOTES.md`\n\n### Roadmap Summary\n\n**Alpha v0.0.1** ✅ Done — playable intro scene, Camiel character, basic animations, Windows export\n\n**Alpha v0.0.2** (planned):\n- Simple main menu with big Start button\n- Background music + soft sound effects\n- One collectible (star/biscuit)\n- Short spoken/written instruction\n- Finish marker\n\n**Alpha v0.0.3** (planned):\n- First educational micro-tasks (touch red block, find blue, count 1-2-3)\n- Parent/teacher notes\n- Accessibility checks\n\n**Design principles:** One idea at a time, large UI, no time pressure, no punishment-heavy failures, minimal controls.\n\n**Known technical improvements:** Code signing, GitHub Actions automated exports, title screen, version label in-game."
+  },
+  "tokenUsage": {
+    "input": 7815,
+    "output": 1070,
+    "total": 163324,
+    "cost": 0.01293768,
+    "cacheRead": 154303,
+    "cacheWrite": 136
+  },
+  "startedAt": "2026-06-05T09:07:43.731Z",
+  "updatedAt": "2026-06-05T09:08:18.775Z",
+  "completedAt": "2026-06-05T09:08:18.775Z",
+  "durationMs": 35043
+}

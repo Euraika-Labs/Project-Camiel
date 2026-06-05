@@ -10,11 +10,29 @@ config_version=5
 
 [application]
 
-config/name="Camiel alpha-v0.0.1"
-run/main_scene="res://scenes/main.tscn"
+config/name="Camiel alpha-v0.0.3"
+run/main_scene="res://scenes/title_screen.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
+
+[autoload]
+
+AudioManager="res://scripts/audio_manager.gd"
+Accessibility="res://scripts/accessibility.gd"
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+
+[audio]
+
+audio/enable_audio_on_mobile=true
+
+[audio_bus_layout]
+
+bus/0/name="Master"
+bus/0/volume_db=0.0
+bus/0/send=""
+bus/1/name="SFX"
+bus/1/volume_db=0.0
+bus/1/send="Master"

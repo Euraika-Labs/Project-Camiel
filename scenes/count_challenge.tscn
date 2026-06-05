@@ -1,0 +1,44 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/count_challenge.gd" id="1_cc"]
+[ext_resource type="PackedScene" path="res://scenes/collectible.tscn" id="2_col"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_count"]
+font_size = 28
+font_color = Color(0.0941176, 0.0784314, 0.0627451, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_msg"]
+font_size = 32
+font_color = Color(0.15, 0.75, 0.15, 1)
+
+[node name="CountChallenge" type="Node2D"]
+position = Vector2(650, 340)
+script = ExtResource("1_cc")
+
+[node name="CountLabel" type="Label" parent="."]
+offset_left = -80.0
+offset_top = -160.0
+offset_right = 120.0
+offset_bottom = -120.0
+text = "Count: 0"
+label_settings = SubResource("LabelSettings_count")
+horizontal_alignment = 1
+
+[node name="MessageLabel" type="Label" parent="."]
+offset_left = -120.0
+offset_top = -200.0
+offset_right = 160.0
+offset_bottom = -160.0
+text = "Tel de sterren!"
+label_settings = SubResource("LabelSettings_msg")
+horizontal_alignment = 1
+visible = false
+
+[node name="Star1" parent="." groups=["count_collectibles"] instance=ExtResource("2_col")]
+position = Vector2(-60, -40)
+
+[node name="Star2" parent="." groups=["count_collectibles"] instance=ExtResource("2_col")]
+position = Vector2(0, -40)
+
+[node name="Star3" parent="." groups=["count_collectibles"] instance=ExtResource("2_col")]
+position = Vector2(60, -40)

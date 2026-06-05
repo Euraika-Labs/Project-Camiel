@@ -1,0 +1,26 @@
+{
+  "runId": "mq0r4is2-s6mnei",
+  "workflowName": "camiel-pr",
+  "script": "export const meta = { name: 'camiel-pr', description: 'Create GitHub PR for the full roadmap commit on Project-Camiel', phases: [{ title: 'Create PR' }] };\n\nconst r = await agent('cd /Volumes/T9/Code/projects/Project-Camiel && git log --oneline -3 && gh pr create --title \"feat: complete roadmap through alpha-v0.0.3\" --body \"## Summary\\n\\nThis PR completes the Project-Camiel roadmap through **alpha-v0.0.3** — a child-friendly educational Godot 4 game.\\n\\n---\\n\\n### Alpha v0.0.2\\n- Main menu with large Start button (keyboard accessible)\\n- AudioManager Autoload: BGM + SFX (collect, finish)\\n- Collectible star with pickup feedback + HUD star counter\\n- Finish marker with Dutch \\\"Goed zo!\\\" win message\\n\\n### Alpha v0.0.3\\n- **Educational micro-tasks** (lesson_1.tscn):\\n  - Touch the red block — color recognition, turns green on success\\n  - Find blue — camouflaged target, visual discrimination\\n  - Count 1-2-3 — number sense with spaced collectibles\\n- Lesson manager with Dutch progress label (\\\"Taken: N / 3\\\")\\n- Parent/teacher notes (docs/parent-teacher-notes.md)\\n- WCAG 2.1 AA accessibility audit + report (docs/accessibility-report.md)\\n- Accessibility Autoload with high-contrast toggle\\n\\n### Tech Debt\\n- GitHub Actions export pipeline: quality gate → Windows export → artifact → release\\n- Code signing documentation (docs/code-signing.md)\\n- Branded title screen (scenes/title_screen.tscn)\\n- Reusable version label component (scenes/ui/version_label.tscn)\\n- .gitattributes for binary .exe/.zip\\n\\n---\\n\\n### Files changed\\n34 files changed, +3,667 lines\\n\\n---\\n\\n### Testing\\n- [ ] Quality gate passes: godot --headless --script res://scripts/tools/verify_camiel_resources.gd\\n- [ ] Game launches without errors (Windows)\\n- [ ] Main menu → intro → collectible → finish marker flow works\\n- [ ] Lesson micro-tasks all trigger success states correctly\\n- [ ] No GDScript errors in output log\\n\\n### Screenshots\\n<!-- Add gameplay screenshots before merging -->\\n\\n### Related issues\\n<!-- Link any GitHub issues here -->\\n\" --base main --head main && echo \"DONE\"', { label: 'create-pr', tier: 'medium', cwd: '/Volumes/T9/Code/projects/Project-Camiel' });\n\nreturn { ok: true, result: r };",
+  "sessionId": "019e96fe-9bb9-74e7-8536-0ddc4bea7482",
+  "journal": [],
+  "status": "aborted",
+  "phases": [
+    "Create PR"
+  ],
+  "agents": [
+    {
+      "id": 1,
+      "label": "create-pr",
+      "phase": "Create PR",
+      "prompt": "cd /Volumes/T9/Code/projects/Project-Camiel && git log --oneline -3 && gh pr create --title \"feat: complete roadmap through alpha-v0.0.3\" --body \"## Summary\n\nThis PR completes the Project-Camiel roadmap through **alpha-v0.0.3** — a child-friendly educational Godot 4 game.\n\n---\n\n### Alpha v0.0.2\n- Main menu with large Start button (keyboard accessible)\n- AudioManager Autoload: BGM + SFX (collect, finish)\n- Collectible star with pickup feedback + HUD star counter\n- Finish marker with Dutch \"Goed zo!\" win message\n\n### Alpha v0.0.3\n- **Educational micro-tasks** (lesson_1.tscn):\n  - Touch the red block — color recognition, turns green on success\n  - Find blue — camouflaged target, visual discrimination\n  - Count 1-2-3 — number sense with spaced collectibles\n- Lesson manager with Dutch progress label (\"Taken: N / 3\")\n- Parent/teacher notes (docs/parent-teacher-notes.md)\n- WCAG 2.1 AA accessibility audit + report (docs/accessibility-report.md)\n- Accessibility Autoload with high-contrast toggle\n\n### Tech Debt\n- GitHub Actions export pipeline: quality gate → Windows export → artifact → release\n- Code signing documentation (docs/code-signing.md)\n- Branded title screen (scenes/title_screen.tscn)\n- Reusable version label component (scenes/ui/version_label.tscn)\n- .gitattributes for binary .exe/.zip\n\n---\n\n### Files changed\n34 files changed, +3,667 lines\n\n---\n\n### Testing\n- [ ] Quality gate passes: godot --headless --script res://scripts/tools/verify_camiel_resources.gd\n- [ ] Game launches without errors (Windows)\n- [ ] Main menu → intro → collectible → finish marker flow works\n- [ ] Lesson micro-tasks all trigger success states correctly\n- [ ] No GDScript errors in output log\n\n### Screenshots\n<!-- Add gameplay screenshots before merging -->\n\n### Related issues\n<!-- Link any GitHub issues here -->\n\" --base main --head main && echo \"DONE\"",
+      "status": "running",
+      "model": "minimax/MiniMax-M2.7",
+      "startedAt": "2026-06-05T09:58:31.442Z",
+      "endedAt": "2026-06-05T09:58:42.166Z"
+    }
+  ],
+  "logs": [],
+  "startedAt": "2026-06-05T09:58:31.442Z",
+  "updatedAt": "2026-06-05T09:58:42.166Z"
+}
