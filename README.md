@@ -28,6 +28,10 @@ The Windows alpha build is published as a GitHub Release asset for `alpha-v0.0.1
 
 See the `docs/` folder for project history, setup, asset structure, Godot implementation details, build/release steps, and roadmap notes.
 
+The GitHub Wiki contains the broader product context, safety principles, character bible, and long-term architecture notes:
+
+https://github.com/Euraika-Labs/Project-Camiel/wiki
+
 ## Community And Security
 
 This repository includes CI, an AI-slop quality gate, CodeQL workflow scanning for GitHub Actions, Dependabot for GitHub Actions, issue templates, a pull request template, contributing guidelines, security policy, support notes, and a project license.
