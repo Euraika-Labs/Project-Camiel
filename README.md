@@ -61,6 +61,12 @@ For first-time setup, see [docs/quick-start.md](docs/quick-start.md).
 
 ## Building
 
+The GitHub Wiki contains the broader product context, safety principles, character bible, and long-term architecture notes:
+
+https://github.com/Euraika-Labs/Project-Camiel/wiki
+
+## Community And Security
+
 ```bash
 # Export Windows build (requires Godot 4.6.4)
 godot --headless --path . --export-release "Windows Desktop" builds/

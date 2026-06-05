@@ -55,7 +55,7 @@ The repository has these GitHub settings configured:
 
 - Repository visibility is public.
 - Issues enabled.
-- Wiki disabled.
+- Wiki enabled.
 - Discussions enabled.
 - Projects enabled.
 - Merge commits disabled.
@@ -65,6 +65,7 @@ The repository has these GitHub settings configured:
 - Always suggest updating pull request branches enabled.
 - Delete branch on merge enabled.
 - Web-based commit signoff enabled.
+- Release immutability enabled.
 - Dependabot alerts enabled.
 - Dependabot automated security fixes enabled.
 - Private vulnerability reporting enabled.
