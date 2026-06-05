@@ -15,3 +15,9 @@ desktop.ini
 # Python local test cache
 __pycache__/
 *.pyc
+
+# pi agent session data
+.pi/
+
+# Godot import metadata (auto-generated)
+*.import

@@ -1,0 +1,181 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/mobile_controller.gd" id="1_mc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_base"]
+bg_color = Color(0.0, 0.0, 0.0, 0.35)
+corner_radius_top_left = 64
+corner_radius_top_right = 64
+corner_radius_bottom_right = 64
+corner_radius_bottom_left = 64
+border_width_top = 3
+border_width_bottom = 3
+border_width_left = 3
+border_width_right = 3
+border_color = Color(1.0, 1.0, 1.0, 0.4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tip"]
+bg_color = Color(1.0, 1.0, 1.0, 0.55)
+corner_radius_top_left = 40
+corner_radius_top_right = 40
+corner_radius_bottom_right = 40
+corner_radius_bottom_left = 40
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_norm"]
+bg_color = Color(0.15, 0.6, 1.0, 0.75)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
+bg_color = Color(0.08, 0.35, 0.95, 0.95)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+## ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## Mobile touch overlay for Camiel.
+##
+## Layout:
+##   Left 35 % of screen → virtual joystick (walk / run)
+##   Right 65 % of screen → action buttons: Jump (bottom-right),
+##                            Sit (middle-right), Sleep (top-right)
+##
+## MobileController (autoload) owns this CanvasLayer; this scene is a child
+## of MobileController/TouchLayer so it shares the same input routing.
+## ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[node name="MobileJoystick" type="CanvasLayer"]
+
+## ── Touch layer: joystick + action buttons (mobile only) ─────────────────────
+[node name="TouchLayer" type="CanvasLayer" parent="."]
+
+## ── Virtual joystick (bottom-left) ───────────────────────────────────────────
+[node name="JoystickArea" type="Control" parent="TouchLayer"]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -280.0
+offset_right = 280.0
+offset_bottom = -24.0
+grow_vertical = 0
+
+[node name="Base" type="Panel" parent="TouchLayer/JoystickArea"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(100, 100)
+mouse_filter = 2  ## Control.MOUSE_FILTER_IGNORE — let touches pass through
+theme_override_styles/normal = SubResource("StyleBoxFlat_base")
+
+[node name="Tip" type="Panel" parent="TouchLayer/JoystickArea/Base"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(40, 40)
+mouse_filter = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_tip")
+
+## ── Action buttons (bottom-right cluster) ─────────────────────────────────────
+[node name="ActionLayer" type="CanvasLayer" parent="."]
+
+## Jump button — bottom-right, largest
+[node name="JumpButton" type="Button" parent="ActionLayer"]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -180.0
+offset_right = -56.0
+offset_bottom = -56.0
+grow_vertical = 0
+text = "⬆  spring"
+flat = true
+mouse_filter = 2  ## Control.MOUSE_FILTER_IGNORE — MobileController reads position
+
+[node name="JumpPanel" type="Panel" parent="ActionLayer/JumpButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_norm")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+
+## Sit button — middle-right
+[node name="SitButton" type="Button" parent="ActionLayer"]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -310.0
+offset_right = -56.0
+offset_bottom = -186.0
+grow_vertical = 0
+text = "⬇  zitten"
+flat = true
+mouse_filter = 2
+
+[node name="SitPanel" type="Panel" parent="ActionLayer/SitButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_norm")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+
+## Sleep button — top-right
+[node name="SleepButton" type="Button" parent="ActionLayer"]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -440.0
+offset_right = -56.0
+offset_bottom = -316.0
+grow_vertical = 0
+text = "💤  slapen"
+flat = true
+mouse_filter = 2
+
+[node name="SleepPanel" type="Panel" parent="ActionLayer/SleepButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_norm")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")

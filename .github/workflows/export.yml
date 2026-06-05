@@ -1,0 +1,106 @@
+name: Export
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  # ── Quality gate ────────────────────────────────────────────────
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gobject/godot-action@v3
+        with:
+          godot-version: 4.6.4
+      - name: Quality Gate
+        run: |
+          python3 scripts/tools/quality_gate.py --root .
+
+  # ── Windows ──────────────────────────────────────────────────────
+  export-windows:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gobject/godot-action@v3
+        with:
+          godot-version: 4.6.4
+      - name: Export Windows
+        run: |
+          mkdir -p builds/$GITHUB_REF_NAME/windows
+          godot --headless --path . --export-release "Windows Desktop" builds/$GITHUB_REF_NAME/windows/Camiel.exe
+      - name: Package
+        run: |
+          cd builds/$GITHUB_REF_NAME/windows
+          zip -r Camiel-windows.zip Camiel.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: camiel-windows-$GITHUB_REF_NAME
+          path: builds/$GITHUB_REF_NAME/windows/
+          retention-days: 30
+
+  # ── Linux ────────────────────────────────────────────────────────
+  export-linux:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gobject/godot-action@v3
+        with:
+          godot-version: 4.6.4
+      - name: Export Linux
+        run: |
+          mkdir -p builds/$GITHUB_REF_NAME/linux
+          godot --headless --path . --export-release "Linux/X11" builds/$GITHUB_REF_NAME/linux/Camiel.x86_64
+      - name: Package
+        run: |
+          cd builds/$GITHUB_REF_NAME/linux
+          tar -czf Camiel-linux.tar.gz Camiel.x86_64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: camiel-linux-$GITHUB_REF_NAME
+          path: builds/$GITHUB_REF_NAME/linux/
+          retention-days: 30
+
+  # ── macOS ────────────────────────────────────────────────────────
+  export-macos:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gobject/godot-action@v3
+        with:
+          godot-version: 4.6.4
+      - name: Export macOS
+        run: |
+          mkdir -p builds/$GITHUB_REF_NAME/macos
+          godot --headless --path . --export-release "macOS" builds/$GITHUB_REF_NAME/macos/Camiel.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: camiel-macos-$GITHUB_REF_NAME
+          path: builds/$GITHUB_REF_NAME/macos/
+          retention-days: 30
+
+  # ── Release ─────────────────────────────────────────────────────
+  release:
+    needs: [export-windows, export-linux, export-macos]
+    if: startsWith(github.ref, refs/tags/)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+      - name: Download all artifacts
+        run: |
+          mkdir -p release/
+          mv camiel-windows-*/Camiel-windows.zip release/ 2>/dev/null || true
+          mv camiel-linux-*/Camiel-linux.tar.gz release/ 2>/dev/null || true
+          mv camiel-macos-*/Camiel.zip release/ 2>/dev/null || true
+      - uses: softprops/action-gh-release@v1
+        with:
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

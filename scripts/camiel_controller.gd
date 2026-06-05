@@ -12,13 +12,29 @@ extends CharacterBody2D
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 var _facing := "right"
+var _mobile_move: Vector2 = Vector2.ZERO   # normalized x from mobile joystick
+var _mobile_jump_queued := false           # rising-edge jump flag for mobile
 
 func _ready() -> void:
 	add_to_group("player")
 	_play("idle")
+	# Wire up mobile controller signals if present in the scene tree
+	var mobile = get_tree().get_first_node_in_group("mobile_controller")
+	if mobile:
+		mobile.move_vector.connect(_on_mobile_move_vector)
+		mobile.jump.connect(_on_mobile_jump)
+
+func _on_mobile_move_vector(v: Vector2) -> void:
+	_mobile_move = v
+
+func _on_mobile_jump() -> void:
+	_mobile_jump_queued = true
 
 func _physics_process(delta: float) -> void:
 	var direction := _read_direction()
+	# Blend in mobile horizontal input (keyboard returns -1/0/1, mobile is already normalized)
+	if _mobile_move.x != 0:
+		direction = int(round(_mobile_move.x))
 	if direction != 0:
 		_facing = "right" if direction > 0 else "left"
 
@@ -30,9 +46,10 @@ func _physics_process(delta: float) -> void:
 
 	if not is_on_floor():
 		velocity.y += gravity * delta
-	elif _jump_pressed():
+	elif _jump_pressed() or _mobile_jump_queued:
 		velocity.y = jump_velocity
 		_play("jump", true)
+		_mobile_jump_queued = false
 
 	move_and_slide()
 	position.x = clampf(position.x, min_x, max_x)
