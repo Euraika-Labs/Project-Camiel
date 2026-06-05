@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://bmenubutton"]
+
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="1_mb"]
+
+[node name="MenuButton" type="Button"]
+offset_right = 200
+offset_bottom = 80
+text = "Button"
+script = ExtResource("1_mb")

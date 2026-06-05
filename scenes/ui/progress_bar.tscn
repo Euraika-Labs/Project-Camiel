@@ -1,0 +1,34 @@
+[gd_scene load_steps=4 format=3 uid="uid://bprogressbar"]
+
+[ext_resource type="Script" path="res://scripts/ui/progress_bar.gd" id="1_pb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.3, 0.3, 0.3, 0.5)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fill"]
+bg_color = Color(0.2, 0.7, 0.2, 1.0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
+[node name="ProgressBar" type="HBoxContainer"]
+script = ExtResource("1_pb")
+
+[node name="Label" type="Label" parent="."]
+offset_top = 2.0
+offset_right = 120.0
+offset_bottom = 38.0
+text = "Taken: 0 / 3"
+
+[node name="Bar" type="ProgressBar" parent="."]
+custom_minimum_size = Vector2(200, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 3.0
+step = 0.0
+show_percentage = false
