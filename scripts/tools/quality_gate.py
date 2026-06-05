@@ -14,6 +14,7 @@ from urllib.parse import unquote, urlparse
 IGNORED_DIRS = {
     ".git",
     ".godot",
+    ".pi",
     ".venv",
     "__pycache__",
     "builds",

@@ -1,0 +1,103 @@
+[gd_scene load_steps=6 format=3 uid="uid://lesson1"]
+
+[ext_resource type="Script" path="res://scripts/lesson_manager.gd" id="1_lm"]
+[ext_resource type="PackedScene" path="res://scenes/camiel.tscn" id="1_cam"]
+[ext_resource type="PackedScene" uid="uid://bredblock" path="res://scenes/red_block.tscn" id="2_rb"]
+[ext_resource type="PackedScene" uid="uid://bluetarget" path="res://scenes/blue_target.tscn" id="3_bt"]
+[ext_resource type="PackedScene" uid="uid://countchallenge" path="res://scenes/count_challenge.tscn" id="4_cc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(1600, 90)
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font_size = 44
+font_color = Color(0.0941176, 0.0784314, 0.0627451, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_instructions"]
+font_size = 24
+font_color = Color(0.0941176, 0.0784314, 0.0627451, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_progress"]
+font_size = 28
+font_color = Color(0.0941176, 0.0784314, 0.0627451, 1)
+
+[node name="Lesson1" type="Node2D"]
+script = ExtResource("1_lm")
+
+[node name="Sky" type="ColorRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.6, 0.84, 1, 1)
+
+[node name="CloudA" type="ColorRect" parent="."]
+offset_left = 110.0
+offset_top = 92.0
+offset_right = 300.0
+offset_bottom = 132.0
+color = Color(1, 1, 1, 0.78)
+
+[node name="CloudB" type="ColorRect" parent="."]
+offset_left = 850.0
+offset_top = 118.0
+offset_right = 1120.0
+offset_bottom = 158.0
+color = Color(1, 1, 1, 0.72)
+
+[node name="GroundVisual" type="ColorRect" parent="."]
+offset_top = 590.0
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.43, 0.74, 0.31, 1)
+
+[node name="GroundTop" type="ColorRect" parent="."]
+offset_top = 590.0
+offset_right = 1280.0
+offset_bottom = 606.0
+color = Color(0.75, 0.93, 0.43, 1)
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(640, 635)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="Title" type="Label" parent="."]
+offset_left = 42.0
+offset_top = 26.0
+offset_right = 900.0
+offset_bottom = 80.0
+text = "Les 1: Kleuren, zoeken en tellen!"
+label_settings = SubResource("LabelSettings_title")
+
+[node name="Instructions" type="Label" parent="."]
+offset_left = 42.0
+offset_top = 86.0
+offset_right = 900.0
+offset_bottom = 120.0
+text = "Raak het RODE blok  |  Vind het verborgen BLAUWE doel  |  Tel 3 sterren"
+label_settings = SubResource("LabelSettings_instructions")
+
+[node name="ProgressLabel" type="Label" parent="."]
+offset_left = 42.0
+offset_top = 126.0
+offset_right = 300.0
+offset_bottom = 170.0
+text = "Taken: 0 / 3"
+label_settings = SubResource("LabelSettings_progress")
+
+[node name="RedBlock" parent="." instance=ExtResource("2_rb")]
+position = Vector2(270, 490)
+
+[node name="BlueTarget" parent="." instance=ExtResource("3_bt")]
+position = Vector2(550, 490)
+
+[node name="CountChallenge" parent="." instance=ExtResource("4_cc")]
+position = Vector2(900, 340)
+
+[node name="Camiel" parent="." instance=ExtResource("1_cam")]
+position = Vector2(160, 590)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(640, 360)
+enabled = true
+

@@ -1,0 +1,172 @@
+[2026-06-05T09:06:03.040Z] [INFO] 
+
+**Results:**
+
+### Found: 1 of 3 files
+
+| File | Path |
+|------|------|
+| ROADMAP.md | `/Volumes/T9/Code/projects/Project-Camiel/docs/roadmap.md` |
+
+**No TODO.md or CHANGELOG.md found** in the project directory.
+
+---
+
+**Full content of `docs/roadmap.md`:**
+
+```markdown
+# Roadmap
+
+## Alpha v0.0.1 Done
+
+- Godot project created.
+- Camiel character assets generated and imported.
+- Camiel animation resource created.
+- Camiel converted to `CharacterBody2D`.
+- Playable intro scene created.
+- Windows export templates installed.
+- Windows alpha build exported.
+- GitHub repository created.
+- GitHub release created with build assets.
+
+## Suggested Next Alpha Goals
+
+Keep the next steps small and child-friendly.
+
+### Alpha v0.0.2 Ideas
+
+- Add a very simple main menu with one big Start button.
+- Add gentle background music and a few soft sound effects.
+- Add one collectible object, such as a star or biscuit.
+- Add one short spoken or written instruction.
+- Add a finish marker so the child can complete the intro.
+
+### Alpha v0.0.3 Ideas
+
+- Add a first educational micro-task:
+  - touch the red block;
+  - find blue;
+  - count 1, 2, 3 objects.
+- Add parent/teacher notes outside the game.
+- Add accessibility checks for font size and contrast.
+
+## Design Principles
+
+- One idea at a time.
+- Clear colors.
+- Large UI.
+- No time pressure.
+- No punishment-heavy failure state.
+- Keep controls minimal.
+
+## Known Technical Improvements
+
+- Add code signing for Windows.
+- Add a GitHub Actions workflow for automated exports.
+- Reduce duplicate legacy assets if repository size becomes an issue.
+- Add a proper title screen.
+- Add a version label inside the game.
+```,
+
+## Root `.md` Files in `/Volumes/T9/Code/projects/Project-Camiel`
+
+| File | Purpose |
+|------|---------|
+| `README.md` | Project overview — Godot 4 intro game for young children, alpha v0.0.1 |
+| `ALPHA_V0_0_1_NOTES.md` | Alpha scope, included features, controls, missing items |
+| `CODE_OF_CONDUCT.md` | Community guidelines — kind, safe, constructive space |
+| `CONTRIBUTING.md` | Dev setup (Godot 4.6.2), verifier command, asset rules, PR expectations |
+| `SECURITY.md` | Supported versions, private reporting instructions, scope notes |
+| `SUPPORT.md` | Where to start — links to docs, issue tracker, security policy |
+
+**Summary:** Project Camiel is a Godot 4 children's game (alpha v0.0.1). All docs emphasize child-friendliness, simplicity, and low pressure. Development uses Godot 4.6.2 with a headless verifier script. Contributions should discuss child-facing design before adding complex interactions. Build artifacts go in GitHub Releases, not git.,
+
+## docs/ Directory Contents
+
+**Location:** `/Volumes/T9/Code/projects/Project-Camiel/docs/`
+
+### Files Found (8 total)
+
+| File | Purpose |
+|------|---------|
+| `README.md` | Entry point with project status at **alpha-v0.0.1** |
+| `project-overview.md` | Goal, target audience (3yo children), controls, GitHub links |
+| `roadmap.md` | Alpha v0.0.1 done + v0.0.2/v0.0.3 ideas + design principles |
+| `development-log.md` | Full history: assets → animations → Godot → controller → export → GitHub |
+| `godot-setup.md` | Engine 4.6.2, project structure, physics params, verification script |
+| `assets-and-animations.md` | Asset locations, animation frame table, jump color fix |
+| `build-and-release.md` | Export templates, preset, build command, GitHub Release setup |
+| `ci-and-community-standards.md` | GitHub Actions CI, CodeQL, quality gate, branch protection rules |
+
+### Key Highlights- **Project:** Child-friendly educational game built in **Godot 4.6.2** (GDScript)
+- **Character:** Camiel — a Bernese Mountain Dog-style character with animations (idle, walk, run, jump, sit, sleep)
+- **Current state:** Playable alpha intro with basic movement, color blocks, and UI feedback
+- **Controls:** Arrow/WASD to move, Shift to run, Space/W to jump, S to sit, X to sleep
+- **Repository:** https://github.com/Euraika-Labs/Project-Camiel (public)
+- **CI:** GitHub Actions with quality gate (`quality_gate.py`) blocking AI-slop patterns
+- **Branch protection:** Enforced on `main` with signed commits, linear history, required PR reviews
+- **Builds:** Not committed to git — published as GitHub Release assets,
+
+The `.claude/` directory **does not exist** in `/Volumes/T9/Code/projects/Project-Camiel/`.The find scan confirms — no `.claude` directory exists under `Project-Camiel`. Other projects in the workspace do have one (e.g. `athena`, `hermesv3`, `pan-agent`, etc.), but `Project-Camiel` itself has no such directory.
+
+Would you like me to create one, or explore a different location?,
+
+## `.github/` Directory — Contents Summary
+
+**`.gitlab/` does not exist.** Only `.github/` is present.
+
+---
+
+### Files in `.github/`
+
+| Path | Content |
+|---|---|
+| `.github/PULL_REQUEST_TEMPLATE.md` | PR checklist with age-appropriate experience guidance, Godot scene testing, doc updates, and no large binary commits |
+| `.github/dependabot.yml` | Weekly GitHub Actions updates on Mondays at 08:00 Brussels time, max 5 open PRs, commits prefixed `ci:` |
+
+---
+
+### `.github/ISSUE_TEMPLATE/`
+
+- **`bug_report.yml`** — Bug report template with fields: summary, steps to reproduce, version, expected behavior. Label: `bug`
+- **`feature_request.yml`** — Feature request template scoped for young children. Fields: idea, child value, scope (Very small → Not sure). Label: `enhancement`
+- **`config.yml`** — Blank issues enabled, links to project docs
+
+---
+
+### `.github/workflows/` (4 workflow files)
+
+| File | Trigger | Purpose |
+|---|---|---|
+| **`ci.yml`** | push/PR to `main`, manual | Runs repository hygiene (quality gate, file size check ≤95MB, conflict markers), verifies Godot project (import, resource check, smoke test), and exports a Windows build artifact |
+| **`codeql.yml`** | push/PR to `main`, weekly cron | Checks if CodeQL is available (public repos or Advanced Security enabled), then analyzes `.github/workflows` for security issues |
+| **`dependency-review.yml`** | PR to `main` | Runs GitHub's dependency review action, fails on high-severity vulnerabilities |
+| **`release.yml`** | git tag (`alpha-v*` / `v*`) or manual dispatch | Resolves tag, builds Windows exe + zip via Godot 4.6.2, uploads to GitHub Release |
+
+---
+
+### `.github/codeql/`
+
+- **`codeql-config.yml`** — Uses `security-and-quality` query suite, scoped to `.github/workflows`
+
+---
+
+**Key observations:**
+- This is a **Godot 4.6.2** game project (`Project-Camiel`) targeting children
+- No `.gitlab/` directory → no GitLab CI configuration
+- CI is GitHub-only, with a full Windows build/export pipeline
+- CodeQL only scans the Actions workflows themselves, not the Godot/GDScript codebase
+- Dependabot only tracks GitHub Actions (not npm/pip/Go deps),**Not a Node.js project** — this is a **Godot 4.6** game project. No `package.json` exists.
+
+From `project.godot`:
+
+| Field | Value |
+|-------|-------|
+| **Project name** | Camiel alpha-v0.0.1 |
+| **Main scene** | `scenes/main.tscn` |
+| **Renderer** | Forward Plus |
+| **Viewport** | 1280×720 |
+| **Config version** | 5 |
+
+No `package.json` to report — scripts, dependencies, and devDependencies are not applicable for Godot projects. The project uses Godot's own build/execution model.
+[2026-06-05T09:06:03.041Z] [INFO] Logs persisted to /Volumes/T9/Code/projects/Project-Camiel/.pi/workflows/runs/run-mq0p7v3h.log

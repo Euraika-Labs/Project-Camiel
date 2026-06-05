@@ -1,0 +1,70 @@
+{
+  "runId": "mq0p7i93-rmnx04",
+  "workflowName": "camiel-roadmap-light",
+  "script": "export const meta = { name: 'camiel-roadmap-light', description: 'Light fan-out to find roadmap docs for Project-Camiel', phases: [{ title: 'Search' }, { title: 'Synthesize' }] };\n\nphase('Search');\n\nconst findings = await parallel([\n  () => agent(`Look for roadmap, changelog, todo, or project documents in /Volumes/T9/Code/projects/Project-Camiel. Check: ROADMAP.md, TODO.md, CHANGELOG.md, docs/, .claude/, .github/, .gitlab/, and any markdown in the root. Also read package.json version and scripts. Return file paths and key content verbatim.`, { label: 'roadmap-files', tier: 'small', cwd: '/Volumes/T9/Code/projects/Project-Camiel' }),\n  () => agent(`In /Volumes/T9/Code/projects/Project-Camiel, run: git branch -a && git tag -l && git log --oneline -20 && git remote -v. Also run: glab project list --mine 2>/dev/null; glab issue list 2>/dev/null; glab milestone list 2>/dev/null. Return all output.`, { label: 'git-context', tier: 'small', cwd: '/Volumes/T9/Code/projects/Project-Camiel' }),\n  () => agent(`Check the Next.js app at /Volumes/T9/Code/projects/Project-Camiel for any /roadmap, /changelog, /status, or /blog pages in src/app/. Also check src/components/ for any roadmap-related UI components and public/ for any changelog files. Return paths and content.`, { label: 'ui-pages', tier: 'small', cwd: '/Volumes/T9/Code/projects/Project-Camiel' }),\n]);\n\nphase('Synthesize');\n\nconst summary = await agent(`You are the synthesizer. Given the findings below, produce a concise roadmap status report for Project-Camiel. \n\nFor each source found, note:\n1. Version/stage from package.json or git tags\n2. Any planned or in-progress features from docs/branches/commits  \n3. Any locked/deferred items\n4. Gaps — what's not clear\n\nIf no roadmap exists anywhere, say so clearly and suggest how to create one.\n\n--- FINDINGS ---\n${findings.map((f, i) => `=== Source ${i + 1} ===\\n${f || 'No output'}`).join('\\n\\n')}\n`, { label: 'synthesize', tier: 'medium' });\n\nreturn { ok: true, findings, summary };",
+  "sessionId": "019e96fe-9bb9-74e7-8536-0ddc4bea7482",
+  "journal": [
+    {
+      "index": 1,
+      "hash": "16b6250371d8faa2d5870455caa77afd859afc4319a5c7f567ca50fe7b3d13e2",
+      "result": "**Git Context for `/Volumes/T9/Code/projects/Project-Camiel`**\n\n### Branches\n```\n* main\n  remotes/origin/HEAD -> origin/main\n  remotes/origin/codex/docs-wiki-review-fixes\n  remotes/origin/dependabot/github_actions/actions/dependency-review-action-5\n  remotes/origin/main\n```\n\n### Tags\n```\nalpha-v0.0.1\n```\n\n### Recent Log (last 20 commits)\n```\na2ddd2d Document stricter main protection\na67f02a Document branch protection settings\n9da3878 Update docs for public repository security\nbd717eb Add AI quality gate to CI\ned1f59b Document CodeQL availability for private repo\nc7c016c Update workflow actions for Node 24\na46d2be Add CI and community standards\n5078449 Add project documentation\n23775c5 Initial alpha v0.0.1 Godot project\n```\n\n### Remotes\n```\norigin  https://github.com/Euraika-Labs/Project-Camiel (fetch)\norigin  https://github.com/Euraika-Labs/Project-Camiel (push)\n```\n\n### GitLab (`glab`) Context\n- **Projects**: None found (user has no accessible GitLab projects, or `glab` not configured for git.euraika.net)\n- **Issues**: None\n- **Milestones**: None\n\n**Note**: The repo is hosted on **GitHub** (`Euraika-Labs/Project-Camiel`), not GitLab — `glab` targets GitLab by default. No issues or milestones are configured on the GitHub side either."
+    },
+    {
+      "index": 2,
+      "hash": "cd4c9606df20857c4773297e84d98538d3aa96a6c1254a65bff7e3b18e7b917e",
+      "result": "This is a **Godot game project** (has `scenes/`, `scripts/`, `project.godot`), not a Next.js app. There's no `src/app/` directory.\n\n**Result: No matches found**\n\nThe target pages and components don't exist in this project:\n- ❌ `src/app/` — does not exist (this is a Godot project)\n- ❌ `src/components/` — does not exist\n- ❌ `public/` — does not exist\n\nThis project uses a Godot engine structure with `scenes/`, `scripts/`, `assets/`, and `docs/` directories."
+    },
+    {
+      "index": 0,
+      "hash": "3ef564ed776e13a0ea2b787609ddee5760bfdd20a7bd986a87c51ccadee8a693",
+      "result": "## Roadmap & Project Document Summary for `/Volumes/T9/Code/projects/Project-Camiel`\n\n**Type:** Godot 4 game project (GDScript), **not** Node.js — no `package.json`.\n\n---\n\n### Key Document Locations\n\n| File | Path |\n|------|------|\n| README | `README.md` (root) |\n| Roadmap | `docs/roadmap.md` |\n| Alpha notes | `ALPHA_V0_0_1_NOTES.md` (root) |\n| Development log | `docs/development-log.md` |\n| Contributing | `CONTRIBUTING.md` (root) |\n| Security policy | `SECURITY.md` (root) |\n| Support | `SUPPORT.md` (root) |\n| CI workflow | `.github/workflows/ci.yml` |\n| Release workflow | `.github/workflows/release.yml` |\n\n---\n\n### docs/ Directory Contents\n- `README.md`, `assets-and-animations.md`, `build-and-release.md`, `ci-and-community-standards.md`, `development-log.md`, `godot-setup.md`, `project-overview.md`, `roadmap.md`\n\n---\n\n### Version Info (from `project.godot`)\n```\nconfig/name=\"Camiel alpha-v0.0.1\"\nrun/main_scene=\"res://scenes/main.tscn\"\nconfig/features=PackedStringArray(\"4.6\", \"Forward Plus\")\n```\n\n### Roadmap Highlights\n\n**Alpha v0.0.1 (Done):** Godot project created, Camiel CharacterBody2D player with idle/walk/run/jump/sit/sleep animations, playable intro scene with color blocks, Windows export.\n\n**Alpha v0.0.2 Ideas:** Main menu with Start button, gentle background music & sound effects, one collectible (star/biscuit), short spoken/written instruction, finish marker.\n\n**Alpha v0.0.3 Ideas:** First educational micro-tasks (touch red block, find blue, count 1-2-3), parent/teacher notes, accessibility checks.\n\n**Design Principles:** One idea at a time, clear colors, large UI, no time pressure, no punishment-heavy failure, minimal controls.\n\n**Known Technical Improvements:** Code signing for Windows, automated GitHub Actions exports, reduce duplicate legacy assets, proper title screen, in-game version label.\n\n---\n\n### CI/CD\n- Godot `4.6.2 stable`, Linux export binary in CI\n- CodeQL scanning (`.github/workflows/codeql.yml`)\n- Dependabot for GitHub Actions (weekly Monday 08:00 Europe/Brussels)\n- PR template includes child-friendly / age-appropriateness checklist"
+    }
+  ],
+  "status": "failed",
+  "phases": [
+    "Search",
+    "Synthesize"
+  ],
+  "currentPhase": "Synthesize",
+  "agents": [
+    {
+      "id": 1,
+      "label": "roadmap-files",
+      "phase": "Search",
+      "prompt": "Look for roadmap, changelog, todo, or project documents in /Volumes/T9/Code/projects/Project-Camiel. Check: ROADMAP.md, TODO.md, CHANGELOG.md, docs/, .claude/, .github/, .gitlab/, and any markdown in the root. Also read package.json version and scripts. Return file paths and key content verbatim.",
+      "status": "done",
+      "model": "minimax/MiniMax-M2.7",
+      "resultPreview": "## Roadmap & Project Document Summary for `/Volumes/T9/Code/projects/Project-Ca…",
+      "tokens": 140695,
+      "startedAt": "2026-06-05T09:04:51.495Z",
+      "endedAt": "2026-06-05T09:06:33.259Z"
+    },
+    {
+      "id": 2,
+      "label": "git-context",
+      "phase": "Search",
+      "prompt": "In /Volumes/T9/Code/projects/Project-Camiel, run: git branch -a && git tag -l && git log --oneline -20 && git remote -v. Also run: glab project list --mine 2>/dev/null; glab issue list 2>/dev/null; glab milestone list 2>/dev/null. Return all output.",
+      "status": "done",
+      "model": "minimax/MiniMax-M2.7",
+      "resultPreview": "**Git Context for `/Volumes/T9/Code/projects/Project-Camiel`**\n\n### Branches\n``…",
+      "tokens": 52599,
+      "startedAt": "2026-06-05T09:04:51.495Z",
+      "endedAt": "2026-06-05T09:06:33.259Z"
+    },
+    {
+      "id": 3,
+      "label": "ui-pages",
+      "phase": "Search",
+      "prompt": "Check the Next.js app at /Volumes/T9/Code/projects/Project-Camiel for any /roadmap, /changelog, /status, or /blog pages in src/app/. Also check src/components/ for any roadmap-related UI components and public/ for any changelog files. Return paths and content.",
+      "status": "done",
+      "model": "minimax/MiniMax-M2.7",
+      "resultPreview": "This is a **Godot game project** (has `scenes/`, `scripts/`, `project.godot`), …",
+      "tokens": 105663,
+      "startedAt": "2026-06-05T09:04:51.495Z",
+      "endedAt": "2026-06-05T09:06:33.259Z"
+    }
+  ],
+  "logs": [],
+  "startedAt": "2026-06-05T09:04:51.495Z",
+  "updatedAt": "2026-06-05T09:06:33.259Z"
+}
