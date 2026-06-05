@@ -131,7 +131,7 @@ This script verifies:
 - No build artefacts (`.exe`, `.pck`, `.zip`) are committed to the repo.
 - `project.godot` is present at the repo root.
 - `config_version` is set in `project.godot`.
-- No unfinished task markers (e.g. X-TODO, X-FIXME, placeholder copy) in source files.
+- No unfinished task markers (e.g. X-TODO, X-FIXME, placeholder copy) in source files. <!-- quality-gate: allow forbidden-phrase -->
 - All Godot resource paths referenced in `.gd` and `.tscn` files exist on disk.
 
 If the quality gate fails, the pipeline stops — no artefact is exported.
