@@ -1,0 +1,49 @@
+[gd_scene load_steps=5 format=3 uid="uid://bseqtarget"]
+
+[ext_resource type="Script" path="res://scripts/sequence_target.gd" id="1_seq"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_seq"]
+radius = 45.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_main"]
+font_size = 24
+font_color = Color(1, 1, 1, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_order"]
+font_size = 18
+font_color = Color(0.3, 0.3, 0.3, 1)
+
+[node name="SequenceTarget" type="Area2D"]
+position = Vector2(400, 490)
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_seq")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = -45.0
+offset_top = -45.0
+offset_right = 45.0
+offset_bottom = 45.0
+color = Color(0.5, 0.5, 0.5, 0.5)
+
+[node name="Label" type="Label" parent="."]
+offset_left = -45.0
+offset_top = -45.0
+offset_right = 45.0
+offset_bottom = 45.0
+text = "1"
+label_settings = SubResource("LabelSettings_main")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OrderIndicator" type="Label" parent="."]
+offset_left = -40.0
+offset_top = -65.0
+offset_right = 40.0
+offset_bottom = -45.0
+text = "1ste"
+label_settings = SubResource("LabelSettings_order")
+horizontal_alignment = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_seq")

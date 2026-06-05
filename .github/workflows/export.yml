@@ -1,0 +1,199 @@
+name: Export
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Sanitize GITHUB_REF_NAME for use in paths (branch names can contain /)
+env:
+  GODOT_VERSION: 4.6.4
+  GODOT_STATUS: stable
+  GODOT_TEMPLATE_VERSION: 4.6.4.stable
+  REF_SLUG: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || github.ref_name }}
+  REF_CLEAN: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || contains(github.ref, 'refs/tags/') && github.ref_name || replace(replace(github.ref_name, '/', '-'), ' ', '-') }}
+
+jobs:
+  # ── Quality gate ────────────────────────────────────────────────
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run AI quality gate
+        run: python3 scripts/tools/quality_gate.py --root .
+
+  # ── Windows ──────────────────────────────────────────────────────
+  export-windows:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y unzip zip
+
+      - name: Download Godot
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/godot.zip" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64"
+
+      - name: Install export templates
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/export_templates.tpz" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
+          unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}"
+          cp -R "$RUNNER_TEMP/export_templates/templates/." \
+            "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/"
+
+      - name: Import project
+        run: |
+          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
+            --headless --editor --path . --quit
+
+      - name: Export Windows
+        run: |
+          mkdir -p dist/windows
+          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
+            --headless --path . \
+            --export-release "Windows Desktop" \
+            "dist/windows/Camiel.exe"
+          zip -j "dist/windows/Camiel-windows.zip" "dist/windows/Camiel.exe"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: camiel-windows-${{ env.REF_CLEAN }}
+          path: dist/windows/Camiel-windows.zip
+          retention-days: 30
+
+  # ── Linux ────────────────────────────────────────────────────────
+  export-linux:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y unzip tar
+
+      - name: Download Godot
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/godot.zip" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64"
+
+      - name: Install export templates
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/export_templates.tpz" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
+          unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}"
+          cp -R "$RUNNER_TEMP/export_templates/templates/." \
+            "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/"
+
+      - name: Import project
+        run: |
+          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
+            --headless --editor --path . --quit
+
+      - name: Export Linux
+        run: |
+          mkdir -p dist/linux
+          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
+            --headless --path . \
+            --export-release "Linux/X11" \
+            "dist/linux/Camiel.x86_64"
+          tar -czf "dist/linux/Camiel-linux.tar.gz" Camiel.x86_64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: camiel-linux-${{ env.REF_CLEAN }}
+          path: dist/linux/Camiel-linux.tar.gz
+          retention-days: 30
+
+  # ── macOS ────────────────────────────────────────────────────────
+  export-macos:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y unzip
+
+      - name: Download Godot
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/godot.zip" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64"
+
+      - name: Install export templates
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/export_templates.tpz" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
+          unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}"
+          cp -R "$RUNNER_TEMP/export_templates/templates/." \
+            "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/"
+
+      - name: Import project
+        run: |
+          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
+            --headless --editor --path . --quit
+
+      - name: Export macOS
+        run: |
+          mkdir -p dist/macos
+          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
+            --headless --path . \
+            --export-release "macOS" \
+            "dist/macos/Camiel.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: camiel-macos-${{ env.REF_CLEAN }}
+          path: dist/macos/Camiel.zip
+          retention-days: 30
+
+  # ── Release ─────────────────────────────────────────────────────
+  release:
+    needs: [export-windows, export-linux, export-macos]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release
+          pattern: camiel-*
+          merge-multiple: false
+
+      - name: Rename artifacts to release-friendly names
+        run: |
+          mv camiel-windows-*/Camiel-windows.zip release/ 2>/dev/null || true
+          mv camiel-linux-*/Camiel-linux.tar.gz release/ 2>/dev/null || true
+          mv camiel-macos-*/Camiel.zip release/ 2>/dev/null || true
+          ls -la release/
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
