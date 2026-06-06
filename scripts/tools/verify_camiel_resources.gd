@@ -34,7 +34,23 @@ func _initialize() -> void:
 			quit(1)
 			return
 
-	for scene_path in ["res://scenes/camiel.tscn", "res://scenes/main.tscn"]:
+	var required_scenes := [
+		"res://scenes/camiel.tscn",
+		"res://scenes/main.tscn",
+		"res://scenes/title_screen.tscn",
+		"res://scenes/main_menu.tscn",
+		"res://scenes/lesson_select.tscn",
+		"res://scenes/lesson_1.tscn",
+		"res://scenes/lesson_2.tscn",
+		"res://scenes/lesson_3.tscn",
+		"res://scenes/lesson_4.tscn",
+		"res://scenes/lesson_5.tscn",
+		"res://scenes/adult_progress.tscn",
+		"res://scenes/ui/mobile_controller.tscn",
+		"res://scenes/ui/mobile_joystick.tscn",
+	]
+
+	for scene_path in required_scenes:
 		if load(scene_path) == null:
 			push_error("Could not load scene: %s" % scene_path)
 			quit(1)

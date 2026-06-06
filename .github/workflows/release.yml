@@ -1,10 +1,6 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "alpha-v*"
-      - "v*"
   workflow_dispatch:
     inputs:
       tag:
@@ -16,10 +12,10 @@ permissions:
   contents: write
 
 env:
-  GODOT_VERSION: 4.6.2
+  GODOT_VERSION: 4.6.3
   GODOT_STATUS: stable
-  GODOT_TEMPLATE_VERSION: 4.6.2.stable
-  GODOT_BIN: Godot_v4.6.2-stable_linux.x86_64
+  GODOT_TEMPLATE_VERSION: 4.6.3.stable
+  GODOT_BIN: Godot_v4.6.3-stable_linux.x86_64
 
 jobs:
   release-windows:

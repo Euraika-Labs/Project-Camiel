@@ -64,6 +64,8 @@ func _apply_success() -> void:
 	label.text = "Goed zo!"
 	label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	order_indicator.visible = false
-	AudioManager.play_sfx("finish")
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager:
+		audio_manager.play_sfx("finish")
 	task_completed.emit("sequence_%d" % order_number)
 	print("Sequence target %d touched! Task complete." % order_number)

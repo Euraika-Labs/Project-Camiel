@@ -1,10 +1,11 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/camiel.tscn" id="1_o5qli"]
 [ext_resource type="Script" path="res://scripts/intro_scene.gd" id="2_m1n7v"]
 [ext_resource type="PackedScene" path="res://scenes/finish_marker.tscn" id="3_fm"]
 [ext_resource type="Script" path="res://scripts/game_hud.gd" id="4_gamehud"]
 [ext_resource type="PackedScene" path="res://scenes/collectible.tscn" id="5_col"]
+[ext_resource type="PackedScene" path="res://scenes/ui/mobile_controller.tscn" id="6_mobile"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
 size = Vector2(1600, 90)
@@ -213,6 +214,8 @@ text = "Stars: 0"
 label_settings = SubResource("LabelSettings_message")
 
 [node name="WinLayer" type="CanvasLayer" parent="."]
+
+[node name="MobileController" parent="." instance=ExtResource("6_mobile")]
 
 [node name="WinOverlay" type="ColorRect" parent="WinLayer"]
 visible = false

@@ -31,6 +31,8 @@ func _apply_found() -> void:
 	# Brighten the blue to make success obvious.
 	sprite.color = found_color.lightened(0.4)
 	label.text = "Gevonden!"
-	AudioManager.play_sfx("collect")
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager:
+		audio_manager.play_sfx("collect")
 	task_completed.emit("blue_target")
 	print("Blue target found! Task complete.")

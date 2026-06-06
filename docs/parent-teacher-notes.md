@@ -1,58 +1,65 @@
-# Parent & Teacher Notes — Camiel alpha-v0.0.3
+# Parent & Teacher Notes - Camiel Beta 1 Candidate
 
 ## About Camiel
 
-Camiel is a child-friendly educational game for children aged 3+. The game features Camiel, a friendly dog character who guides children through gentle learning challenges. The experience is calm, colourful, and free of time pressure — designed to support early learning in a stress-free environment.
+Camiel is a calm educational game for children around age 3+. The game uses large targets, simple Dutch prompts, gentle audio, and no time pressure. Adults are expected to introduce the game and stay nearby during early play.
 
-## Learning Objectives
+## Learning Pack
 
-### Touch the Red Block
+### Lesson 1: Colours, Searching, And Counting
 
-- **Colour recognition (red):** Children identify the red block among other elements in the scene.
-- **Cause and effect:** Touching the block triggers an immediate visual change (it turns green) and a chime sound — teaching children that their actions have consequences.
-- **Physical coordination:** Moving Camiel to the target requires directional movement, building early spatial awareness.
+- **Red block:** identify and touch red.
+- **Hidden blue target:** look carefully and find blue.
+- **Count 1-2-3:** collect three stars and connect objects to counting.
 
-### Find the Hidden Blue Target
+### Lesson 2: Shapes
 
-- **Visual discrimination and observation:** The blue target is deliberately camouflaged against the scene background, encouraging careful looking rather than quick scanning.
-- **Persisting to find:** The task resists quick success, teaching children that effort is rewarded even when something is not immediately obvious.
-- **Colour recognition (blue):** Children confirm the colour once the target is found.
+- Children touch circle, square, and triangle targets.
+- Supports early shape vocabulary and visual discrimination.
 
-### Count 1–2–3
+### Lesson 3: Sequence
 
-- **Number sense (1, 2, 3):** Children see three stars and hear them counted aloud as each is collected.
-- **One-to-one correspondence:** Each star collected maps to exactly one count — a foundational mathematical concept.
-- **Sequential thinking:** The challenge requires collecting in any order, reinforcing that the count updates after each action.
+- Children touch targets in order: first, second, third.
+- Supports turn-taking, memory, and simple ordered actions.
 
-## How to Play
+### Lesson 4: Big And Small
 
-1. Start from the main menu.
-2. Press **Start** to begin the intro scene.
-3. Press **Les** (Lesson) from the main menu to access the three educational micro-tasks.
-4. Children complete each challenge at their own pace — there is **no timer and no failure state**.
-5. On completion a "Goed zo!" (Well done!) message appears and the child returns to the menu.
+- Children touch large, small, then middle-sized targets.
+- Supports size comparison and basic descriptive language.
 
-## Classroom Suggestions
+### Lesson 5: Repeat The Row
 
-- **1:1 adult-child pairing** is recommended for the best learning dialogue.
-- **Project on a large screen** for whole-group introduction to the game mechanics before individual play.
-- **Use as a reward or calm-down activity** — the game is deliberately low-arousal.
-- **Pause and discuss:** After each micro-task, ask the child to name the colour or count the collected items out loud.
-- **Encourage verbal narration:** Ask the child to "tell Camiel where to go" rather than controlling the character for them.
+- Children repeat a colour sequence: red, yellow, blue.
+- Reinforces colour recognition and short working-memory practice.
 
-## Accessibility
+## How To Use
 
-- Large UI elements (minimum 48×48 px touch targets) — suitable for developing fine motor control.
-- High-contrast colours throughout all UI text and game elements.
-- Audio + visual feedback for every event — no audio-only cues.
-- No fast animations, flashing, or strobing effects.
-- No time pressure, score penalties, or negative feedback.
-- **High-contrast toggle** available via the Accessibility autoload (`Accessibility.toggle_high_contrast()`).
+1. Start the game and choose **Les** from the main menu.
+2. Pick one lesson from the large lesson selector.
+3. Let the child move Camiel at their own pace.
+4. Talk through the prompt aloud if the child is not reading yet.
+5. Use **Voor volwassenen** to review local progress or reset it.
 
-## Technical
+## Progress And Privacy
 
-- **Engine:** Godot 4 (open source, MIT/GPL)
-- **Platform:** Windows (alpha build), macOS and HTML5 exports planned
-- **Project page:** [github.com/Euraika-Labs/Project-Camiel](https://github.com/Euraika-Labs/Project-Camiel)
-- **Autoload services:** `AudioManager` (music + SFX), `Accessibility` (contrast settings)
-- **Language:** Dutch throughout; English equivalents can be added per locale
+Progress is stored only on the device in `user://progress.json` through `ProgressTracker`. The Beta 1 candidate does not use accounts, cloud sync, ads, analytics, or third-party tracking. The adult progress view shows completed lessons and stars, and includes a reset button.
+
+## Accessibility And Setup
+
+- Use the adult screen to toggle mute, reduced motion, and high contrast.
+- Reduced motion currently stops collectible bobbing.
+- Every audio cue has a visual cue.
+- Lessons avoid timers, punishment, and negative scoring.
+- Mobile touch controls are available for the intro scene on touch devices.
+
+## Feedback For Beta 1
+
+Collect feedback through an adult only. Useful notes include:
+
+- Which lesson confused the child?
+- Which control was hard to use?
+- Did the child understand the prompt without reading?
+- Did any scene crash, freeze, or fail to return to the menu?
+- Were audio, motion, or contrast settings needed?
+
+Do not collect personal details from children. If examples are needed, describe behavior without names.

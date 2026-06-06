@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/lesson_manager.gd" id="1_lm"]
 [ext_resource type="PackedScene" path="res://scenes/camiel.tscn" id="1_cam"]
-[ext_resource type="PackedScene" uid="uid://bredblock" path="res://scenes/red_block.tscn" id="2_rb"]
-[ext_resource type="PackedScene" uid="uid://bluetarget" path="res://scenes/blue_target.tscn" id="3_bt"]
-[ext_resource type="PackedScene" uid="uid://countchallenge" path="res://scenes/count_challenge.tscn" id="4_cc"]
+[ext_resource type="PackedScene" path="res://scenes/red_block.tscn" id="2_rb"]
+[ext_resource type="PackedScene" path="res://scenes/blue_target.tscn" id="3_bt"]
+[ext_resource type="PackedScene" path="res://scenes/count_challenge.tscn" id="4_cc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
 size = Vector2(1600, 90)
@@ -100,4 +100,3 @@ position = Vector2(160, 590)
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(640, 360)
 enabled = true
-

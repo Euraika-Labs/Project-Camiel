@@ -6,20 +6,20 @@ Camiel can be exported as a self-contained HTML5 game that runs in any modern de
 
 ## Prerequisites
 
-1. **Download Godot 4.6.4 export templates** before exporting for the first time:
-   - Open Godot 4.6.4 editor
+1. **Download Godot 4.6.3 export templates** before exporting for the first time:
+   - Open Godot 4.6.3 editor
    - Go to **Editor → Manage Export Templates**
-   - In the version field type `4.6.4` and press Enter
+   - In the version field type `4.6.3` and press Enter
    - Click **Download** and wait for it to complete (~500 MB)
-   - Templates are stored at `~/.local/share/godot/export_templates/4.6.4/`
+   - Templates are stored at `~/.local/share/godot/export_templates/4.6.3/`
 
-2. **Godot editor must be the 4.6.4 release** — download from [godotengine.org/download](https://godotengine.org/download)
+2. **Godot editor must be the 4.6.3 release** — download from [godotengine.org/download](https://godotengine.org/download)
 
 ---
 
 ## How to Export
 
-1. Open the project in Godot 4.6.4 editor (`godot --path .`)
+1. Open the project in Godot 4.6.3 editor (`godot --path .`)
 2. Go to **Project → Export**
 3. If no HTML5 preset is configured, click **Add…** and select **HTML5**
 4. Set **Export Path** to e.g. `builds/html5/index.html`
@@ -112,7 +112,7 @@ The `.github/workflows/export.yml` workflow does not currently build the web exp
       - uses: actions/checkout@v4
       - uses: gobject/godot-action@v3
         with:
-          godot-version: 4.6.4
+          godot-version: 4.6.3
       - name: Export HTML5
         run: |
           mkdir -p builds/$GITHUB_REF_NAME/web

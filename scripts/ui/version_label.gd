@@ -5,4 +5,4 @@ extends Label
 
 
 func _ready() -> void:
-	text = "Camiel alpha-v0.0.3"
+	text = "Camiel beta-1-candidate"

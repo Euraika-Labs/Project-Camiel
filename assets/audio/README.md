@@ -6,13 +6,13 @@ This directory holds all audio files used by the game.
 
 | File | Purpose | Format | Notes |
 |------|---------|--------|-------|
-| `bgm_ambient.ogg` | Looping background music for menus and gameplay | OGG Vorbis | ~1–3 min loop, soft & gentle |
-| `sfx_collect.ogg` | Collectible star pickup sound | OGG Vorbis | Short (~0.5 s), cheerful chime |
-| `sfx_finish.ogg` | Level complete / flag reached fanfare | OGG Vorbis | Short (~1–2 s), warm success tone |
+| `bgm_ambient.wav` | Looping background music for menus and gameplay | WAV PCM | Short silent beta placeholder |
+| `sfx_collect.wav` | Collectible star pickup sound | WAV PCM | Short cheerful chime |
+| `sfx_finish.wav` | Level complete / flag reached fanfare | WAV PCM | Short warm success tone |
 
 ## Placeholder Files
 
-Until real assets are produced, use silent OGG files or generate simple tones
+Until real assets are produced, use silent WAV files or generate simple tones
 with a tool such as [sFXR](https://sfxr.me), Audacity, or the Godot AudioStreamPlayer
 tone generator.
 

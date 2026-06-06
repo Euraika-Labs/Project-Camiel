@@ -13,9 +13,11 @@ signal lesson_finished
 
 var _current_step := 1
 var _total_steps := 3
+var _started_at := 0
 
 
 func _ready() -> void:
+	_started_at = Time.get_ticks_msec()
 	target_1.order_number = 1
 	target_2.order_number = 2
 	target_3.order_number = 3
@@ -59,11 +61,20 @@ func _update_progress_label() -> void:
 
 func _apply_lesson_complete() -> void:
 	progress_label.text = "Goed zo! Alle stappen goed!"
-	AudioManager.play_sfx("finish")
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager:
+		audio_manager.play_sfx("finish")
+	var progress_tracker := get_node_or_null("/root/ProgressTracker")
+	if progress_tracker:
+		progress_tracker.record_lesson_complete("lesson_3", 3, _elapsed_seconds())
 	await get_tree().create_timer(2.0).timeout
 	lesson_finished.emit()
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/lesson_select.tscn")
 
 
 func _on_back_button_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/lesson_select.tscn")
+
+
+func _elapsed_seconds() -> int:
+	return int((Time.get_ticks_msec() - _started_at) / 1000)

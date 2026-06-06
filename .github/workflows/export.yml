@@ -12,9 +12,9 @@ permissions:
 
 # Sanitize GITHUB_REF_NAME for use in paths (branch names can contain /)
 env:
-  GODOT_VERSION: 4.6.4
+  GODOT_VERSION: 4.6.3
   GODOT_STATUS: stable
-  GODOT_TEMPLATE_VERSION: 4.6.4.stable
+  GODOT_TEMPLATE_VERSION: 4.6.3.stable
   REF_SLUG: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || github.ref_name }}
   REF_CLEAN: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || contains(github.ref, 'refs/tags/') && github.ref_name || replace(replace(github.ref_name, '/', '-'), ' ', '-') }}
 
@@ -116,7 +116,7 @@ jobs:
             --headless --path . \
             --export-release "Linux/X11" \
             "dist/linux/Camiel.x86_64"
-          tar -czf "dist/linux/Camiel-linux.tar.gz" Camiel.x86_64
+          tar -czf "dist/linux/Camiel-linux.tar.gz" -C dist/linux Camiel.x86_64
 
       - uses: actions/upload-artifact@v4
         with:
@@ -187,9 +187,9 @@ jobs:
 
       - name: Rename artifacts to release-friendly names
         run: |
-          mv camiel-windows-*/Camiel-windows.zip release/ 2>/dev/null || true
-          mv camiel-linux-*/Camiel-linux.tar.gz release/ 2>/dev/null || true
-          mv camiel-macos-*/Camiel.zip release/ 2>/dev/null || true
+          mv release/camiel-windows-*/Camiel-windows.zip release/ 2>/dev/null || true
+          mv release/camiel-linux-*/Camiel-linux.tar.gz release/ 2>/dev/null || true
+          mv release/camiel-macos-*/Camiel.zip release/ 2>/dev/null || true
           ls -la release/
 
       - uses: softprops/action-gh-release@v2

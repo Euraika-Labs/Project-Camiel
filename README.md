@@ -26,10 +26,13 @@
   - **Count 1, 2, 3** — number sense
 - Lesson system with Dutch progress tracking ("Taken: N/3")
 - Parent/teacher notes in `docs/parent-teacher-notes.md`
-- WCAG 2.1 AA accessibility compliant
+- Accessibility report and improvement notes
 
-### Alpha v0.0.4+ — In progress
-- Voice-over audio, mobile touch controls, web export, parental dashboard
+### Beta 1 Candidate — Trusted Testing
+- Five-lesson learning pack with local progress tracking
+- Adult-facing local progress view and reset control
+- Mobile touch overlay for the intro scene
+- Mute, reduced-motion, and high-contrast controls for adult setup
 
 ## Controls
 
@@ -43,7 +46,7 @@
 
 ## Quick Start
 
-1. Install [Godot 4.6.4](https://godotengine.org)
+1. Install [Godot 4.6.3](https://godotengine.org)
 2. Open the project: `File > Open Project > select project.godot`
 3. Press Play (F5)
 
@@ -61,19 +64,23 @@ For first-time setup, see [docs/quick-start.md](docs/quick-start.md).
 
 ## Building
 
+```bash
+# Run quality gate
+python3 scripts/tools/quality_gate.py --root .
+
+# Run Godot verification
+godot --headless --path . --script res://scripts/tools/verify_camiel_resources.gd
+godot --headless --path . --script res://scripts/tools/verify_beta1_flow.gd
+
+# Export macOS build
+godot --headless --path . --export-release "macOS" dist/macos/Camiel.zip
+```
+
 The GitHub Wiki contains the broader product context, safety principles, character bible, and long-term architecture notes:
 
 https://github.com/Euraika-Labs/Project-Camiel/wiki
 
 ## Community And Security
-
-```bash
-# Export Windows build (requires Godot 4.6.4)
-godot --headless --path . --export-release "Windows Desktop" builds/
-
-# Run quality gate
-python3 scripts/tools/quality_gate.py --root .
-```
 
 ## Contributing
 

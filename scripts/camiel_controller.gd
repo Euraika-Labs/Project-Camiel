@@ -57,9 +57,9 @@ func _physics_process(delta: float) -> void:
 
 func _read_direction() -> int:
 	var direction := 0
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT) or Input.is_action_pressed("ui_left"):
 		direction -= 1
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT) or Input.is_action_pressed("ui_right"):
 		direction += 1
 	return direction
 
@@ -67,13 +67,13 @@ func _run_pressed() -> bool:
 	return Input.is_key_pressed(KEY_SHIFT)
 
 func _jump_pressed() -> bool:
-	return Input.is_key_pressed(KEY_SPACE) or Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP)
+	return Input.is_key_pressed(KEY_SPACE) or Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP) or Input.is_action_pressed("jump")
 
 func _sit_pressed() -> bool:
-	return Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN)
+	return Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN) or Input.is_action_pressed("sit")
 
 func _sleep_pressed() -> bool:
-	return Input.is_key_pressed(KEY_X)
+	return Input.is_key_pressed(KEY_X) or Input.is_action_pressed("sleep")
 
 func _update_animation(direction: int) -> void:
 	if not is_on_floor():

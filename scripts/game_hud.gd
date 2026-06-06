@@ -23,7 +23,9 @@ func _update_label() -> void:
 func _on_collectible_collected() -> void:
 	_stars += 1
 	_update_label()
-	AudioManager.play_sfx("collect")
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager:
+		audio_manager.play_sfx("collect")
 
 
 func _connect_to_collectibles() -> void:

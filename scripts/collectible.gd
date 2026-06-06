@@ -22,6 +22,10 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _collected:
 		return
+	var accessibility := get_node_or_null("/root/Accessibility")
+	if accessibility and accessibility.is_reduced_motion_enabled():
+		position.y = _base_y
+		return
 	_time += delta
 	position.y = _base_y + sin(_time * bob_speed) * bob_height
 

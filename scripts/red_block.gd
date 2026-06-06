@@ -31,6 +31,8 @@ func _apply_success() -> void:
 	color_rect.color = success_color
 	label.text = "Goed zo!"
 	label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
-	AudioManager.play_sfx("finish")
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager:
+		audio_manager.play_sfx("finish")
 	task_completed.emit("red_block")
 	print("Red block touched! Task complete.")

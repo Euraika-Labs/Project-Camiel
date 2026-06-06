@@ -3,10 +3,10 @@
 # a Play button, and the current version label.
 extends Node2D
 
-@onready var play_button: Button = $UI/PlayButton
+@onready var play_button: Button = $UI/VBox/PlayButton
 @onready var camiel_sprite: AnimatedSprite2D = $Camiel/AnimatedSprite2D
 
-const VERSION := "alpha-v0.0.3"
+const VERSION := "beta-1-candidate"
 
 
 func _ready() -> void:

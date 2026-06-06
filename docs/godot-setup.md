@@ -2,86 +2,43 @@
 
 ## Engine Version
 
-Current engine:
-
-`Godot 4.6.2.stable`
-
-The project was created and tested with this version.
+Use `Godot 4.6.3.stable` with matching `4.6.3.stable` export templates.
 
 ## Main Project Files
 
-- `project.godot`: Godot project config.
-- `scenes/main.tscn`: Main playable intro scene.
+- `project.godot`: Godot project config and autoload registration.
+- `scenes/title_screen.tscn`: configured startup scene.
+- `scenes/main_menu.tscn`: child-facing menu.
+- `scenes/lesson_select.tscn`: five-lesson selector.
+- `scenes/main.tscn`: playable intro scene.
 - `scenes/camiel.tscn`: Camiel character scene.
-- `assets/camiel/camiel_sprite_frames.tres`: SpriteFrames resource for Camiel.
-- `scripts/camiel_controller.gd`: Player movement and animation controller.
-- `scripts/intro_scene.gd`: Intro scene message logic.
-
-## Main Scene
-
-The project main scene is:
-
-`res://scenes/main.tscn`
-
-The main scene includes:
-
-- Background color rectangles.
-- A grass floor.
-- A small platform.
-- StaticBody2D collision for the floor, platform, and side walls.
-- A Camiel instance.
-- A Camera2D.
-- A CanvasLayer UI with title, message, and controls.
-
-## Camiel Scene
-
-Camiel is a `CharacterBody2D`.
-
-Child nodes:
-
-- `AnimatedSprite2D`
-- `CollisionShape2D`
-
-The AnimatedSprite2D uses:
-
-`res://assets/camiel/camiel_sprite_frames.tres`
-
-## Player Physics
-
-The controller currently exposes:
-
-- `walk_speed`
-- `run_speed`
-- `jump_velocity`
-- `gravity`
-- `acceleration`
-- `friction`
-- `min_x`
-- `max_x`
-
-Movement is intentionally simple for the alpha.
+- `scripts/camiel_controller.gd`: player movement and animation controller.
+- `scripts/progress_tracker.gd`: local progress storage.
 
 ## Verification
 
-The project includes a verification script:
+Run the Python and Godot gates from the repository root:
 
-`scripts/tools/verify_camiel_resources.gd`
-
-It checks:
-
-- The SpriteFrames resource exists.
-- Expected animation names exist.
-- Expected frame counts match.
-- `scenes/camiel.tscn` and `scenes/main.tscn` load.
-- Camiel scene root is a `CharacterBody2D`.
-- Main scene contains a Camiel instance.
-
-Example command:
-
-```powershell
-& "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.6.2-stable_win64_console.exe" --headless --path "." --script "res://scripts/tools/verify_camiel_resources.gd"
+```bash
+python3 scripts/tools/quality_gate.py --root .
+python3 -m unittest tests.test_quality_gate
+godot --headless --path . --script res://scripts/tools/verify_camiel_resources.gd
+godot --headless --path . --script res://scripts/tools/verify_beta1_flow.gd
+godot --headless --path . --quit-after 2
 ```
+
+The resource verifier checks Camiel animation resources and all core Beta 1 scenes. The flow verifier checks progress recording/reset and scene instantiation for the title, menu, lesson selector, lessons, and adult progress view.
+
+## Export Templates
+
+Install export templates before building release artifacts:
+
+```bash
+mkdir -p "$HOME/Library/Application Support/Godot/export_templates/4.6.3.stable"
+```
+
+Use Godot's editor template manager or download the official `Godot_v4.6.3-stable_export_templates.tpz` package and copy its `templates/` contents into that directory.
 
 ## Notes
 
-The exported build is not code-signed. Windows may show a SmartScreen warning when running it for the first time.
+Current macOS exports use ad-hoc signing and are not notarized. Gatekeeper warnings are expected for downloaded ZIPs until a signing and notarization workflow is added.

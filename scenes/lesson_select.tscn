@@ -1,0 +1,81 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/lesson_select.gd" id="1"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font_size = 48
+font_color = Color(0.0941176, 0.0784314, 0.0627451, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_summary"]
+font_size = 24
+font_color = Color(0.0941176, 0.0784314, 0.0627451, 1)
+
+[node name="LessonSelect" type="Node2D"]
+script = ExtResource("1")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.6, 0.84, 1, 1)
+
+[node name="VBox" type="VBoxContainer" parent="ColorRect"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -260.0
+offset_right = 320.0
+offset_bottom = 260.0
+alignment = 1
+
+[node name="Title" type="Label" parent="ColorRect/VBox"]
+layout_mode = 2
+text = "Kies een les"
+label_settings = SubResource("LabelSettings_title")
+horizontal_alignment = 1
+
+[node name="SummaryLabel" type="Label" parent="ColorRect/VBox"]
+layout_mode = 2
+text = "Klaar: 0 / 5 lessen"
+label_settings = SubResource("LabelSettings_summary")
+horizontal_alignment = 1
+
+[node name="Lesson1Button" type="Button" parent="ColorRect/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Les 1 - Kleuren en tellen"
+
+[node name="Lesson2Button" type="Button" parent="ColorRect/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Les 2 - Vormen"
+
+[node name="Lesson3Button" type="Button" parent="ColorRect/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Les 3 - Volgorde"
+
+[node name="Lesson4Button" type="Button" parent="ColorRect/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Les 4 - Groot en klein"
+
+[node name="Lesson5Button" type="Button" parent="ColorRect/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Les 5 - Herhaal de rij"
+
+[node name="BackButton" type="Button" parent="ColorRect/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Terug"
+
+[connection signal="pressed" from="ColorRect/VBox/Lesson1Button" to="." method="_on_lesson_1_button_pressed"]
+[connection signal="pressed" from="ColorRect/VBox/Lesson2Button" to="." method="_on_lesson_2_button_pressed"]
+[connection signal="pressed" from="ColorRect/VBox/Lesson3Button" to="." method="_on_lesson_3_button_pressed"]
+[connection signal="pressed" from="ColorRect/VBox/Lesson4Button" to="." method="_on_lesson_4_button_pressed"]
+[connection signal="pressed" from="ColorRect/VBox/Lesson5Button" to="." method="_on_lesson_5_button_pressed"]
+[connection signal="pressed" from="ColorRect/VBox/BackButton" to="." method="_on_back_button_pressed"]

@@ -33,7 +33,12 @@ text = "Start!"
 [node name="LessonButton" type="Button" parent="ColorRect/VBox"]
 text = "Les"
 
-[node name="VersionLabel" type="Label" parent="ColorRect/VBox"]
-text = "alpha-v0.0.3"
+[node name="AdultButton" type="Button" parent="ColorRect/VBox"]
+text = "Voor volwassenen"
 
+[node name="VersionLabel" type="Label" parent="ColorRect/VBox"]
+text = "beta-1-candidate"
+
+[connection signal="pressed" from="ColorRect/VBox/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="ColorRect/VBox/LessonButton" to="." method="_on_lesson_button_pressed"]
+[connection signal="pressed" from="ColorRect/VBox/AdultButton" to="." method="_on_adult_button_pressed"]

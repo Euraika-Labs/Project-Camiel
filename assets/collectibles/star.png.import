@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cstar47ddd578ff3b610c1371"
-path="res://.godot/imported/star.png-47ddd578ff3b610c137173c61ac73558.ctex"
+uid="uid://dq0cshvv5a0fm"
+path="res://.godot/imported/star.png-a1ce3d7128da5e06a8fada6cc0c1ec69.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/collectibles/star.png"
-dest_files=["res://.godot/imported/star.png-47ddd578ff3b610c137173c61ac73558.ctex"]
+dest_files=["res://.godot/imported/star.png-a1ce3d7128da5e06a8fada6cc0c1ec69.ctex"]
 
 [params]
 

@@ -39,5 +39,7 @@ func _update_label() -> void:
 func _apply_complete() -> void:
 	message_label.text = "%d! Goed zo!" % num_to_collect
 	message_label.visible = true
-	AudioManager.play_sfx("finish")
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager:
+		audio_manager.play_sfx("finish")
 	task_completed.emit()

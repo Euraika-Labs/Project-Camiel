@@ -137,7 +137,7 @@ offset_right = -24.0
 offset_bottom = -24.0
 grow_horizontal = 0
 grow_vertical = 0
-text = "alpha-v0.0.3"
+text = "beta-1-candidate"
 label_settings = SubResource("LabelSettings_version")
 horizontal_alignment = 2
 

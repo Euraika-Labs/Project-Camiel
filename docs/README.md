@@ -1,6 +1,6 @@
 # Project Camiel Documentation
 
-This folder documents what is known and what has been done so far for Project Camiel.
+This folder documents current implementation, release process, and product decisions for Project Camiel.
 
 ## Documents
 
@@ -10,13 +10,17 @@ This folder documents what is known and what has been done so far for Project Ca
 - [Assets And Animations](assets-and-animations.md)
 - [Build And Release](build-and-release.md)
 - [CI And Community Standards](ci-and-community-standards.md)
+- [Agent Research Workflow](agent-research-workflow.md)
 - [Roadmap](roadmap.md)
+- [Parent Dashboard](parent-dashboard.md)
+- [Accessibility Report](accessibility-report.md)
+- [Parent Teacher Notes](parent-teacher-notes.md)
 
 ## Current Status
 
-Project Camiel is currently at `alpha-v0.0.1`.
+Project Camiel is a `beta-1-candidate`.
 
-The alpha is a small Godot 4 intro experience for children from around 3 years old. It focuses on a friendly character, simple movement, clear colors, and a gentle first interaction.
+The current product includes the intro experience, five learning lessons, a lesson selector, local progress tracking, an adult progress view, accessibility toggles, desktop export presets, and verification scripts for the Beta 1 flow.
 
 For the broader product vision, safety model, character bible, and long-term architecture notes, see the GitHub Wiki:
 

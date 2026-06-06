@@ -28,14 +28,13 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 func _reach_finish(_body: Node2D) -> void:
-	# 1. Play the finish SFX via the shared AudioManager autoload.
-	AudioManager.play_sfx("finish")
+	# 1. Play the finish SFX via the shared audio autoload when present.
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager:
+		audio_manager.play_sfx("finish")
 
 	# 2. Tell the main scene to show "Goed zo!" and trigger win screen.
-	#    The main scene (intro_scene.gd) is a sibling of FinishMarker.
-	var main = get_tree().get_first_node_in_group("main")
-	if main and main.has_method("_on_finish_reached"):
-		main._on_finish_reached()
+	finished.emit()
 
 	# 3. After 2 s, show the replay prompt on the flag label.
 	await get_tree().create_timer(2.0).timeout

@@ -10,28 +10,28 @@ Camiel is a child-friendly educational game for children aged 3+. Camiel is a fr
 
 ---
 
-## Step 1: Install Godot 4.6.4
+## Step 1: Install Godot 4.6.3
 
 ### Option A: Windows
-1. Download Godot 4.6.4 from [godotengine.org](https://godotengine.org) (select Windows 64-bit)
+1. Download Godot 4.6.3 from [godotengine.org](https://godotengine.org) (select Windows 64-bit)
 2. Run the `.exe` installer, or download the portable `.zip` and extract anywhere
 3. That is it — no installation needed for portable version
 
 ### Option B: macOS
-1. Download Godot 4.6.4 from [godotengine.org](https://godotengine.org) (select macOS)
+1. Download Godot 4.6.3 from [godotengine.org](https://godotengine.org) (select macOS)
 2. Drag Godot.app to your Applications folder
 3. On first run: System Preferences > Security & Privacy > allow "App Store and identified developers"
 
 ### Option C: Linux
-1. Download Godot 4.6.4 from [godotengine.org](https://godotengine.org) (select Linux)
-2. Make executable: `chmod +x Godot_v4.6.4_x11.64`
-3. Run: `./Godot_v4.6.4_x11.64`
+1. Download Godot 4.6.3 from [godotengine.org](https://godotengine.org) (select Linux)
+2. Make executable: `chmod +x Godot_v4.6.3_x11.64`
+3. Run: `./Godot_v4.6.3_x11.64`
 
 ---
 
 ## Step 2: Open the Project
 
-1. Launch Godot 4.6.4
+1. Launch Godot 4.6.3
 2. Click **"Import"** (the folder icon)
 3. Navigate to where you extracted Project Camiel
 4. Select `project.godot` and click **"Import & Run"**
@@ -64,7 +64,7 @@ Camiel is a child-friendly educational game for children aged 3+. Camiel is a fr
 ## Troubleshooting
 
 ### The game does not start
-- Make sure you have Godot 4.6.4 (not 3.x or 4.6.2)
+- Make sure you have Godot 4.6.3 (not 3.x or 4.6.2)
 - Press F5 to start, not just open the project
 
 ### No sound

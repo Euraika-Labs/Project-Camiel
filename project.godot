@@ -6,11 +6,11 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=6
+config_version=5
 
 [application]
 
-config/name="Camiel alpha-v0.0.3"
+config/name="Camiel beta-1-candidate"
 run/main_scene="res://scenes/title_screen.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 
@@ -36,11 +36,27 @@ mobile_jump={
 "deadzone": 0.5,
 "events": []
 }
+jump={
+"deadzone": 0.5,
+"events": []
+}
+sit={
+"deadzone": 0.5,
+"events": []
+}
+sleep={
+"deadzone": 0.5,
+"events": []
+}
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true
 
 [audio]
 

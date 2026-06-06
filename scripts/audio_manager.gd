@@ -9,9 +9,9 @@ const MASTER_BUS := "Master"
 const SFX_BUS    := "SFX"
 
 # ── Default asset paths (relative to res://) ─────────────────────────────────
-const BGM_PATH := "res://assets/audio/bgm_ambient.ogg"
-const SFX_COLLECT_PATH := "res://assets/audio/sfx_collect.ogg"
-const SFX_FINISH_PATH  := "res://assets/audio/sfx_finish.ogg"
+const BGM_PATH := "res://assets/audio/bgm_ambient.wav"
+const SFX_COLLECT_PATH := "res://assets/audio/sfx_collect.wav"
+const SFX_FINISH_PATH  := "res://assets/audio/sfx_finish.wav"
 
 # ── Internal state ───────────────────────────────────────────────────────────
 var _bgm_player:  AudioStreamPlayer
@@ -33,16 +33,16 @@ func _ready() -> void:
 	_master_bus_idx = AudioServer.get_bus_index(MASTER_BUS)
 	_sfx_bus_idx    = AudioServer.get_bus_index(SFX_BUS)
 
-	# Assign buses by index so naming isn't required at runtime.
-	_bgm_player.bus = SFX_BUS     # BGM routed through SFX so it respects sfx volume
+	# Assign buses by name so project bus configuration remains explicit.
+	_bgm_player.bus = MASTER_BUS
 	_sfx_player.bus = SFX_BUS
 
 	# Default volume (0 dB = full)
 	set_bgm_volume(0.8)
 	set_sfx_volume(0.8)
 
-	# Auto-load music if the file exists.
-	if ResourceLoader.exists(BGM_PATH):
+	# Auto-load music during real gameplay, not during headless verification.
+	if DisplayServer.get_name() != "headless" and ResourceLoader.exists(BGM_PATH):
 		play_music(BGM_PATH)
 
 
@@ -51,11 +51,11 @@ func _ready() -> void:
 ## Start looping background music from `path`. No-op if path is invalid.
 func play_music(path: String) -> void:
 	if not ResourceLoader.exists(path):
-		push_warning("[AudioManager] BGM not found: ", path)
+		push_warning("[AudioManager] BGM not found: %s" % path)
 		return
 	var stream := load(path) as AudioStream
 	if stream == null:
-		push_warning("[AudioManager] Could not load BGM: ", path)
+		push_warning("[AudioManager] Could not load BGM: %s" % path)
 		return
 	_bgm_player.stream = stream
 	_bgm_player.volume_db = linear_to_db(_bgm_volume_db)
@@ -76,11 +76,11 @@ func play_sfx(event: String, custom_path: String = "") -> void:
 			"collect": path = SFX_COLLECT_PATH
 			"finish":  path  = SFX_FINISH_PATH
 	if path.is_empty() or not ResourceLoader.exists(path):
-		push_warning("[AudioManager] SFX not found for event: ", event)
+		push_warning("[AudioManager] SFX not found for event: %s" % event)
 		return
 	var stream := load(path) as AudioStream
 	if stream == null:
-		push_warning("[AudioManager] Could not load SFX: ", path)
+		push_warning("[AudioManager] Could not load SFX: %s" % path)
 		return
 	_sfx_player.stream = stream
 	_sfx_player.volume_db = linear_to_db(_sfx_volume_db)
@@ -96,6 +96,7 @@ func set_bgm_volume(linear: float) -> void:
 ## Set SFX volume (0.0 = silent, 1.0 = full).
 func set_sfx_volume(linear: float) -> void:
 	_sfx_volume_db = clampf(linear, 0.0, 1.0)
+	_sfx_player.volume_db = linear_to_db(_sfx_volume_db)
 
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
@@ -104,11 +105,18 @@ func set_sfx_volume(linear: float) -> void:
 func _get_or_create_player(node_name: String, loop: bool) -> AudioStreamPlayer:
 	var existing := get_node_or_null(node_name) as AudioStreamPlayer
 	if existing != null:
-		existing.loop = loop
+		if loop and not existing.finished.is_connected(_on_bgm_finished):
+			existing.finished.connect(_on_bgm_finished)
 		return existing
 	var player := AudioStreamPlayer.new()
 	player.name = node_name
-	player.loop = loop
 	player.process_mode = Node.PROCESS_MODE_ALWAYS   # keep playing across scenes
+	if loop:
+		player.finished.connect(_on_bgm_finished)
 	add_child(player)
 	return player
+
+
+func _on_bgm_finished() -> void:
+	if _bgm_player and _bgm_player.stream:
+		_bgm_player.play()

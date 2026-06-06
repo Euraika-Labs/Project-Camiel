@@ -14,6 +14,6 @@ offset_right = -24.0
 offset_bottom = -24.0
 grow_horizontal = 0
 grow_vertical = 0
-text = "Camiel alpha-v0.0.3"
+text = "Camiel beta-1-candidate"
 horizontal_alignment = 2
 script = ExtResource("1_vl")

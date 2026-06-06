@@ -6,6 +6,7 @@ tmp/
 
 # Exported binaries are attached to GitHub Releases instead of committed.
 builds/
+dist/
 
 # OS/editor noise
 .DS_Store

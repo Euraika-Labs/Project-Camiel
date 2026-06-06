@@ -1,7 +1,7 @@
 # menu_button.gd
 # Reusable menu button with consistent styling across the game.
 extends Button
-const VERSION := "alpha-v0.0.3"
+const VERSION := "beta-1-candidate"
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(200, 80)

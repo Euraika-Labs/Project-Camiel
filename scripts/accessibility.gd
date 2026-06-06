@@ -3,8 +3,11 @@
 # Toggle with Accessibility.toggle_high_contrast().
 extends Node
 
+signal accessibility_changed
 
 var _high_contrast := false
+var _reduced_motion := false
+var _muted := false
 
 
 func _ready() -> void:
@@ -19,9 +22,37 @@ func toggle_high_contrast() -> void:
 	_apply()
 
 
+func toggle_reduced_motion() -> void:
+	_reduced_motion = not _reduced_motion
+	accessibility_changed.emit()
+
+
+func toggle_mute() -> void:
+	_muted = not _muted
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager == null:
+		accessibility_changed.emit()
+		return
+	if _muted:
+		audio_manager.set_bgm_volume(0.0)
+		audio_manager.set_sfx_volume(0.0)
+	else:
+		audio_manager.set_bgm_volume(0.8)
+		audio_manager.set_sfx_volume(0.8)
+	accessibility_changed.emit()
+
+
 ## Returns true if high-contrast mode is currently active.
 func is_high_contrast_enabled() -> bool:
 	return _high_contrast
+
+
+func is_reduced_motion_enabled() -> bool:
+	return _reduced_motion
+
+
+func is_muted() -> bool:
+	return _muted
 
 
 func _apply() -> void:
@@ -35,6 +66,7 @@ func _apply() -> void:
 	for layer in _get_contrast_layers():
 		if layer.has_method("_apply_contrast"):
 			layer._apply_contrast(_high_contrast)
+	accessibility_changed.emit()
 
 
 func _get_contrast_layers() -> Array[CanvasLayer]:

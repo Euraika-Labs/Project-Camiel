@@ -1,5 +1,18 @@
 # Changelog
 
+## [beta-1-candidate] — 2026-06-06
+### Added
+- Lesson selector for five lessons.
+- Lesson 4 size-comparison activity and Lesson 5 colour-sequence review.
+- Local adult progress screen with reset control.
+- Mute, reduced-motion, and high-contrast controls.
+- Mobile touch overlay integration for the intro scene.
+
+### Changed
+- Updated visible version labels and export metadata to beta candidate.
+- Lesson completion now records local progress through `ProgressTracker`.
+- CI/export workflows target verified Godot 4.6.3 release URLs.
+
 ## [alpha-v0.0.3] — 2026-06-05
 ### Added
 - Educational micro-tasks: red block, blue target, count challenge (lesson_1.tscn)
