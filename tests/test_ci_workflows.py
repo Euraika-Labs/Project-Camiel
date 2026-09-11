@@ -4,13 +4,7 @@ import re
 import unittest
 from pathlib import Path
 
-try:
-    import yaml
-
-    _HAS_YAML = True
-except ImportError:  # pragma: no cover - environment dependent
-    yaml = None  # type: ignore[assignment]
-    _HAS_YAML = False
+import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -173,7 +167,6 @@ class CiWorkflowTests(unittest.TestCase):
             matches, "repository-hygiene job does not run tests.test_ci_workflows"
         )
 
-    @unittest.skipUnless(_HAS_YAML, "PyYAML not installed")
     def test_workflows_parse_as_yaml(self) -> None:
         yaml.safe_load(self.ci_text)
         yaml.safe_load(self.release_text)
