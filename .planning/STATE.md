@@ -4,16 +4,16 @@ milestone: v0.0.4
 current_phase: 01
 current_phase_name: 3D Foundation & Archive
 status: executing
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-09-11T14:57:45.996Z"
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-09-11T15:07:48.134Z"
 last_activity: 2026-09-11
 last_activity_desc: Phase 01 execution started
-state_head: 9de561641ca196a10c0e7f627347e0e7ec3cba43
+state_head: 6b790fb6e1f19315a9650dc32572be8da8a33b05
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 ## Current Position
 
 Phase: 01 (3D Foundation & Archive) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-09-11 — Phase 01 execution started
 
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P02 | 13min | 2 tasks | 1 files |
 | Phase 01 P03 | 45min | 2 tasks | 8 files |
 | Phase 01 P04 | 35min | 2 tasks | 7 files |
+| Phase 01 P05 | 25min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,7 @@ Recent decisions affecting current work:
 - [Phase 01]: [Phase 01-02]: Discovered the engine's Jolt physics literal is "Jolt Physics" (not "JoltPhysics3D" as research assumed) and that this repo's committed project.godot config_version=6 is invalid for 4.7.2 (engine expects 5, silently discards the file and rewrites it to 5 on next save) — Plan 01-03 must account for both before editing project.godot
 - [Phase 01]: [Phase 01-03]: Hardened the headless check (D-01/D-02/D-03/D-04/D-07 enforcement, HEADLESS_CHECK_MAX_LIMIT_SECONDS cap, behaviour probes) with a committed 11-case self-test; fixed a resolve_godot fallback bug the self-test itself surfaced (an explicit but invalid GODOT env var used to silently succeed via a different engine).
 - [Phase 01]: Camera-relative steering only turns Camiel to face travel direction on forward/back input; pure lateral input strafes without reorienting, since turning to face a direction computed from a self-referential frame has no fixed point and spins forever (Rule 1 fix, Plan 01-04) — Discovered via the fall_at_edge probe case and confirmed by tracing Camiel's position while holding D alone before/after the fix
+- [Phase 01]: [Phase 01-05]: CI and release workflows pinned to Godot 4.7.2, with SHA512 verification added on every engine/export-template download and the 2D-era verifier/quit-after smoke test replaced by scripts/tools/run_headless_check.sh in both workflows; CONTRIBUTING.md updated to match.
 
 ### Pending Todos
 
@@ -102,6 +104,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-11T14:57:45.985Z
-Stopped at: Completed 01-04-PLAN.md
+Last session: 2026-09-11T15:07:48.123Z
+Stopped at: Completed 01-05-PLAN.md
 Resume file: None
