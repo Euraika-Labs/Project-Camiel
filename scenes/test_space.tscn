@@ -17,6 +17,26 @@ size = Vector3(12, 1, 12)
 [sub_resource type="BoxMesh" id="BoxMesh_frqla"]
 size = Vector3(12, 1, 12)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_frqla"]
+size = Vector3(2, 0.4, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0252l"]
+albedo_color = Color(0.55, 0.7, 0.95, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1a4xt"]
+material = SubResource("StandardMaterial3D_0252l")
+size = Vector3(2, 0.4, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jrruh"]
+size = Vector3(12, 2, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3kllb"]
+material = SubResource("StandardMaterial3D_0252l")
+size = Vector3(12, 2, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_qviim"]
+size = Vector3(200, 4, 200)
+
 [node name="TestSpace" type="Node3D" unique_id=587115395]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1867786250]
@@ -39,3 +59,29 @@ mesh = SubResource("BoxMesh_frqla")
 [node name="Camiel" type="CharacterBody3D" parent="." unique_id=1761816634 instance=ExtResource("2_25oy3")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
 script = ExtResource("3_frqla")
+
+[node name="RaisedStep" type="StaticBody3D" parent="." unique_id=1721281632]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.2, -3)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RaisedStep" unique_id=1809515372]
+shape = SubResource("BoxShape3D_frqla")
+
+[node name="Mesh" type="MeshInstance3D" parent="RaisedStep" unique_id=286315336]
+mesh = SubResource("BoxMesh_1a4xt")
+
+[node name="BackWall" type="StaticBody3D" parent="." unique_id=1204172554]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -6.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall" unique_id=611842177]
+shape = SubResource("BoxShape3D_jrruh")
+
+[node name="Mesh" type="MeshInstance3D" parent="BackWall" unique_id=536319876]
+mesh = SubResource("BoxMesh_3kllb")
+
+[node name="FallBoundary" type="Area3D" parent="." unique_id=1229324150]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -12, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FallBoundary" unique_id=1008809110]
+shape = SubResource("BoxShape3D_qviim")
+
+[connection signal="body_entered" from="FallBoundary" to="Camiel" method="_on_fall_boundary_body_entered"]

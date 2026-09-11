@@ -52,3 +52,6 @@ margin = 0.2
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D" unique_id=48234651]
 current = true
+
+[node name="ReturnSound" type="AudioStreamPlayer" parent="." unique_id=294234591]
+volume_db = -8.0
