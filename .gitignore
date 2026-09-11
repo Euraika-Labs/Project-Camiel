@@ -21,3 +21,8 @@ __pycache__/
 
 # Godot import metadata (auto-generated)
 *.import
+
+# GSD tooling run-scoped state (never committed — session/PID-specific)
+.gsd/
+.planning/milestone.lock
+.planning/state.json
