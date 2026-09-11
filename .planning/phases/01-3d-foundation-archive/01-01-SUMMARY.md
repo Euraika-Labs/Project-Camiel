@@ -170,3 +170,10 @@ None - no external service configuration required.
 ---
 *Phase: 01-3d-foundation-archive*
 *Completed: 2026-09-11*
+
+## Self-Check: PASSED
+
+- FOUND: .planning/phases/01-3d-foundation-archive/01-01-SUMMARY.md
+- FOUND: commit 06841d7 (Task 3 removal commit)
+- FOUND: project.godot on disk
+- Note: this self-check was appended after the SUMMARY commit (1f468be) and is recorded here for the record; SUMMARY commit content itself predates this note.
