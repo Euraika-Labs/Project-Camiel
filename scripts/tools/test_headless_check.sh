@@ -216,4 +216,19 @@ find "${WORK_DIR}/scripts/tools" -maxdepth 1 -type f -name 'probe_*.gd.uid' -exe
 assert_result "zero behaviour probes fails" 1 "no behaviour probes found" -- \
 	bash "${CHECK_SCRIPT}"
 
+# --- Case 13: generic ERROR: during import fails (CR-02) ---
+# The import step's log scan omitted the generic `ERROR:` pattern used by
+# every other step (main scene, verifier, probes), so an engine-level import
+# failure phrased as `ERROR: ...` (not `SCRIPT ERROR:`/`Parse Error:`) was
+# silently ignored. A corrupted image file with no .gd/.tscn extension and
+# unreachable from any tracked scene reproduces this: Godot's import pass
+# logs `ERROR: Error importing '...'.` but its own process exit code stays 0
+# (F9), so before this fix the whole check still reported
+# "Headless check passed."
+reset_copy
+printf 'not a real png file, just garbage bytes 0123456789' >"${WORK_DIR}/assets/zz_broken.png"
+assert_result "generic ERROR during import fails" 1 "CHECK FAILED" "error pattern found in import log" -- \
+	bash "${CHECK_SCRIPT}"
+rm -f "${WORK_DIR}/assets/zz_broken.png" "${WORK_DIR}/assets/zz_broken.png.import"
+
 echo "Headless check self-test passed."

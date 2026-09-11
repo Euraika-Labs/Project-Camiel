@@ -173,9 +173,14 @@ case "$VERSION_LINE" in
 esac
 
 # [step] import — a dedicated import pass before any scene loads (Pitfall 3).
+# Uses the same three-pattern scan as every other step below (main scene,
+# verifier, probes): a generic engine-level import failure (e.g. a corrupted
+# or unsupported asset unreachable from any tracked scene) prints as a plain
+# `ERROR:` line, not `SCRIPT ERROR:`/`Parse Error:`, and Godot's own exit
+# code does not reflect it (F9), so the log-scan is the only backstop.
 IMPORT_LOG="${LOG_DIR}/import.log"
 run_step "import" "$IMPORT_LIMIT" "$IMPORT_LOG" "$GODOT_BIN" --headless --editor --path "$ROOT" --quit
-if grep -qE 'SCRIPT ERROR|Parse Error' "$IMPORT_LOG"; then
+if grep -qE 'SCRIPT ERROR|Parse Error|ERROR:' "$IMPORT_LOG"; then
 	fail "import" "error pattern found in import log" "$IMPORT_LOG"
 fi
 
