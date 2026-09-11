@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Project Camiel is a Godot 4.6.4 **3D** educational game for children from around age 3, starring the character Camiel. It guides pre-reading children in Dutch through simple 3D lessons (colour recognition, counting, shape order, sequence) with no reading required, while parents and teachers act as secondary users who co-play, guide, and (in this milestone) will be able to review a child's lesson progress.
+Project Camiel is a Godot 4.7.2 **3D** educational game for children from around age 3, starring the character Camiel. It guides pre-reading children in Dutch through simple 3D lessons (colour recognition, counting, shape order, sequence) with no reading required, while parents and teachers act as secondary users who co-play, guide, and (in this milestone) will be able to review a child's lesson progress.
 
 This project pivoted from a 2D game to a full 3D game during the discussion of the original Phase 1 (see Key Decisions). The roadmap below is the rebuilt 3D plan; the prior 2D-stabilization plan is retired.
 
@@ -47,20 +47,22 @@ Project Camiel is an existing, public Godot 4 repository (`Euraika-Labs/Project-
 
 **What previously shipped in 2D, kept as history, not as validated 3D capability:** Camiel's 2D character art and sprite animations (idle, walk, run, jump, sit, sleep) on a `CharacterBody2D`; keyboard-driven 2D movement; Windows desktop builds distributed as GitHub Release assets (unsigned); a CI quality gate and headless Godot resource/scene verifier. A fresh codebase audit (`.planning/codebase/CONCERNS.md`, `ARCHITECTURE.md`, `STACK.md`) also found several 2D capabilities the project's own documentation described as shipped were not actually reachable or working (a broken title-screen node path, a non-compiling `ProgressTracker` autoload, an unreachable `Accessibility` autoload, UI contrast that failed WCAG AA despite a report claiming compliance, lessons 2 through 5 with no menu path to reach them, an unwired mobile touch controller, and an invalid Web export preset). None of this 2D code carries forward into the runtime project; it is archived under a git tag (per the locked decisions below) and consulted only as a reference for what gameplay and lesson concepts to port into 3D — for example, the 2D lesson mechanics (touch the red block, find the hidden blue target, count to three, touch shapes in order, touch targets in sequence) describe the *learning* intent that the 3D lessons re-express in a 3D scene.
 
+**Engine version history:** the 2D-era plan and several docs pinned Godot 4.6.4, which does not exist as a Godot release (verified against the GitHub API on 2026-09-11; the 4.6 series ends at 4.6.3, and `.github/workflows/ci.yml` used 4.6.2). The 3D rebuild pins 4.7.2, the newest stable release (2026-08-18).
+
 The milestone therefore now runs 3D-foundation and lesson-parity phases first — establishing a working 3D game, from title screen through every lesson, with progress saved — before adding the alpha-v0.0.4 feature ideas from `docs/roadmap.md` on top of that foundation.
 
 ## Constraints
 
-- **Engine**: Godot 4.6.4, GDScript, desktop-first (Windows primary, Linux secondary) — this milestone pins one Godot version everywhere. The project now targets 3D (`Node3D`-based scenes) rather than 2D.
-- **Renderer**: The project currently uses Forward Plus; the Godot Web export requires the Compatibility renderer, and low-end devices may need it too. This choice must be settled in the phase that builds the 3D foundation, because it affects every 3D visual built afterward.
+- **Engine**: Godot 4.7.2 with GDScript only (C# cannot be exported to the Web), desktop-first (Windows primary, Linux secondary) — this milestone pins one Godot version everywhere. The project targets 3D (`Node3D`-based scenes).
+- **Renderer**: Compatibility renderer on every platform, so desktop, Web export, and low-end devices share one look and one visual test pass.
 - **Audience**: Content and UI must work for pre-reading children from around age 3 — minimal reliance on text, no time pressure, no punishment-heavy failure states, large touch/click targets (per the design principles in `docs/roadmap.md`).
 - **Accessibility**: All shipped UI text must meet WCAG 2.1 AA color contrast (4.5:1 normal text, 3:1 qualifying large text).
-- **Privacy**: The parent dashboard must never transmit child progress data off the local device (per the design principles in `docs/parent-dashboard.md`).
+- **Privacy**: The parent dashboard must never transmit child progress data off the local device (per the design principles in `docs/parent-dashboard.md`); the shipped game includes no telemetry.
 - **Repo quality gate**: `python3 scripts/tools/quality_gate.py`, run in CI, scans the whole repository (including `.planning/`) and blocks unfinished-work markers, placeholder copy, and broken relative Markdown links — all planning documents must stay clear of these patterns.
 
 ## Key Decisions
 
-Decisions marked **Locked** were made explicitly by the user during the pivot discussion and should not be re-opened. The Outcome column otherwise tracks execution status.
+Decisions marked **Locked** were made explicitly by the user and should not be re-opened. The Outcome column otherwise tracks execution status.
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
@@ -68,11 +70,13 @@ Decisions marked **Locked** were made explicitly by the user during the pivot di
 | Fully replace the 2D game: the 3D game is built from scratch in this same repository; 2D scenes/scripts/assets are reference only and are removed from the runtime project after being archived under a git tag (the removal itself is confirmed with the user at that time) | Avoids maintaining two parallel games; the 2D code still documents gameplay and lesson intent worth porting | Locked |
 | Camiel and lesson props start as primitive 3D shapes (capsule, boxes, spheres); gameplay does not wait on art | The real Camiel 3D model and its animations are deferred to v2, with the model's source (AI-generated from existing art vs. made/commissioned) left as an open v2 decision | Locked |
 | Rebuild the roadmap now, with no feasibility spike | User chose to proceed straight to a rebuilt roadmap rather than validate 3D feasibility first | Locked |
+| Stay on Godot with GDScript for the 3D rebuild | Engine research on 2026-09-11 compared Godot, Unity 6, Unreal 5, and web-native Three.js/Babylon.js: Godot has the lowest migration cost, meets Windows/Linux/Web and glTF needs, is MIT-licensed with no runtime telemetry; Unreal has no Web export, Unity collects diagnostic data by default and needs a C# rewrite | Locked |
+| Godot 4.7.2 is the single pinned engine version across CI, exports, and docs | 4.6.4 does not exist; 4.7.2 is the newest stable release, and a from-scratch rebuild makes this the cheapest moment to move to it | Locked |
+| Compatibility renderer everywhere | One look across Windows, Linux, Web, and low-end devices; simpler lighting suits primitive-shape visuals | Locked |
 | The win screen shows two buttons, "Nog een keer" (replay) and "Naar menu", each with an icon, activated by tap, click, or Enter on the focused button, through one code path | Carried forward from the paused Phase 1 (2D) discussion; applies to whichever phase builds the win screen (Phase 2 in the rebuilt roadmap) | Locked |
 | One milestone bundles the 3D-foundation and lesson-parity phases first, then the alpha-v0.0.4 feature phases | Building voice-over, mobile, web, and dashboard features on top of an unproven 3D foundation would compound risk | — Pending |
-| Godot 4.6.4 is the single pinned engine version across CI and docs | Carried forward unchanged from the 2D milestone; still the target engine for the 3D rebuild | — Pending |
 | The parent dashboard phase is sequenced after the progress-persistence phase | Building a dashboard before the data it reads actually exists would ship a viewer with nothing to view | — Pending |
 | Windows is the primary target, Linux secondary; Web and mobile-touch are this milestone's scope, not yet delivered capabilities | User-set target runtime priority for this milestone, unchanged by the pivot | — Pending |
 
 ---
-*Last updated: 2026-09-11 after the 2D-to-3D pivot and roadmap rebuild*
+*Last updated: 2026-09-11 after the phase 1 discussion (engine, version, and renderer decisions)*

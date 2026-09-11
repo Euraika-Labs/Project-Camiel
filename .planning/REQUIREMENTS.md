@@ -12,7 +12,7 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 - [ ] **FOUND-01**: The pre-pivot 2D game state (scenes, scripts, and assets) is archived under a dedicated git tag before any 2D runtime content is removed
 - [ ] **FOUND-02**: The 2D gameplay scenes, scripts, and assets are removed from the runtime project once the archive tag exists and the user has confirmed the removal
 - [ ] **FOUND-03**: The project's renderer (Forward Plus or Compatibility) is decided and set consistently in Godot project settings for the 3D build
-- [ ] **FOUND-04**: A `Node3D`-based scene, script, and asset folder structure exists as the baseline for all new 3D content, running on Godot 4.6.4
+- [ ] **FOUND-04**: A `Node3D`-based scene, script, and asset folder structure exists as the baseline for all new 3D content, running on Godot 4.7.2
 - [ ] **FOUND-05**: A primitive-shape Camiel (capsule) moves freely in all directions in a small 3D test space, viewed through a camera that follows Camiel
 - [ ] **FOUND-06**: A local headless run command surfaces any GDScript parse or runtime script error during startup, runnable before every commit
 
@@ -45,7 +45,7 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 
 - [ ] **ACCESS-01**: Every text/background color combination in the shipped 3D UI meets WCAG 2.1 AA contrast (4.5:1 normal text, 3:1 for text that qualifies as large), verified by computed ratios
 - [ ] **ACCESS-02**: A reachable UI control toggles high-contrast mode, and the visual change applies immediately to on-screen UI
-- [ ] **CI-01**: A single Godot engine version (4.6.4) is pinned and used consistently by the CI workflow, the release workflow, the export workflow, and the Godot setup doc
+- [ ] **CI-01**: A single Godot engine version (4.7.2) is pinned and used consistently by the CI workflow, the release workflow, the export workflow, and the Godot setup doc
 - [ ] **CI-02**: The version string shown in-game and used in build artifact names comes from one source of truth instead of being hand-edited in multiple files
 - [ ] **CI-03**: The CI pipeline fails the build when a GDScript parse error or runtime script error occurs during startup or scene load, across the new 3D scenes
 - [ ] **CI-04**: The Linux export job successfully packages the built binary into a `.tar.gz` artifact
@@ -66,7 +66,7 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 
 ### Web Export
 
-- [ ] **WEB-01**: The Web export preset uses the correct Godot 4 platform identifier and the Compatibility renderer, and produces a build via the Godot 4.6.4 editor or CLI
+- [ ] **WEB-01**: The Web export preset uses the correct Godot 4 platform identifier and the Compatibility renderer, and produces a build via the Godot 4.7.2 editor or CLI
 - [ ] **WEB-02**: A CI job builds the Web export, and the resulting build is verified to load
 - [ ] **WEB-03**: `docs/web-export.md`, `docs/quick-start.md`, and `docs/roadmap.md` agree with each other, and with the shipped state, on the Web export's actual availability
 

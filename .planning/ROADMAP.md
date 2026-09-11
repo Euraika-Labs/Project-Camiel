@@ -30,7 +30,7 @@ This roadmap replaces the 2D-stabilization plan after the project pivoted to a f
   1. The pre-pivot 2D game state is archived under a dedicated git tag before any 2D runtime content is removed.
   2. The 2D gameplay scenes, scripts, and assets are removed from the runtime project once the archive tag exists and the user has confirmed the removal.
   3. The project's renderer (Forward Plus or Compatibility) is decided and set consistently in Godot project settings.
-  4. A `Node3D`-based scene/script/asset folder structure exists as the baseline for all new 3D content, running on Godot 4.6.4.
+  4. A `Node3D`-based scene/script/asset folder structure exists as the baseline for all new 3D content, running on Godot 4.7.2.
   5. A primitive-shape Camiel (capsule) moves freely in all directions in a small 3D test space, viewed through a camera that follows Camiel.
   6. Running a local headless command surfaces any GDScript parse or runtime script error before commit.
 **Plans**: Not yet planned
@@ -75,7 +75,7 @@ This roadmap replaces the 2D-stabilization plan after the project pivoted to a f
 **Success Criteria** (what must be TRUE):
   1. Every text/background colour combination in the shipped 3D UI meets WCAG 2.1 AA contrast (4.5:1 normal text, or 3:1 for text that qualifies as large), verified by computed ratios.
   2. A reachable UI control toggles high-contrast mode and the visual change is applied immediately.
-  3. The CI workflow, the release workflow, the export workflow, and the Godot setup doc all name Godot 4.6.4 as the single pinned engine version, and the in-game version string and build artifact names are drawn from one source of truth.
+  3. The CI workflow, the release workflow, the export workflow, and the Godot setup doc all name Godot 4.7.2 as the single pinned engine version, and the in-game version string and build artifact names are drawn from one source of truth.
   4. The CI pipeline fails the build when a GDScript parse error or runtime script error occurs during startup or scene load, and the Linux export job produces a valid .tar.gz artifact.
   5. Pushing a version tag creates exactly one GitHub release with the Windows, Linux, and macOS files attached as files, not directories, and README.md / docs/roadmap.md describe only 3D capabilities that actually exist, with README's stated license matching LICENSE.
 **Plans**: Not yet planned
@@ -108,7 +108,7 @@ This roadmap replaces the 2D-stabilization plan after the project pivoted to a f
 **Depends on**: Phase 6
 **Requirements**: WEB-01, WEB-02, WEB-03
 **Success Criteria** (what must be TRUE):
-  1. The Web export preset uses the correct Godot 4 platform identifier and the Compatibility renderer, and produces a build from the Godot 4.6.4 editor or CLI.
+  1. The Web export preset uses the correct Godot 4 platform identifier and the Compatibility renderer, and produces a build from the Godot 4.7.2 editor or CLI.
   2. A CI job builds the Web export on every relevant push or tag, and the resulting build is verified to load.
   3. docs/web-export.md, docs/quick-start.md, and docs/roadmap.md agree with each other, and with the shipped state, on the Web export's actual availability.
 **Plans**: Not yet planned
