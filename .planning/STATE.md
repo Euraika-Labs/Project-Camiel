@@ -3,17 +3,17 @@ gsd_state_version: "1.0"
 milestone: v0.0.4
 current_phase: 01
 current_phase_name: 3D Foundation & Archive
-status: executing
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-09-11T15:07:48.134Z"
+status: verifying
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-09-11T18:14:47.890Z"
 last_activity: 2026-09-11
 last_activity_desc: Phase 01 execution started
-state_head: 6b790fb6e1f19315a9650dc32572be8da8a33b05
+state_head: 204dc8dae043f60deb9c4344de1bab66d972b1a1
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 
 Phase: 01 (3D Foundation & Archive) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-11 — Phase 01 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -63,6 +63,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P03 | 45min | 2 tasks | 8 files |
 | Phase 01 P04 | 35min | 2 tasks | 7 files |
 | Phase 01 P05 | 25min | 2 tasks | 4 files |
+| Phase 01 P06 | 185min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Recent decisions affecting current work:
 - [Phase 01]: [Phase 01-03]: Hardened the headless check (D-01/D-02/D-03/D-04/D-07 enforcement, HEADLESS_CHECK_MAX_LIMIT_SECONDS cap, behaviour probes) with a committed 11-case self-test; fixed a resolve_godot fallback bug the self-test itself surfaced (an explicit but invalid GODOT env var used to silently succeed via a different engine).
 - [Phase 01]: Camera-relative steering only turns Camiel to face travel direction on forward/back input; pure lateral input strafes without reorienting, since turning to face a direction computed from a self-referential frame has no fixed point and spins forever (Rule 1 fix, Plan 01-04) — Discovered via the fall_at_edge probe case and confirmed by tracing Camiel's position while holding D alone before/after the fix
 - [Phase 01]: [Phase 01-05]: CI and release workflows pinned to Godot 4.7.2, with SHA512 verification added on every engine/export-template download and the 2D-era verifier/quit-after smoke test replaced by scripts/tools/run_headless_check.sh in both workflows; CONTRIBUTING.md updated to match.
+- [Phase 01]: [Phase 01-06]: D-11 playtest verdict (verbatim): "switch to turn-and-walk" - scripts/camiel_controller.gd steering_mode default changed from CAMERA_RELATIVE to TURN_AND_WALK; no tunable values changed since no feel/tuning complaint was raised
+- [Phase 01]: [Phase 01-06]: FOUND-06 closed - tests/test_ci_workflows.py's silent PyYAML skipUnless fallback replaced with a hard import, and the repository-hygiene CI job now installs PyYAML before running tests
 
 ### Pending Todos
 
@@ -104,6 +107,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-11T15:07:48.123Z
-Stopped at: Completed 01-05-PLAN.md
+Last session: 2026-09-11T18:14:32.869Z
+Stopped at: Completed 01-06-PLAN.md
 Resume file: None

@@ -37,7 +37,7 @@ This roadmap replaces the 2D-stabilization plan after the project pivoted to a f
   5. A primitive-shape Camiel (capsule) moves freely in all directions in a small 3D test space, viewed through a camera that follows Camiel.
   6. Running a local headless command surfaces any GDScript parse or runtime script error before commit.
 
-**Plans**: 5/6 plans executed
+**Plans**: 6/6 plans executed
 
 Plans:
 **Wave 1**
@@ -56,7 +56,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 01-06-PLAN.md — Final gate and the D-11 playtest that confirms the steering model
+- [x] 01-06-PLAN.md — Final gate and the D-11 playtest that confirms the steering model
 
 **Open Questions** (owned by this phase — do not decide during roadmapping):
 
@@ -191,7 +191,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 3D Foundation & Archive | 5/6 | In Progress|  |
+| 1. 3D Foundation & Archive | 6/6 | In Progress|  |
 | 2. Playable 3D Intro Experience | 0/0 | Not started | - |
 | 3. 3D Lesson Parity & Progress Persistence | 0/0 | Not started | - |
 | 4. Accessibility & Release Pipeline Hardening | 0/0 | Not started | - |
