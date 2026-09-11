@@ -11,14 +11,7 @@ config_version=6
 [application]
 
 config/name="Camiel alpha-v0.0.3"
-run/main_scene="res://scenes/title_screen.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
-
-[autoload]
-
-AudioManager="res://scripts/audio_manager.gd"
-Accessibility="res://scripts/accessibility.gd"
-ProgressTracker="res://scripts/progress_tracker.gd"
 
 [input]
 
@@ -31,10 +24,6 @@ ui_focus_prev={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"store_command":true,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194325,"key_label":0,"unicode":0,"echo":false,"script":null)
 ]
-}
-mobile_jump={
-"deadzone": 0.5,
-"events": []
 }
 
 [display]
