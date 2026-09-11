@@ -13,7 +13,7 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 - [x] **FOUND-02**: The 2D gameplay scenes, scripts, and assets are removed from the runtime project once the archive tag exists and the user has confirmed the removal
 - [x] **FOUND-03**: The project's renderer (Forward Plus or Compatibility) is decided and set consistently in Godot project settings for the 3D build
 - [ ] **FOUND-04**: A `Node3D`-based scene, script, and asset folder structure exists as the baseline for all new 3D content, running on Godot 4.7.2
-- [ ] **FOUND-05**: A primitive-shape Camiel (capsule) moves freely in all directions in a small 3D test space, viewed through a camera that follows Camiel
+- [x] **FOUND-05**: A primitive-shape Camiel (capsule) moves freely in all directions in a small 3D test space, viewed through a camera that follows Camiel
 - [ ] **FOUND-06**: A local headless run command surfaces any GDScript parse or runtime script error during startup, runnable before every commit
 
 ### Title Screen & Main Menu
@@ -127,7 +127,7 @@ Which phases cover which requirements.
 | FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Pending |
 | MENU-01 | Phase 2 | Pending |
 | MENU-02 | Phase 2 | Pending |
