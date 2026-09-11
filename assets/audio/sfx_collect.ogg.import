@@ -1,18 +1,18 @@
 [remap]
 
-importer="audio"
+importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
-path="res://.godot/imported/sfx_collect.ogg-56392025f22cf1fdb1c1a6bec0c7d579.oggstr"
+uid="uid://nd0ido5xvqgx"
+valid=false
 
 [deps]
 
 source_file="res://assets/audio/sfx_collect.ogg"
-dest_files=["res://.godot/imported/sfx_collect.ogg-56392025f22cf1fdb1c1a6bec0c7d579.oggstr"]
 
 [params]
 
-compress/lossy_quality=0.7
-compress/normalize=false
-compress/bitrate=128
-compress/peak=0.95
-filters/scene=true
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
