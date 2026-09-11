@@ -178,6 +178,35 @@ class CiWorkflowTests(unittest.TestCase):
         yaml.safe_load(self.ci_text)
         yaml.safe_load(self.release_text)
 
+    def test_release_env_pins_godot_4_7_2(self) -> None:
+        self.assertIn("GODOT_VERSION: 4.7.2", self.release_text)
+        self.assertIn("GODOT_STATUS: stable", self.release_text)
+        self.assertIn("GODOT_TEMPLATE_VERSION: 4.7.2.stable", self.release_text)
+        self.assertIn(
+            "GODOT_BIN: Godot_v4.7.2-stable_linux.x86_64", self.release_text
+        )
+
+    def test_release_verify_step_runs_headless_check(self) -> None:
+        steps = _job_steps(self.release_text, "release-windows")
+        matches = [(name, run) for name, run in steps if name == "Verify project"]
+        self.assertEqual(1, len(matches))
+        _, run_text = matches[0]
+        self.assertIn(
+            'GODOT="$RUNNER_TEMP/godot/${GODOT_BIN}" bash scripts/tools/run_headless_check.sh',
+            run_text,
+        )
+        self.assertNotIn("verify_camiel_resources", self.release_text)
+
+    def test_release_downloads_verify_sha512(self) -> None:
+        self._assert_downloads_verify_sha512(self.release_text, ["release-windows"])
+
+    def test_contributing_names_check(self) -> None:
+        text = CONTRIBUTING_PATH.read_text(encoding="utf-8")
+        self.assertIn("4.7.2", text)
+        self.assertIn("bash scripts/tools/run_headless_check.sh", text)
+        self.assertNotIn("4.6.2", text)
+        self.assertNotIn("verify_camiel_resources", text)
+
 
 if __name__ == "__main__":
     unittest.main()
