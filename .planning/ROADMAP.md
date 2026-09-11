@@ -2,7 +2,7 @@
 
 ## Overview
 
-This milestone takes Project Camiel from a documented-but-partially-broken alpha to a build that actually delivers on its own documentation. The first four phases stabilize what already exists — the playable path from title screen through every lesson, progress persistence, accessibility compliance, unreachable subsystem wiring, and the CI/release pipeline — so a young child can complete the game without errors or adult help, with progress saved. The remaining five phases deliver the alpha-v0.0.4 feature ideas from `docs/roadmap.md` on top of that stable foundation: Dutch voice-over, production-quality mobile touch controls, a working Web export, a local parent dashboard, and additional lesson content.
+This roadmap replaces the 2D-stabilization plan after the project pivoted to a full 3D game. The first four phases build the 3D foundation and reach lesson parity with the original 2D design — the 2D game archived and retired, a working 3D project baseline, a fully playable title-screen-through-intro-level experience, all five lessons ported to 3D with progress saved, and a UI/pipeline hardening pass — so a young child can complete the 3D game without errors or adult help, with progress saved. The remaining five phases deliver the alpha-v0.0.4 feature ideas from `docs/roadmap.md` on top of that 3D foundation: Dutch voice-over, production-quality mobile touch controls, a working Web export, a local parent dashboard, and additional lesson content.
 
 ## Phases
 
@@ -10,70 +10,79 @@ This milestone takes Project Camiel from a documented-but-partially-broken alpha
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Playable Intro Path** - Title screen through the free-play intro level runs with no runtime errors or dead buttons
-- [ ] **Phase 2: Lesson Correctness & Progress Persistence** - Lessons 1-5 are reachable, correct in any task order, and record progress to disk
-- [ ] **Phase 3: Accessibility Compliance & Subsystem Wiring** - WCAG AA contrast, a working high-contrast toggle, and unreachable code (mobile controller, UI widgets) wired into live scenes
-- [ ] **Phase 4: CI/CD & Release Pipeline Stabilization** - One pinned Godot version, one version-string source, and a release pipeline that produces exactly one correct release
+- [ ] **Phase 1: 3D Foundation & Archive** - The 2D game is archived and removed, and a thin playable 3D slice runs on a clean project baseline
+- [ ] **Phase 2: Playable 3D Intro Experience** - Title screen through the 3D intro level (move, jump, collect, reach goal, win screen) works by tap, click, or keyboard
+- [ ] **Phase 3: 3D Lesson Parity & Progress Persistence** - Lessons 1-5 are reachable in 3D, correct, and record progress to disk
+- [ ] **Phase 4: Accessibility & Release Pipeline Hardening** - WCAG AA contrast, a working high-contrast toggle, and a release pipeline that produces exactly one correct release
 - [ ] **Phase 5: Dutch Voice-Over** - Spoken Dutch audio cues guide pre-reading children through every screen and lesson
 - [ ] **Phase 6: Mobile Touch Controls** - Production-quality analog, multi-touch controls available in every level and lesson
 - [ ] **Phase 7: Web Export** - A real, CI-built HTML5/Web build that loads and plays in a desktop browser
 - [ ] **Phase 8: Parent Dashboard** - A local, read-only web dashboard for a child's lesson progress
-- [ ] **Phase 9: Additional Lesson Levels** - At least one new lesson beyond the original five, on a shared lesson pattern
+- [ ] **Phase 9: Additional Lesson Levels** - At least one new lesson beyond the original five, on a shared 3D lesson pattern
 
 ## Phase Details
 
-### Phase 1: Playable Intro Path
-**Goal**: A child can go from the title screen through the free-play intro level, using either keyboard or mouse/touch, without hitting a runtime script error or an unresponsive button.
+### Phase 1: 3D Foundation & Archive
+**Goal**: The pre-pivot 2D game is safely archived and removed from the runtime project, and a new 3D Godot project baseline runs a primitive-shape Camiel moving freely in a small 3D test space with a following camera, verified by a local headless run that surfaces script errors.
 **Depends on**: Nothing (first phase)
-**Requirements**: STAB-01, STAB-02, STAB-03, STAB-04, STAB-05, STAB-06, STAB-07, STAB-08
+**Requirements**: FOUND-01, FOUND-02, FOUND-03, FOUND-04, FOUND-05, FOUND-06
 **Success Criteria** (what must be TRUE):
-  1. Pressing Play on the title screen (by mouse/tap or by keyboard) transitions to the main menu exactly once, and the About control either performs a defined action or has been removed.
-  2. Clicking or tapping Start on the main menu begins the intro level; the Enter key only triggers whichever control currently has focus.
-  3. Playing the intro level end to end (walk, collect the star, reach the finish marker) produces no runtime script errors, plays the correct sound effects, and the win overlay and replay both work through one non-duplicated code path.
-  4. Background music loops continuously and the sound-effect volume control has an audible effect.
+  1. The pre-pivot 2D game state is archived under a dedicated git tag before any 2D runtime content is removed.
+  2. The 2D gameplay scenes, scripts, and assets are removed from the runtime project once the archive tag exists and the user has confirmed the removal.
+  3. The project's renderer (Forward Plus or Compatibility) is decided and set consistently in Godot project settings.
+  4. A `Node3D`-based scene/script/asset folder structure exists as the baseline for all new 3D content, running on Godot 4.6.4.
+  5. A primitive-shape Camiel (capsule) moves freely in all directions in a small 3D test space, viewed through a camera that follows Camiel.
+  6. Running a local headless command surfaces any GDScript parse or runtime script error before commit.
+**Plans**: Not yet planned
+
+**Open Questions** (owned by this phase — do not decide during roadmapping):
+- Renderer: Forward Plus vs. Compatibility. Must be settled here because it affects every 3D visual built afterward and the later Web export.
+- Camera and control scheme for free 3D movement suitable for a child around age 3 (auto-follow vs. manual camera, keyboard/mouse/touch mapping) — this is the phase that first builds movement.
+
+### Phase 2: Playable 3D Intro Experience
+**Goal**: A child can go from the title screen through the free-play 3D intro level — moving, jumping, collecting, and reaching the goal — using tap, click, or keyboard, and see a working win screen.
+**Depends on**: Phase 1
+**Requirements**: MENU-01, MENU-02, INTRO-01, INTRO-02, INTRO-03, INTRO-04, INTRO-05, INTRO-06
+**Success Criteria** (what must be TRUE):
+  1. Pressing Play on the title screen (tap, click, or keyboard) transitions to the main menu exactly once.
+  2. Pressing Start on the main menu (tap, click, or keyboard) begins the 3D intro level through one code path.
+  3. In the intro level, Camiel moves freely in 3D space, jumps, and can collect a 3D collectible object with pickup feedback playing exactly once.
+  4. Reaching the 3D finish marker shows the win screen with two buttons, "Nog een keer" (replay) and "Naar menu", each with an icon, activated by tap, click, or Enter on the focused button, through one code path.
+  5. Background music loops continuously and the SFX volume control has an audible effect.
 **Plans**: Not yet planned
 **UI hint**: yes
 
-### Phase 2: Lesson Correctness & Progress Persistence
-**Goal**: Every lesson from 1 through 5 is reachable from the main menu, completes correctly no matter which task is finished first, and its completion is durably recorded to disk.
-**Depends on**: Phase 1
+### Phase 3: 3D Lesson Parity & Progress Persistence
+**Goal**: Every lesson from 1 through 5 is reachable in 3D from a lesson-select screen, completes correctly according to its own rules, and its completion is durably recorded to disk.
+**Depends on**: Phase 2
 **Requirements**: LESSON-01, LESSON-02, LESSON-03, LESSON-04, LESSON-05, LESSON-06, PROGRESS-01, PROGRESS-02
 **Success Criteria** (what must be TRUE):
-  1. The main menu offers a way to start any of Lessons 1 through 5.
-  2. Lesson 1 finishes regardless of which of its three tasks (red block, blue target, counting) the child completes first.
-  3. Lesson 2 only completes after circle, square, and triangle are touched in that order.
-  4. Lessons 4 and 5 are real, completable educational tasks rather than placeholders, and the collect sound effect plays exactly once per pickup.
-  5. Completing any lesson writes a matching entry (lesson_id, stars, time_seconds, completed_at) to user://progress.json, with no compile error from the ProgressTracker autoload.
+  1. A lesson-select screen, reachable from the main menu, offers a way to start any of Lessons 1 through 5 by tap, click, or keyboard.
+  2. Lesson 1 (3D colour recognition red/blue and counting to 3) finishes regardless of which of its three tasks is completed first.
+  3. Lesson 2 (3D shape order circle-square-triangle) only completes after the shapes are touched in that order.
+  4. Lesson 3 (3D sequence) only completes after its targets are activated in the defined order.
+  5. Lessons 4 and 5 are real, completable 3D educational tasks, and completing any lesson (1-5) writes a matching entry (lesson_id, stars, time_seconds, completed_at) to user://progress.json, with no error from the progress-tracking system.
 **Plans**: Not yet planned
 **UI hint**: yes
 
-### Phase 3: Accessibility Compliance & Subsystem Wiring
-**Goal**: On-screen text meets WCAG 2.1 AA contrast, the high-contrast toggle actually changes the UI, and code already built for the mobile controller and reusable UI widgets is reachable from a live scene instead of sitting unused.
-**Depends on**: Phase 2
-**Requirements**: ACCESS-01, ACCESS-02, ACCESS-03, WIRING-01, WIRING-02
-**Success Criteria** (what must be TRUE):
-  1. Every text/background color combination in the shipped UI meets WCAG 2.1 AA contrast (4.5:1 normal text, or 3:1 for text that qualifies as large), verified by computed ratios.
-  2. A reachable UI control toggles high-contrast mode and the visual change is applied immediately.
-  3. docs/accessibility-report.md and docs/roadmap.md state only the accessibility status that is actually true of the current build.
-  4. Touching the on-screen mobile controller moves Camiel in at least the intro level.
-  5. Each reusable UI widget scene (dialog popup, menu button, progress bar, version label) is instanced in a reachable scene, or has been removed.
-**Plans**: Not yet planned
-**UI hint**: yes
+**Open Questions** (owned by this phase — do not decide during roadmapping):
+- Design of Lessons 4 and 5 (they were empty placeholders in 2D). Their concrete educational concept is undecided and must be settled while this phase is discussed.
 
-### Phase 4: CI/CD & Release Pipeline Stabilization
-**Goal**: The build and release pipeline uses one consistent Godot version and version string, and a tagged release reliably produces one correct set of platform artifacts.
+### Phase 4: Accessibility & Release Pipeline Hardening
+**Goal**: The 3D build's UI meets WCAG 2.1 AA contrast with a working high-contrast toggle, and the CI/release pipeline uses one consistent Godot version and reliably produces exactly one correct release.
 **Depends on**: Phase 3
-**Requirements**: CI-01, CI-02, CI-03, CI-04, CI-05, CI-06, DOCS-01, DOCS-02
+**Requirements**: ACCESS-01, ACCESS-02, CI-01, CI-02, CI-03, CI-04, CI-05, DOCS-01, DOCS-02
 **Success Criteria** (what must be TRUE):
-  1. The CI workflow, the release workflow, the export workflow, and the Godot setup doc all name the same Godot engine version.
-  2. The version shown in-game and used in build artifact names comes from a single source of truth.
-  3. The Linux export job produces a valid .tar.gz artifact, and pushing a version tag creates exactly one GitHub release with the Windows, Linux, and macOS files attached as files, not directories.
-  4. The CI smoke test fails the build when a script parse error or runtime script error occurs during startup.
-  5. README.md, docs/roadmap.md, and docs/build-and-release.md describe only capabilities and instructions that actually exist in this repository, and README's stated license matches LICENSE.
+  1. Every text/background colour combination in the shipped 3D UI meets WCAG 2.1 AA contrast (4.5:1 normal text, or 3:1 for text that qualifies as large), verified by computed ratios.
+  2. A reachable UI control toggles high-contrast mode and the visual change is applied immediately.
+  3. The CI workflow, the release workflow, the export workflow, and the Godot setup doc all name Godot 4.6.4 as the single pinned engine version, and the in-game version string and build artifact names are drawn from one source of truth.
+  4. The CI pipeline fails the build when a GDScript parse error or runtime script error occurs during startup or scene load, and the Linux export job produces a valid .tar.gz artifact.
+  5. Pushing a version tag creates exactly one GitHub release with the Windows, Linux, and macOS files attached as files, not directories, and README.md / docs/roadmap.md describe only 3D capabilities that actually exist, with README's stated license matching LICENSE.
 **Plans**: Not yet planned
+**UI hint**: yes
 
 ### Phase 5: Dutch Voice-Over
-**Goal**: A pre-reading child can be guided through the whole experience by spoken Dutch audio cues, not just by on-screen text.
+**Goal**: A pre-reading child can be guided through the whole 3D experience by spoken Dutch audio cues, not just by on-screen text.
 **Depends on**: Phase 4
 **Requirements**: VOICE-01, VOICE-02
 **Success Criteria** (what must be TRUE):
@@ -84,28 +93,28 @@ This milestone takes Project Camiel from a documented-but-partially-broken alpha
 **UI hint**: yes
 
 ### Phase 6: Mobile Touch Controls
-**Goal**: The game is fully playable by touch on a touchscreen device, matching what keyboard play can do, across every level and lesson.
+**Goal**: The 3D game is fully playable by touch on a touchscreen device, matching what keyboard play can do, across every level and lesson.
 **Depends on**: Phase 5
 **Requirements**: MOBILE-01, MOBILE-02, MOBILE-03
 **Success Criteria** (what must be TRUE):
-  1. The on-screen joystick moves Camiel at proportional (analog) speed rather than snapping straight to full speed.
+  1. The on-screen joystick moves Camiel in 3D space at proportional (analog) speed rather than snapping straight to full speed.
   2. A child can hold the movement joystick and press jump at the same time without either input being dropped.
-  3. The mobile touch controller is available in the intro level and in every lesson, not only the intro level.
+  3. The touch controller is available in the intro level and in every lesson, not only the intro level.
 **Plans**: Not yet planned
 **UI hint**: yes
 
 ### Phase 7: Web Export
-**Goal**: Camiel runs as a real, CI-built HTML5/Web build that loads and plays in a desktop browser.
+**Goal**: Camiel runs as a real, CI-built HTML5/Web 3D build that loads and plays in a desktop browser.
 **Depends on**: Phase 6
 **Requirements**: WEB-01, WEB-02, WEB-03
 **Success Criteria** (what must be TRUE):
-  1. The Web export preset uses the correct Godot 4 platform identifier and produces a build from the Godot 4.6.4 editor or CLI.
+  1. The Web export preset uses the correct Godot 4 platform identifier and the Compatibility renderer, and produces a build from the Godot 4.6.4 editor or CLI.
   2. A CI job builds the Web export on every relevant push or tag, and the resulting build is verified to load.
   3. docs/web-export.md, docs/quick-start.md, and docs/roadmap.md agree with each other, and with the shipped state, on the Web export's actual availability.
 **Plans**: Not yet planned
 
 ### Phase 8: Parent Dashboard
-**Goal**: A parent or teacher can view a child's lesson progress in a local, read-only web dashboard, with no data ever leaving the device. Builds on the progress persistence delivered in Phase 2.
+**Goal**: A parent or teacher can view a child's 3D-lesson progress in a local, read-only web dashboard, with no data ever leaving the device. Builds on the progress persistence delivered in Phase 3.
 **Depends on**: Phase 7
 **Requirements**: DASH-01, DASH-02, DASH-03
 **Success Criteria** (what must be TRUE):
@@ -116,13 +125,13 @@ This milestone takes Project Camiel from a documented-but-partially-broken alpha
 **UI hint**: yes
 
 ### Phase 9: Additional Lesson Levels
-**Goal**: The game offers educational content beyond the original five lessons, built on a shared lesson pattern so future lessons don't each require a copy-pasted orchestrator.
+**Goal**: The 3D game offers educational content beyond the original five lessons, built on a shared lesson pattern so future lessons don't each require a copy-pasted orchestrator.
 **Depends on**: Phase 8
 **Requirements**: MORE-01, MORE-02
 **Success Criteria** (what must be TRUE):
-  1. At least one new lesson beyond the original five is reachable from the lesson-select menu and fully completable.
+  1. At least one new lesson beyond the original five is reachable from the lesson-select screen and fully completable.
   2. Completing the new lesson records progress the same way Lessons 1-5 do.
-  3. The new lesson is built on a shared lesson-base pattern rather than a one-off copy of an existing orchestrator script.
+  3. The new lesson is built on a shared 3D lesson-base pattern rather than a one-off copy of an existing orchestrator script.
 **Plans**: Not yet planned
 **UI hint**: yes
 
@@ -133,10 +142,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Playable Intro Path | 0/0 | Not started | - |
-| 2. Lesson Correctness & Progress Persistence | 0/0 | Not started | - |
-| 3. Accessibility Compliance & Subsystem Wiring | 0/0 | Not started | - |
-| 4. CI/CD & Release Pipeline Stabilization | 0/0 | Not started | - |
+| 1. 3D Foundation & Archive | 0/0 | Not started | - |
+| 2. Playable 3D Intro Experience | 0/0 | Not started | - |
+| 3. 3D Lesson Parity & Progress Persistence | 0/0 | Not started | - |
+| 4. Accessibility & Release Pipeline Hardening | 0/0 | Not started | - |
 | 5. Dutch Voice-Over | 0/0 | Not started | - |
 | 6. Mobile Touch Controls | 0/0 | Not started | - |
 | 7. Web Export | 0/0 | Not started | - |
