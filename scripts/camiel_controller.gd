@@ -9,7 +9,7 @@ signal returned_to_safe_spot(position: Vector3)
 
 enum SteeringMode { CAMERA_RELATIVE, TURN_AND_WALK }
 
-@export var steering_mode: SteeringMode = SteeringMode.CAMERA_RELATIVE
+@export var steering_mode: SteeringMode = SteeringMode.TURN_AND_WALK
 @export var walk_speed := 2.5
 @export var acceleration := 12.0
 @export var deceleration := 16.0
