@@ -206,4 +206,14 @@ reset_copy
 assert_result "invalid limit override exits 2" 2 "HEADLESS_CHECK_MAX_LIMIT_SECONDS" -- \
 	env HEADLESS_CHECK_MAX_LIMIT_SECONDS=abc bash "${CHECK_SCRIPT}"
 
+# --- Case 12: zero behaviour probes fails (CR-01) ---
+# Removing every probe_*.gd must not let the check silently pass with no
+# behaviour verified (the vacuity bug: an empty glob took the "no probes"
+# branch straight through to "Headless check passed." / exit 0).
+reset_copy
+find "${WORK_DIR}/scripts/tools" -maxdepth 1 -type f -name 'probe_*.gd' -exec rm -f {} +
+find "${WORK_DIR}/scripts/tools" -maxdepth 1 -type f -name 'probe_*.gd.uid' -exec rm -f {} +
+assert_result "zero behaviour probes fails" 1 "no behaviour probes found" -- \
+	bash "${CHECK_SCRIPT}"
+
 echo "Headless check self-test passed."

@@ -199,20 +199,24 @@ if ! grep -q '3D project verified:' "$VERIFY_LOG"; then
 	fail "verifier" "missing success line" "$VERIFY_LOG"
 fi
 
-# [step] probes — every scripts/tools/probe_*.gd, in sorted order.
+# [step] probes — every scripts/tools/probe_*.gd, in sorted order. A probe
+# glob that matches nothing (deleted, renamed, moved, or a naming-convention
+# drift) must fail loudly rather than let the check report success with zero
+# behaviour verified — mirrors the non-vacuity guard in
+# verify_3d_project.gd::_check_resources() for its .gd/.tscn lists.
 PROBE_FILES="$(find "$ROOT/scripts/tools" -maxdepth 1 -type f -name 'probe_*.gd' 2>/dev/null | sort)"
 if [ -z "$PROBE_FILES" ]; then
-	echo "No behaviour probes found."
-else
-	while IFS= read -r PROBE_PATH; do
-		PROBE_NAME="$(basename "$PROBE_PATH")"
-		PROBE_LOG="${LOG_DIR}/probe_${PROBE_NAME%.gd}.log"
-		run_step "probe ${PROBE_NAME}" "$PROBE_LIMIT" "$PROBE_LOG" "$GODOT_BIN" --headless --fixed-fps 60 --path "$ROOT" --script "res://scripts/tools/${PROBE_NAME}"
-		if grep -qE 'SCRIPT ERROR|Parse Error|ERROR:' "$PROBE_LOG"; then
-			fail "probe ${PROBE_NAME}" "error pattern found in probe log" "$PROBE_LOG"
-		fi
-	done <<<"$PROBE_FILES"
+	echo "CHECK FAILED: no behaviour probes found under scripts/tools/probe_*.gd."
+	exit 1
 fi
+while IFS= read -r PROBE_PATH; do
+	PROBE_NAME="$(basename "$PROBE_PATH")"
+	PROBE_LOG="${LOG_DIR}/probe_${PROBE_NAME%.gd}.log"
+	run_step "probe ${PROBE_NAME}" "$PROBE_LIMIT" "$PROBE_LOG" "$GODOT_BIN" --headless --fixed-fps 60 --path "$ROOT" --script "res://scripts/tools/${PROBE_NAME}"
+	if grep -qE 'SCRIPT ERROR|Parse Error|ERROR:' "$PROBE_LOG"; then
+		fail "probe ${PROBE_NAME}" "error pattern found in probe log" "$PROBE_LOG"
+	fi
+done <<<"$PROBE_FILES"
 
 rm -rf "$LOG_DIR"
 echo "Headless check passed."
