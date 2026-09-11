@@ -1,0 +1,12 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/accessibility-report.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Accessibility Report — Camiel alpha-v0.0.3",
+  "summary": "Compliance audit for Camiel alpha-v0.0.3 testing all UI and game elements against WCAG 2.1 AA accessibility standards.",
+  "scope": ["WCAG 2.1 AA", "colour contrast", "font sizes", "touch targets", "motion", "audio-visual redundancy", "Godot 4", "alpha-v0.0.3"],
+  "cross_refs": [],
+  "locked": false,
+  "precedence": null
+}

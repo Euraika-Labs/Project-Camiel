@@ -1,0 +1,12 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/project-overview.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Project Overview",
+  "summary": "Project Camiel is a child-friendly educational game for ages 3+. Current alpha features an intro scene with basic movement and text feedback.",
+  "scope": ["Project Camiel", "educational game", "children", "intro scene", "movement", "color blocks", "game controls"],
+  "cross_refs": ["https://github.com/Euraika-Labs/Project-Camiel", "https://github.com/Euraika-Labs/Project-Camiel/releases/tag/alpha-v0.0.1"],
+  "locked": false,
+  "precedence": null
+}

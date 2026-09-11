@@ -1,0 +1,12 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/web-export.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Web Export Guide (HTML5)",
+  "summary": "Guide to exporting Camiel as self-contained HTML5 game; covers process, platform performance, and hosting options.",
+  "scope": ["HTML5 export", "Godot", "web hosting", "GitHub Pages", "itch.io", "WebAssembly", "performance"],
+  "cross_refs": [],
+  "locked": false,
+  "precedence": null
+}

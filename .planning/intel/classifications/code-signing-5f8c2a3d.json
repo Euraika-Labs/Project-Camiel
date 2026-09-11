@@ -1,0 +1,13 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/code-signing.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Code Signing — Camiel Windows Builds",
+  "summary": "Guide to code signing Windows Camiel builds, explaining certificates, signtool configuration, and SmartScreen warnings.",
+  "scope": ["code signing", "Windows builds", "certificates", "signtool", "SmartScreen", "GitHub Actions", "environment variables", "troubleshooting"],
+  "cross_refs": [".github/workflows/export.yml", ".gitignore"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

@@ -1,0 +1,12 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/godot-update-notes.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Godot 4.6.2 → 4.6.4 Update Notes",
+  "summary": "Documents Godot engine update from 4.6.2 to 4.6.4, including changes, compatibility, and required actions.",
+  "scope": ["Godot", "engine update", "project format", "export", "compatibility"],
+  "cross_refs": [],
+  "locked": false,
+  "precedence": null
+}

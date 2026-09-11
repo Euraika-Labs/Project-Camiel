@@ -1,0 +1,13 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/quick-start.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Quick-Start Guide — Project Camiel",
+  "summary": "Tutorial for installing Godot, opening Project Camiel, playing the game, and troubleshooting.",
+  "scope": ["Project Camiel", "Godot 4.6.4", "installation", "gameplay", "troubleshooting"],
+  "cross_refs": ["docs/parent-teacher-notes.md", "docs/accessibility-report.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

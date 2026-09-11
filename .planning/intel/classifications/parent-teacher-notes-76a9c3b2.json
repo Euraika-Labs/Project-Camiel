@@ -1,0 +1,13 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/parent-teacher-notes.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Parent & Teacher Notes — Camiel alpha-v0.0.3",
+  "summary": "Guide for parents and teachers on using Camiel, an educational game for children aged 3+.",
+  "scope": ["Camiel", "educational game", "parent guidance", "teacher guidance", "learning objectives", "accessibility"],
+  "cross_refs": ["https://github.com/Euraika-Labs/Project-Camiel"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

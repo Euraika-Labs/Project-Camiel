@@ -1,0 +1,12 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/README.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Project Camiel Documentation",
+  "summary": "Index and overview of Project Camiel documentation; current status is alpha-v0.0.1.",
+  "scope": ["Project Camiel", "documentation", "Godot 4"],
+  "cross_refs": ["project-overview.md", "development-log.md", "godot-setup.md", "assets-and-animations.md", "build-and-release.md", "ci-and-community-standards.md", "roadmap.md", "https://github.com/Euraika-Labs/Project-Camiel/wiki"],
+  "locked": false,
+  "precedence": null
+}

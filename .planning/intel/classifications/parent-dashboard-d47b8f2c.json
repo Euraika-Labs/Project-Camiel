@@ -1,0 +1,13 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/parent-dashboard.md",
+  "type": "SPEC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "Parent Dashboard",
+  "summary": "Specifies parent/teacher dashboard for viewing lesson progress with JSON data model and REST API.",
+  "scope": ["Parent Dashboard", "lesson progress", "JSON schema", "REST API", "Next.js"],
+  "cross_refs": [],
+  "locked": false,
+  "precedence": null,
+  "notes": "Strong SPEC signals: explicit data model with field definitions, API endpoint tables with methods/paths, response shape schemas, technical stack decisions. Some introductory product prose but dominant signals are technical contracts and implementation specification."
+}

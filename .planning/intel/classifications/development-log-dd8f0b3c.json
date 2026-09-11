@@ -1,0 +1,12 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/development-log.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Development Log",
+  "summary": "Chronological record of Project Camiel game development, including asset creation, Godot setup, character controller, and GitHub configuration.",
+  "scope": ["Character Assets", "Animation Assets", "Godot Engine", "Project Camiel", "Player Controller", "GitHub", "Godot Export"],
+  "cross_refs": ["scripts/camiel_controller.gd", "scripts/intro_scene.gd", "export_presets.cfg", "project.godot", "scenes/main.tscn", "scenes/camiel.tscn", "assets/camiel/camiel_sprite_frames.tres", "assets/camiel/animations/", "builds/alpha-v0.0.1/windows/Camiel-alpha-v0.0.1.exe", "builds/alpha-v0.0.1/windows/Camiel-alpha-v0.0.1-windows.zip", "Euraika-Labs/Project-Camiel"],
+  "locked": false,
+  "precedence": null
+}

@@ -1,0 +1,13 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/assets-and-animations.md",
+  "type": "DOC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "Assets And Animations",
+  "summary": "Guide to canonical asset locations, animation structure, and Godot sprite frame organization.",
+  "scope": ["assets", "animations", "Godot", "SpriteFrames", "character sprites", "PNG workflow", "import settings"],
+  "cross_refs": [],
+  "locked": false,
+  "precedence": null,
+  "notes": "Prose-heavy guide documenting asset structure and workflows. Strong DOC signals. Animation table provides context but not a technical contract."
+}

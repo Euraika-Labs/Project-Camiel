@@ -1,0 +1,12 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/build-and-release.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Build & Release Guide — Camiel",
+  "summary": "Procedural guide for building, exporting, and releasing Camiel locally and via CI/CD pipeline.",
+  "scope": ["build", "release", "Godot export", "CI/CD", "GitHub Actions", "version numbering", "export presets"],
+  "cross_refs": [".github/workflows/export.yml", "CHANGELOG.md", "project.godot", "export_presets.cfg", "scripts/ui/extract_templates.py", "res://scripts/tools/verify_camiel_resources.gd", "scenes/main_menu.tscn", "docs/roadmap.md"],
+  "locked": false,
+  "precedence": null
+}

@@ -1,0 +1,13 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/ci-and-community-standards.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "CI And Community Standards",
+  "summary": "Documentation of GitHub Actions workflows, quality gates, repository settings, and branch protection rules.",
+  "scope": ["GitHub Actions", "CI workflows", "Quality gate", "Repository settings", "Branch protection", "Community standards", "CodeQL", "Dependabot"],
+  "cross_refs": ["scripts/tools/quality_gate.py", "tests/test_quality_gate.py", "README.md", "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "SECURITY.md", "SUPPORT.md", "LICENSE"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

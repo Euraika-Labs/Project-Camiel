@@ -1,0 +1,13 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/roadmap.md",
+  "type": "DOC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "Roadmap",
+  "summary": "Project timeline with completed milestones (v0.0.1-v0.0.3), design principles, and planned features for upcoming versions.",
+  "scope": ["Godot", "game development", "educational tasks", "v0.0.1", "v0.0.2", "v0.0.3", "v0.0.4", "voice-over", "mobile", "web export"],
+  "cross_refs": ["docs/parent-teacher-notes.md", "docs/accessibility-report.md", "docs/code-signing.md", ".github/workflows/export.yml", "scenes/title_screen.tscn", "scenes/ui/version_label.tscn", "scripts/accessibility.gd"],
+  "locked": false,
+  "precedence": null,
+  "notes": "Roadmap format with completed items (checklist), design principles section, and backlog items. No ADR/PRD/SPEC signals; classified as DOC (project context and planning documentation). Medium confidence due to format not matching strong canonical markers."
+}

@@ -1,0 +1,13 @@
+{
+  "source_path": "/Volumes/T9/Euraika/projects/Project-Camiel/docs/godot-setup.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "Godot Setup",
+  "summary": "Project setup guide for Godot 4.6.2: engine config, scenes, components, physics, and verification tools.",
+  "scope": ["Godot", "project setup", "scenes", "physics controller", "animation", "verification"],
+  "cross_refs": [],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}
