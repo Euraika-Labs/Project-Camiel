@@ -43,12 +43,19 @@ Task IDs are assigned by the planner; rows below are seeded per requirement and 
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| TBD | TBD | TBD | FOUND-01 | — | N/A | smoke (git) | `git tag -l archive/2d-alpha-v0.0.3 && git rev-parse archive/2d-alpha-v0.0.3` | ✅ | ⬜ pending |
-| TBD | TBD | TBD | FOUND-02 | — | N/A | automated (existing tool) | `python3 scripts/tools/quality_gate.py --root .` | ✅ | ⬜ pending |
-| TBD | TBD | TBD | FOUND-03 | — | N/A | automated (grep) | `grep -q 'renderer/rendering_method="gl_compatibility"' project.godot && ! grep -q 'Forward Plus' project.godot` | ✅ | ⬜ pending |
-| TBD | TBD | TBD | FOUND-04 | — | N/A | automated (headless import) | `godot --headless --editor --path . --quit` (exit 0, no import errors in log) | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | FOUND-05 | — | N/A | manual-only | N/A — closed by D-11 playtest | — | ⬜ pending |
-| TBD | TBD | TBD | FOUND-06 | — | N/A | automated (new script) | `scripts/tools/run_headless_check.sh` | ❌ W0 | ⬜ pending |
+| 01-01-T1 | 01-01 | 1 | FOUND-01 | T-01-02, T-01-03 | Annotated tag whose name matches no release trigger | smoke (git) | `test "$(git cat-file -t archive/2d-alpha-v0.0.3)" = tag && git merge-base --is-ancestor archive/2d-alpha-v0.0.3 HEAD` | ✅ | ⬜ pending |
+| 01-01-T3 | 01-01 | 1 | FOUND-02 | T-01-01, T-01-04 | Removal only after the blocking-human checkpoint; no dangling res:// paths | automated (existing tool) | `python3 scripts/tools/quality_gate.py --root .` | ✅ | ⬜ pending |
+| 01-02-T1 | 01-02 | 1 | FOUND-04 | T-01-SC | Engine zip SHA512 and code signature verified | smoke (CLI) | `/Applications/Godot.app/Contents/MacOS/Godot --version` (starts with 4.7.2.stable) | ✅ | ⬜ pending |
+| 01-02-T2 | 01-02 | 1 | FOUND-06 | T-01-06 | Stall soak runs under a watchdog (D-03) | smoke (facts file) | `grep -qx 'Soak verdict: no-stall' .planning/phases/01-3d-foundation-archive/01-ENGINE-FACTS.md` | ❌ W0 | ⬜ pending |
+| 01-03-T1 | 01-03 | 2 | FOUND-03, FOUND-04, FOUND-06 | T-01-09 | Check fails on a planted parse error (red proof) | automated (new script) | `bash scripts/tools/run_headless_check.sh` | ❌ W0 | ⬜ pending |
+| 01-03-T2 | 01-03 | 2 | FOUND-03, FOUND-04, FOUND-06 | T-01-09, T-01-10, T-01-11 | Every failure direction of the check proven | automated (self-test) | `bash scripts/tools/test_headless_check.sh` | ❌ W0 | ⬜ pending |
+| 01-04-T1 | 01-04 | 3 | FOUND-05 | — | N/A | automated (headless probe) | `bash scripts/tools/run_headless_check.sh` (PASS lines from probe_camiel_movement.gd) | ❌ W0 | ⬜ pending |
+| 01-04-T2 | 01-04 | 3 | FOUND-05 | T-01-14, T-01-15, T-01-16 | Fall return cannot loop; steering argument parsing bounded | automated (headless probe) | `bash scripts/tools/run_headless_check.sh` | ❌ W0 | ⬜ pending |
+| 01-05-T1 | 01-05 | 3 | FOUND-06 | T-01-SC2, T-01-18 | CI engine downloads SHA512-verified; check step pinned by test | automated (unittest) | `python3 -m unittest -v tests.test_ci_workflows` | ❌ W0 | ⬜ pending |
+| 01-05-T2 | 01-05 | 3 | FOUND-04, FOUND-06 | T-01-SC2 | Release verifies with the same check | automated (unittest) | `python3 -m unittest -v tests.test_ci_workflows` | ❌ W0 | ⬜ pending |
+| 01-06-T1 | 01-06 | 4 | FOUND-05, FOUND-06 | — | N/A | automated (final gate) | `bash scripts/tools/run_headless_check.sh && bash scripts/tools/test_headless_check.sh` | ❌ W0 | ⬜ pending |
+| 01-06-T2 | 01-06 | 4 | FOUND-05 | T-01-21 | Playtest cannot be auto-approved | manual-only (D-11 playtest) | N/A, closed by the D-11 playtest | — | ⬜ pending |
+| 01-06-T3 | 01-06 | 4 | FOUND-05 | — | N/A | automated | `bash scripts/tools/run_headless_check.sh` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

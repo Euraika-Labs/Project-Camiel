@@ -379,17 +379,21 @@ Current repo state confirmed this session: `HEAD` is `19ebc6b` on branch `docs/c
 
 **If this table is empty:** N/A — see entries above.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Does Godot 4.7.2 fix the headless stall (issue 122707)?**
+Both questions are resolved as planning questions: each one points at the plan task that settles it. Neither resolution is an observed engine result. Godot 4.7.2 is not installed yet (D-08) and no plan has run.
+
+1. **Does Godot 4.7.2 fix the headless stall (issue 122707)?** — RESOLVED: settled by a planned measurement and a stop-and-ask protocol. The answer is not known yet.
    - What we know: filed and reproduced against 4.7.1; closed by maintainers as "not planned" (not "fixed"); the 4.7.2 changelog reviewed this session lists 57 bug fixes but did not surface a reference to this issue number.
    - What's unclear: whether any of those 57 fixes incidentally resolve the underlying busy-wait, or whether it's still present.
    - Recommendation: D-03 already covers this — build the headless check with a hard `timeout` from the start (don't add it reactively), and if a stall is observed during Phase 1 execution, stop and raise it with the user per D-03 rather than silently increasing the timeout or downgrading the engine version.
+   - Resolution: Plan 01-02 Task 2 (fact F2) measures the stall before any 3D work starts. It runs a 75-second headless soak of a scratch Node3D scene with a Jolt CharacterBody3D under a 120-second watchdog. `Soak verdict: no-stall` requires all 15 heartbeats and exit 0 before the watchdog fires. A `stall` verdict stops execution at a blocking-human `checkpoint:decision`, and the 4.7.2 pin and every timeout stay unchanged (D-03). Plan 01-03 Task 1 has the precondition that `01-ENGINE-FACTS.md` contains `Soak verdict: no-stall`. From then on the 01-03 check runs every Godot invocation under a watchdog: status 124 is reported as a D-03 stall, and the limit variable can only lower limits. Whether 4.7.2 stalls stays open until that soak runs, and assumption A3 stays at Medium risk until then.
 
-2. **Exact `InputEventKey` literals for the new movement/jump InputMap actions.**
+2. **Exact `InputEventKey` literals for the new movement/jump InputMap actions.** — RESOLVED: settled by having the engine generate the literals. No literal has been produced yet.
    - What we know: the structural shape (from this repo's existing `ui_focus_next`/`ui_focus_prev`/`mobile_jump` entries, read this session) and which physical keys are required (arrows, WASD, Space — D-07).
    - What's unclear: the precise `physical_keycode` integers Godot's editor would generate for each key on this machine/keyboard layout.
    - Recommendation: generate these through the Godot editor's Input Map UI once Godot is installed, rather than hand-typing keycode integers — this avoids Pitfall 4 (silent `project.godot` corruption).
+   - Resolution: the plans keep this recommendation's goal (no hand-typed keycode integers, Pitfall 4), but they use the engine serializer in a headless run instead of the editor's Input Map UI. Plan 01-02 Task 2 records the installed engine's integer values for KEY_W, KEY_A, KEY_S, KEY_D, the arrow keys, and KEY_SPACE (fact F6). It also records whether an InputEventKey fed through `Input.parse_input_event()` triggers an InputMap action headless (fact F7). Plan 01-03 sets up the writing method: the engine serializer writes `project.godot`, and running the settings generator a second time produces no git diff. Plan 01-04 Task 1 (part A) applies that method for D-07. A throwaway generator `--script` adds `move_forward`, `move_back`, `move_left`, `move_right`, and `jump`. Each is bound to InputEventKey events whose `physical_keycode` comes from the KEY_* constants, with `keycode` left unset. The script then calls `ProjectSettings.save()`, and `git diff project.godot` must add exactly those five entries. The literals only exist after those tasks run.
 
 ## Environment Availability
 
