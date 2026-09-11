@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 # run_headless_check.sh
-# One local/CI project check (D-09): imports the project, boots the main
-# scene, and runs the --script verifier, failing on any script/parse error
-# even though Godot's own process exit code does not reflect one.
+# One local/CI project check (D-09): guards, version pin, import, boots the
+# main scene, runs the --script verifier, and runs behaviour probes, failing
+# on any script/parse error even though Godot's own process exit code does
+# not reflect one.
 # Usage: GODOT=/path/to/Godot bash scripts/tools/run_headless_check.sh
+# Env: GODOT (engine binary path), HEADLESS_CHECK_MAX_LIMIT_SECONDS (a
+# positive integer that can only lower the watchdog limits below, never
+# raise them, D-03).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-IMPORT_LIMIT=180
-RUN_LIMIT=60
-VERIFY_LIMIT=60
+DEFAULT_IMPORT_LIMIT=180
+DEFAULT_RUN_LIMIT=60
+DEFAULT_VERIFY_LIMIT=60
+DEFAULT_PROBE_LIMIT=120
 
 LOG_DIR="$(mktemp -d)"
 
@@ -21,7 +26,9 @@ fail() {
 	local logfile="${3:-}"
 	echo "CHECK FAILED: ${step}: ${reason}"
 	if [ -n "$logfile" ] && [ -f "$logfile" ]; then
-		grep -E 'SCRIPT ERROR|Parse Error|ERROR:' "$logfile" || true
+		if grep -E 'SCRIPT ERROR|Parse Error|ERROR:' "$logfile"; then
+			:
+		fi
 		echo "--- last 40 lines of ${logfile} ---"
 		tail -n 40 "$logfile"
 	fi
@@ -42,10 +49,16 @@ run_with_timeout() {
 	local elapsed=0
 	while kill -0 "$pid" 2>/dev/null; do
 		if [ "$elapsed" -ge "$limit" ]; then
-			kill -TERM "$pid" 2>/dev/null || true
+			if kill -TERM "$pid" 2>/dev/null; then
+				:
+			fi
 			sleep 5
-			kill -KILL "$pid" 2>/dev/null || true
-			wait "$pid" 2>/dev/null || true
+			if kill -KILL "$pid" 2>/dev/null; then
+				:
+			fi
+			if wait "$pid" 2>/dev/null; then
+				:
+			fi
 			return 124
 		fi
 		sleep 1
@@ -80,10 +93,17 @@ run_step() {
 	fi
 }
 
+# resolve_godot: the GODOT env var, when explicitly set, is authoritative —
+# an invalid GODOT value fails hard rather than silently falling back to a
+# different engine (T-01-11 spoofing/tampering). Only an UNSET GODOT falls
+# through to `command -v godot`, then the hardcoded default path.
 resolve_godot() {
-	if [ -n "${GODOT:-}" ] && [ -x "${GODOT}" ]; then
-		printf '%s\n' "${GODOT}"
-		return 0
+	if [ -n "${GODOT:-}" ]; then
+		if [ -x "${GODOT}" ]; then
+			printf '%s\n' "${GODOT}"
+			return 0
+		fi
+		return 1
 	fi
 	if command -v godot >/dev/null 2>&1; then
 		command -v godot
@@ -95,6 +115,46 @@ resolve_godot() {
 	fi
 	return 1
 }
+
+# --- static guards (run before any engine invocation, D-01/D-07) ---
+
+if CS_HIT=$(find "$ROOT" \( -path "$ROOT/.git" -o -path "$ROOT/.godot" \) -prune -o -type f \( -name '*.cs' -o -name '*.csproj' -o -name '*.sln' \) -print 2>/dev/null | sort | head -n 1) && [ -n "$CS_HIT" ]; then
+	echo "CHECK FAILED: C# file found (D-01): ${CS_HIT}"
+	exit 1
+fi
+
+if RAW_KEY_HIT=$(find "$ROOT/scenes" "$ROOT/scripts" -type d -path "$ROOT/scripts/tools" -prune -o -type f -name '*.gd' -print 2>/dev/null | sort | xargs grep -HnE 'is_(physical_)?key(_label)?_pressed' 2>/dev/null | head -n 1) && [ -n "$RAW_KEY_HIT" ]; then
+	HIT_FILE="${RAW_KEY_HIT%%:*}"
+	HIT_REST="${RAW_KEY_HIT#*:}"
+	HIT_LINE="${HIT_REST%%:*}"
+	echo "CHECK FAILED: raw key polling found (D-07); use InputMap actions: ${HIT_FILE}:${HIT_LINE}"
+	exit 1
+fi
+
+# --- limit cap (D-03): can only lower the default watchdog limits ---
+
+if [ -n "${HEADLESS_CHECK_MAX_LIMIT_SECONDS:-}" ]; then
+	case "${HEADLESS_CHECK_MAX_LIMIT_SECONDS}" in
+	'' | *[!0-9]*)
+		echo "CHECK FAILED: invalid HEADLESS_CHECK_MAX_LIMIT_SECONDS"
+		exit 2
+		;;
+	esac
+	if [ "${HEADLESS_CHECK_MAX_LIMIT_SECONDS}" -eq 0 ]; then
+		echo "CHECK FAILED: invalid HEADLESS_CHECK_MAX_LIMIT_SECONDS"
+		exit 2
+	fi
+	MAX_LIMIT="${HEADLESS_CHECK_MAX_LIMIT_SECONDS}"
+	IMPORT_LIMIT=$((DEFAULT_IMPORT_LIMIT < MAX_LIMIT ? DEFAULT_IMPORT_LIMIT : MAX_LIMIT))
+	RUN_LIMIT=$((DEFAULT_RUN_LIMIT < MAX_LIMIT ? DEFAULT_RUN_LIMIT : MAX_LIMIT))
+	VERIFY_LIMIT=$((DEFAULT_VERIFY_LIMIT < MAX_LIMIT ? DEFAULT_VERIFY_LIMIT : MAX_LIMIT))
+	PROBE_LIMIT=$((DEFAULT_PROBE_LIMIT < MAX_LIMIT ? DEFAULT_PROBE_LIMIT : MAX_LIMIT))
+else
+	IMPORT_LIMIT=$DEFAULT_IMPORT_LIMIT
+	RUN_LIMIT=$DEFAULT_RUN_LIMIT
+	VERIFY_LIMIT=$DEFAULT_VERIFY_LIMIT
+	PROBE_LIMIT=$DEFAULT_PROBE_LIMIT
+fi
 
 if ! GODOT_BIN="$(resolve_godot)"; then
 	echo "CHECK FAILED: Godot 4.7.2 not found. Set GODOT=/path/to/Godot."
@@ -137,6 +197,21 @@ if grep -qE 'SCRIPT ERROR|Parse Error|ERROR:' "$VERIFY_LOG"; then
 fi
 if ! grep -q '3D project verified:' "$VERIFY_LOG"; then
 	fail "verifier" "missing success line" "$VERIFY_LOG"
+fi
+
+# [step] probes — every scripts/tools/probe_*.gd, in sorted order.
+PROBE_FILES="$(find "$ROOT/scripts/tools" -maxdepth 1 -type f -name 'probe_*.gd' 2>/dev/null | sort)"
+if [ -z "$PROBE_FILES" ]; then
+	echo "No behaviour probes found."
+else
+	while IFS= read -r PROBE_PATH; do
+		PROBE_NAME="$(basename "$PROBE_PATH")"
+		PROBE_LOG="${LOG_DIR}/probe_${PROBE_NAME%.gd}.log"
+		run_step "probe ${PROBE_NAME}" "$PROBE_LIMIT" "$PROBE_LOG" "$GODOT_BIN" --headless --fixed-fps 60 --path "$ROOT" --script "res://scripts/tools/${PROBE_NAME}"
+		if grep -qE 'SCRIPT ERROR|Parse Error|ERROR:' "$PROBE_LOG"; then
+			fail "probe ${PROBE_NAME}" "error pattern found in probe log" "$PROBE_LOG"
+		fi
+	done <<<"$PROBE_FILES"
 fi
 
 rm -rf "$LOG_DIR"

@@ -8,6 +8,18 @@ var _scene_count := 0
 
 
 func _initialize() -> void:
+	if not _check_engine_version():
+		quit(1)
+		return
+
+	if not _check_renderer():
+		quit(1)
+		return
+
+	if not _check_physics_engine():
+		quit(1)
+		return
+
 	if not _check_main_scene():
 		quit(1)
 		return
@@ -18,6 +30,74 @@ func _initialize() -> void:
 
 	print("3D project verified: %d scripts, %d scenes." % [_script_count, _scene_count])
 	quit(0)
+
+
+func _check_engine_version() -> bool:
+	var info := Engine.get_version_info()
+	var major: int = info.get("major", 0)
+	var minor: int = info.get("minor", 0)
+	var patch: int = info.get("patch", 0)
+	var status: String = info.get("status", "")
+
+	if major != 4 or minor != 7 or patch != 2 or status != "stable":
+		push_error("Godot 4.7.2-stable required (D-02), running %d.%d.%d-%s" % [major, minor, patch, status])
+		return false
+
+	return true
+
+
+func _check_renderer() -> bool:
+	var found_property := false
+
+	for property: Dictionary in ProjectSettings.get_property_list():
+		var property_name: String = property.get("name", "")
+		if not property_name.begins_with("rendering/renderer/rendering_method"):
+			continue
+
+		found_property = true
+		var value: String = ProjectSettings.get_setting(property_name, "")
+		var hint_string: String = property.get("hint_string", "")
+		var hint_values: PackedStringArray = hint_string.split(",")
+
+		if value != "gl_compatibility":
+			push_error("%s must be gl_compatibility (D-04), found: %s" % [property_name, value])
+			return false
+
+		if not hint_values.has("gl_compatibility"):
+			push_error("%s does not offer gl_compatibility (D-04): %s" % [property_name, hint_string])
+			return false
+
+	if not found_property:
+		push_error("No rendering/renderer/rendering_method property found (D-04).")
+		return false
+
+	return true
+
+
+func _check_physics_engine() -> bool:
+	var property_name := "physics/3d/physics_engine"
+	var value: String = ProjectSettings.get_setting(property_name, "DEFAULT")
+
+	if value == "DEFAULT":
+		push_error("%s must not be DEFAULT; a Jolt entry is required (D-04)." % property_name)
+		return false
+
+	var hint_string := ""
+	for property: Dictionary in ProjectSettings.get_property_list():
+		if property.get("name", "") == property_name:
+			hint_string = property.get("hint_string", "")
+			break
+
+	var hint_values: PackedStringArray = hint_string.split(",")
+	if not hint_values.has(value):
+		push_error("%s value is not one of the engine's own options (D-04): %s not in %s" % [property_name, value, hint_string])
+		return false
+
+	if not value.to_lower().contains("jolt"):
+		push_error("%s must be a Jolt entry (D-04), found: %s" % [property_name, value])
+		return false
+
+	return true
 
 
 func _check_main_scene() -> bool:
