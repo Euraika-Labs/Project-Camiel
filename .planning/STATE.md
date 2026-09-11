@@ -4,16 +4,16 @@ milestone: v0.0.4
 current_phase: 01
 current_phase_name: 3D Foundation & Archive
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-09-11T12:05:07.206Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-09-11T14:28:24.651Z"
 last_activity: 2026-09-11
 last_activity_desc: Phase 01 execution started
-state_head: dfbf12b91ec9cb90ece5b7bffbf8a27f00676c2c
+state_head: 39ff64fdf9e862f0d7619c27f7223eacb208688b
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 6
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 ## Current Position
 
 Phase: 01 (3D Foundation & Archive) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-09-11 — Phase 01 execution started
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 |------|----------|-------|-------|
 | Phase 01 P01 | multi-session | 3 tasks | 249 files |
 | Phase 01 P02 | 13min | 2 tasks | 1 files |
+| Phase 01 P03 | 45min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,7 @@ Recent decisions affecting current work:
 - [Phase 01]: Archived pre-pivot 2D game under git tag archive/2d-alpha-v0.0.3 (pushed to origin) and removed all 2D scenes/scripts/art from the runtime project after explicit user confirmation (remove-and-push-tag).
 - [Phase 01]: [Phase 01-02]: Godot 4.7.2 installed and integrity-verified (SHA512 + codesign); D-03 soak found no headless stall on 4.7.2 (issue 122707 does not reproduce) — Settles the D-03 risk before any 3D work is built, per the phase objective
 - [Phase 01]: [Phase 01-02]: Discovered the engine's Jolt physics literal is "Jolt Physics" (not "JoltPhysics3D" as research assumed) and that this repo's committed project.godot config_version=6 is invalid for 4.7.2 (engine expects 5, silently discards the file and rewrites it to 5 on next save) — Plan 01-03 must account for both before editing project.godot
+- [Phase 01]: [Phase 01-03]: Hardened the headless check (D-01/D-02/D-03/D-04/D-07 enforcement, HEADLESS_CHECK_MAX_LIMIT_SECONDS cap, behaviour probes) with a committed 11-case self-test; fixed a resolve_godot fallback bug the self-test itself surfaced (an explicit but invalid GODOT env var used to silently succeed via a different engine).
 
 ### Pending Todos
 
@@ -98,6 +100,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-11T12:05:07.196Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-09-11T14:28:24.639Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None
