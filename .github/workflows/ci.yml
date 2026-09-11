@@ -17,10 +17,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GODOT_VERSION: 4.6.2
+  GODOT_VERSION: 4.7.2
   GODOT_STATUS: stable
-  GODOT_TEMPLATE_VERSION: 4.6.2.stable
-  GODOT_BIN: Godot_v4.6.2-stable_linux.x86_64
+  GODOT_TEMPLATE_VERSION: 4.7.2.stable
+  GODOT_BIN: Godot_v4.7.2-stable_linux.x86_64
 
 jobs:
   repository-hygiene:
@@ -34,7 +34,7 @@ jobs:
       - name: Test quality gate
         shell: bash
         run: |
-          python3 -m unittest tests.test_quality_gate
+          python3 -m unittest tests.test_quality_gate tests.test_ci_workflows
 
       - name: Run AI quality gate
         shell: bash
@@ -95,24 +95,23 @@ jobs:
           curl --fail --show-error --location --retry 5 --retry-delay 5 \
             -o "$RUNNER_TEMP/godot.zip" \
             "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/SHA512-SUMS.txt" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/SHA512-SUMS.txt"
+          expected="$(awk -v name="Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip" '$2 == name || $2 == "*" name { print $1; exit }' "$RUNNER_TEMP/SHA512-SUMS.txt")"
+          actual="$(sha512sum "$RUNNER_TEMP/godot.zip" | awk '{ print $1 }')"
+          if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+            echo "::error::SHA512 mismatch for Godot engine download"
+            exit 1
+          fi
           unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
           chmod +x "$RUNNER_TEMP/godot/${GODOT_BIN}"
           echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
 
-      - name: Import project
+      - name: Run headless project check
         shell: bash
         run: |
-          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --editor --path . --quit
-
-      - name: Verify resources
-        shell: bash
-        run: |
-          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --path . --script "res://scripts/tools/verify_camiel_resources.gd"
-
-      - name: Smoke test main scene
-        shell: bash
-        run: |
-          "$RUNNER_TEMP/godot/${GODOT_BIN}" --headless --path . --quit-after 2
+          GODOT="$RUNNER_TEMP/godot/${GODOT_BIN}" bash scripts/tools/run_headless_check.sh
 
   export-windows:
     name: Export Windows build
@@ -136,6 +135,15 @@ jobs:
           curl --fail --show-error --location --retry 5 --retry-delay 5 \
             -o "$RUNNER_TEMP/godot.zip" \
             "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/SHA512-SUMS.txt" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/SHA512-SUMS.txt"
+          expected="$(awk -v name="Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip" '$2 == name || $2 == "*" name { print $1; exit }' "$RUNNER_TEMP/SHA512-SUMS.txt")"
+          actual="$(sha512sum "$RUNNER_TEMP/godot.zip" | awk '{ print $1 }')"
+          if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+            echo "::error::SHA512 mismatch for Godot engine download"
+            exit 1
+          fi
           unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
           chmod +x "$RUNNER_TEMP/godot/${GODOT_BIN}"
           echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
@@ -146,6 +154,15 @@ jobs:
           curl --fail --show-error --location --retry 5 --retry-delay 5 \
             -o "$RUNNER_TEMP/export_templates.tpz" \
             "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/SHA512-SUMS.txt" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/SHA512-SUMS.txt"
+          expected="$(awk -v name="Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz" '$2 == name || $2 == "*" name { print $1; exit }' "$RUNNER_TEMP/SHA512-SUMS.txt")"
+          actual="$(sha512sum "$RUNNER_TEMP/export_templates.tpz" | awk '{ print $1 }')"
+          if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+            echo "::error::SHA512 mismatch for Godot export templates download"
+            exit 1
+          fi
           unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
           mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}"
           cp -R "$RUNNER_TEMP/export_templates/templates/." "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/"
