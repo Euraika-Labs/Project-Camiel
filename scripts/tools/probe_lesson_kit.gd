@@ -10,6 +10,7 @@ var _failed := false
 var _cases_run := 0
 var _completed_ids: Array[String] = []
 var _completed_count := 0
+var _rejected_count := 0
 
 
 func _initialize() -> void:
@@ -17,6 +18,9 @@ func _initialize() -> void:
 	if _failed:
 		return
 	await _case_hud_form_and_win_panel()
+	if _failed:
+		return
+	await _case_activation_gate_refuses_then_allows()
 	if _failed:
 		return
 
@@ -38,6 +42,16 @@ func _fail(case_name: String, detail: String) -> void:
 func _on_task_completed_counted(task_id: String) -> void:
 	_completed_count += 1
 	_completed_ids.append(task_id)
+
+
+func _on_rejected_counted() -> void:
+	_rejected_count += 1
+
+
+func _emission_energy(target: Area3D) -> float:
+	var mesh_instance: MeshInstance3D = target.get_node("Mesh")
+	var material: StandardMaterial3D = mesh_instance.get_surface_override_material(0)
+	return material.emission_energy_multiplier
 
 
 var _back_requested_count := 0
@@ -261,6 +275,194 @@ func _case_hud_form_and_win_panel() -> void:
 	hud.back_requested.disconnect(_on_back_requested_counted)
 	hud.win_back_requested.disconnect(_on_win_back_requested_counted)
 	hud.queue_free()
+	await process_frame
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+func _case_activation_gate_refuses_then_allows() -> void:
+	var case_name := "activation_gate_refuses_then_allows"
+	var built: Dictionary = await _build_test_room()
+	var room: Node3D = built["room"]
+	var camiel: CharacterBody3D = built["camiel"]
+	var target_packed: PackedScene = load("res://scenes/lesson_target.tscn")
+	var far_away := Vector3(0, 0.1, -5.5)
+	camiel.teleport_to(far_away)
+
+	_completed_count = 0
+	_completed_ids.clear()
+	_rejected_count = 0
+
+	# --- Target 1: inactive touch rejects, does not consume the one shot,
+	# then activation makes the same target completable. ---
+	var target1: Area3D = target_packed.instantiate()
+	target1.task_id = "t1"
+	target1.requires_activation = true
+	target1.display_text = "1"
+	room.add_child(target1)
+	target1.global_position = Vector3(2, 0.5, 4)
+	await process_frame
+	await process_frame
+
+	if target1.is_active():
+		_fail(case_name, "target1 reports itself active immediately after _ready(), expected inactive")
+		return
+	var emission_inactive := _emission_energy(target1)
+
+	target1.rejected.connect(_on_rejected_counted)
+	target1.task_completed.connect(_on_task_completed_counted)
+	var rejected_connections := target1.get_signal_connection_list("rejected")
+	if rejected_connections.size() != 1:
+		_fail(case_name, "target1.rejected has %d connections, expected 1" % rejected_connections.size())
+		return
+	var completed_connections := target1.get_signal_connection_list("task_completed")
+	if completed_connections.size() != 1:
+		_fail(case_name, "target1.task_completed has %d connections, expected 1" % completed_connections.size())
+		return
+
+	camiel.teleport_to(target1.global_position)
+	var frames_waited := 0
+	while _rejected_count == 0 and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+	if _rejected_count != 1:
+		_fail(case_name, "rejected fired %d times within 120 physics frames, expected 1" % _rejected_count)
+		return
+	if _completed_count != 0:
+		_fail(case_name, "task_completed fired %d times for an inactive target, expected 0" % _completed_count)
+		return
+	var label1: Label3D = target1.get_node("Label")
+	if label1.text != "1":
+		_fail(case_name, "target1's label reads %s after rejection, expected 1 -- rejection must never touch the label" % label1.text)
+		return
+	print("[probe_lesson_kit] activation_gate rejection frames: %d" % frames_waited)
+
+	camiel.teleport_to(far_away)
+	for _i in range(10):
+		await physics_frame
+
+	target1.activate()
+	if not target1.is_active():
+		_fail(case_name, "target1 does not report active after activate()")
+		return
+	var emission_active := _emission_energy(target1)
+	if emission_active <= emission_inactive:
+		_fail(case_name, "target1's emission energy did not increase after activate() (inactive=%.2f, active=%.2f)" % [emission_inactive, emission_active])
+		return
+
+	camiel.teleport_to(target1.global_position)
+	frames_waited = 0
+	while _completed_count == 0 and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+	if _completed_count != 1:
+		_fail(case_name, "task_completed fired %d times after activation, expected 1" % _completed_count)
+		return
+	if _rejected_count != 1:
+		_fail(case_name, "rejected count changed to %d after the later completion; the earlier refusal must not have consumed the one shot, nor should completion add a new rejection" % _rejected_count)
+		return
+	print("[probe_lesson_kit] activation_gate post-activation completion frames: %d" % frames_waited)
+
+	# --- Target 2: activating a target the body is already standing inside
+	# completes it without the body leaving and returning, because an area
+	# never re-fires body_entered for a body that never left. ---
+	var target2: Area3D = target_packed.instantiate()
+	target2.task_id = "t2"
+	target2.requires_activation = true
+	room.add_child(target2)
+	target2.global_position = Vector3(-2, 0.5, 4)
+	await process_frame
+	await process_frame
+	target2.rejected.connect(_on_rejected_counted)
+	target2.task_completed.connect(_on_task_completed_counted)
+
+	var rejected_before_t2 := _rejected_count
+	var completed_before_t2 := _completed_count
+	camiel.teleport_to(target2.global_position)
+	frames_waited = 0
+	while _rejected_count == rejected_before_t2 and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+	if _rejected_count != rejected_before_t2 + 1:
+		_fail(case_name, "target2 did not reject the initial touch while inactive")
+		return
+	if _completed_count != completed_before_t2:
+		_fail(case_name, "target2 completed while inactive, before activation")
+		return
+
+	# The body has not moved. Activating now must complete it without a
+	# fresh body_entered signal, since the body never left the area.
+	target2.activate()
+	frames_waited = 0
+	while _completed_count == completed_before_t2 and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+	if _completed_count != completed_before_t2 + 1:
+		_fail(case_name, "target2 did not complete after activate() while the body stood inside it, without moving")
+		return
+	if _rejected_count != rejected_before_t2 + 1:
+		_fail(case_name, "target2's rejected count changed again during the already-standing completion")
+		return
+
+	# --- Target 3: deactivating a completable target makes a touch reject
+	# again. ---
+	var target3: Area3D = target_packed.instantiate()
+	target3.task_id = "t3"
+	target3.requires_activation = true
+	room.add_child(target3)
+	target3.global_position = Vector3(4, 0.5, -4)
+	await process_frame
+	await process_frame
+	target3.rejected.connect(_on_rejected_counted)
+	target3.task_completed.connect(_on_task_completed_counted)
+	target3.activate()
+	target3.deactivate()
+
+	var rejected_before_t3 := _rejected_count
+	var completed_before_t3 := _completed_count
+	camiel.teleport_to(far_away)
+	for _i in range(10):
+		await physics_frame
+	camiel.teleport_to(target3.global_position)
+	frames_waited = 0
+	while _rejected_count == rejected_before_t3 and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+	if _rejected_count != rejected_before_t3 + 1:
+		_fail(case_name, "target3 did not reject after deactivate() was called on an activated target")
+		return
+	if _completed_count != completed_before_t3:
+		_fail(case_name, "target3 completed after deactivate(), expected a rejection")
+		return
+
+	# --- Reset: target2 returns to inactive and its one-shot latch clears. ---
+	target2.reset()
+	if target2.is_active():
+		_fail(case_name, "target2 still reports active after reset(), expected inactive")
+		return
+
+	var rejected_before_reset := _rejected_count
+	var completed_before_reset := _completed_count
+	camiel.teleport_to(far_away)
+	for _i in range(10):
+		await physics_frame
+	camiel.teleport_to(target2.global_position)
+	frames_waited = 0
+	while _rejected_count == rejected_before_reset and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+	if _rejected_count != rejected_before_reset + 1:
+		_fail(case_name, "target2 did not reject after reset(), expected it to reject rather than complete")
+		return
+	if _completed_count != completed_before_reset:
+		_fail(case_name, "target2 completed after reset(), expected a rejection")
+		return
+
+	target1.queue_free()
+	target2.queue_free()
+	target3.queue_free()
+	room.queue_free()
 	await process_frame
 
 	_cases_run += 1
