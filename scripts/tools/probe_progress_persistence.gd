@@ -28,6 +28,12 @@ func _initialize() -> void:
 	await _case_write_then_reread()
 	if _failed:
 		return
+	await _case_second_write_replaces_and_keeps_both()
+	if _failed:
+		return
+	await _case_corrupt_file_recovers_silently()
+	if _failed:
+		return
 
 	if _cases_run == 0:
 		_fail("non_vacuity", "no case ran; the probe would verify nothing")
@@ -125,6 +131,15 @@ func _read_progress_file(case_name: String) -> Dictionary:
 	return data
 
 
+## Writes text directly to a real path with a file handle, bypassing the
+## tracker entirely, to simulate a write that was interrupted or made by a
+## different version of the game.
+func _write_raw(path: String, text: String) -> void:
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	f.store_string(text)
+	f.close()
+
+
 # ── Cases ────────────────────────────────────────────────────────
 
 func _case_first_run_is_silent() -> void:
@@ -192,5 +207,97 @@ func _case_write_then_reread() -> void:
 	print("[probe_progress_persistence] progress.json after write_then_reread: %s" % JSON.stringify(data, "\t"))
 
 	_free_tracker(tracker)
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+func _case_second_write_replaces_and_keeps_both() -> void:
+	var case_name := "second_write_replaces_and_keeps_both"
+
+	# Starting from the file write_then_reread left on disk: a fresh tracker
+	# loads the existing one entry, which is a read-back-what-we-wrote
+	# assertion in its own right.
+	var tracker := await _make_tracker()
+	var entries: Array[Dictionary] = tracker.get_entries()
+	if entries.size() != 1:
+		_fail(case_name, "a fresh tracker loading the existing file reported %d entries, expected 1" % entries.size())
+		return
+
+	tracker.record_lesson_complete("lesson_2", 7.25)
+
+	var data := _read_progress_file(case_name)
+	if _failed:
+		return
+	if int(data.get("version", -1)) != 1:
+		_fail(case_name, "version was %s, expected 1" % [data.get("version")])
+		return
+	if not (data.has("entries") and data["entries"] is Array):
+		_fail(case_name, "entries missing or not an Array")
+		return
+
+	# This is what proves the atomic rename replaces rather than merges, and
+	# that nothing silently dropped the earlier history: the file on disk
+	# now holds both entries, in order.
+	var entries_on_disk: Array = data["entries"]
+	if entries_on_disk.size() != 2:
+		_fail(case_name, "entries has %d elements, expected 2" % entries_on_disk.size())
+		return
+
+	var first: Dictionary = entries_on_disk[0]
+	if first["lesson_id"] != "lesson_1" or absf(float(first["time_seconds"]) - 42.5) > 0.001:
+		_fail(case_name, "first entry was %s, expected the original lesson_1 entry unchanged" % [first])
+		return
+
+	var second: Dictionary = entries_on_disk[1]
+	if second["lesson_id"] != "lesson_2" or absf(float(second["time_seconds"]) - 7.25) > 0.001:
+		_fail(case_name, "second entry was %s, expected the new lesson_2 entry" % [second])
+		return
+
+	_free_tracker(tracker)
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+func _case_corrupt_file_recovers_silently() -> void:
+	var case_name := "corrupt_file_recovers_silently"
+
+	# A deliberately truncated write, as if interrupted mid-write. Written
+	# directly with a file handle -- not through the tracker -- to simulate
+	# the corruption, not the tracker's own atomic write path.
+	_write_raw(PROGRESS_PATH, "{\"version\": 1, \"entries\": [ { \"lesson_id\": \"x\"")
+
+	var tracker_a := await _make_tracker()
+	var entries_a: Array[Dictionary] = tracker_a.get_entries()
+	if not entries_a.is_empty():
+		_fail(case_name, "a fresh tracker over a truncated file reported %d entries, expected 0" % entries_a.size())
+		return
+	_free_tracker(tracker_a)
+
+	# Well-formed JSON, wrong top-level shape. A shape check that only
+	# catches malformed text would still crash on a well-formed file written
+	# by a different version.
+	_write_raw(PROGRESS_PATH, "[1, 2, 3]")
+
+	var tracker_b := await _make_tracker()
+	var entries_b: Array[Dictionary] = tracker_b.get_entries()
+	if not entries_b.is_empty():
+		_fail(case_name, "a fresh tracker over a wrong-shaped file reported %d entries, expected 0" % entries_b.size())
+		return
+
+	# A child whose save was damaged must keep playing and start saving
+	# again, not be stuck with a tracker that can never write again.
+	tracker_b.record_lesson_complete("lesson_3", 5.0)
+
+	var data := _read_progress_file(case_name)
+	if _failed:
+		return
+	if int(data.get("version", -1)) != 1:
+		_fail(case_name, "version after recovery was %s, expected 1" % [data.get("version")])
+		return
+	if not (data.has("entries") and data["entries"] is Array) or data["entries"].size() != 1:
+		_fail(case_name, "entries after recovery were %s, expected exactly one" % [data.get("entries")])
+		return
+
+	_free_tracker(tracker_b)
 	_cases_run += 1
 	print("PASS %s" % case_name)
