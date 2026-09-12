@@ -61,7 +61,7 @@ focus_previous = NodePath("../StartButton")
 theme = ExtResource("1_wu84c")
 script = ExtResource("4_oa1go")
 label_text = "Lessen"
-icon_kind = "walk"
+icon_kind = "lesson_shapes"
 
 [node name="AudioPanel" type="PanelContainer" parent="CenterContainer/MarginContainer/Content" unique_id=2087255942]
 layout_mode = 2

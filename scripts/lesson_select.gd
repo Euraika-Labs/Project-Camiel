@@ -25,7 +25,7 @@ signal transition_requested(target_path: String)
 ## probe iterates this table and loads every path, so the table can never
 ## advertise a lesson that is not there.
 const LESSONS: Array[Dictionary] = [
-	{"id": "lesson_1", "path": "res://scenes/lesson_1.tscn", "label": "Les 1", "icon": "walk"},
+	{"id": "lesson_1", "path": "res://scenes/lesson_1.tscn", "label": "Les 1", "icon": "lesson_colors"},
 ]
 
 const MENU_BUTTON_PATH := "res://scenes/ui/menu_button.tscn"
