@@ -1,0 +1,33 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="1_14o44"]
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="2_4wm8l"]
+[ext_resource type="Script" path="res://scripts/ui/vector_icon.gd" id="3_u5utv"]
+
+[node name="MenuButton" type="Button" unique_id=1313707963]
+custom_minimum_size = Vector2(280, 112)
+theme = ExtResource("1_14o44")
+script = ExtResource("2_4wm8l")
+
+[node name="Content" type="VBoxContainer" parent="." unique_id=1789493705]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Icon" type="Control" parent="Content" unique_id=426925360]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+script = ExtResource("3_u5utv")
+
+[node name="Label" type="Label" parent="Content" unique_id=743277918]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"ButtonLabel"
+horizontal_alignment = 1
