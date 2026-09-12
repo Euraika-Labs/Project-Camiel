@@ -12,7 +12,7 @@ This roadmap replaces the 2D-stabilization plan after the project pivoted to a f
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: 3D Foundation & Archive** - The 2D game is archived and removed, and a thin playable 3D slice runs on a clean project baseline (completed 2026-09-11)
-- [ ] **Phase 2: Playable 3D Intro Experience** - Title screen through the 3D intro level (move, jump, collect, reach goal, win screen) works by tap, click, or keyboard
+- [x] **Phase 2: Playable 3D Intro Experience** - Title screen through the 3D intro level (move, jump, collect, reach goal, win screen) works by tap, click, or keyboard (completed 2026-09-12)
 - [ ] **Phase 3: 3D Lesson Parity & Progress Persistence** - Lessons 1-5 are reachable in 3D, correct, and record progress to disk
 - [ ] **Phase 4: Accessibility & Release Pipeline Hardening** - WCAG AA contrast, a working high-contrast toggle, and a release pipeline that produces exactly one correct release
 - [ ] **Phase 5: Dutch Voice-Over** - Spoken Dutch audio cues guide pre-reading children through every screen and lesson
@@ -211,7 +211,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 3D Foundation & Archive | 6/6 | Complete    | 2026-09-11 |
-| 2. Playable 3D Intro Experience | 6/6 | In Progress|  |
+| 2. Playable 3D Intro Experience | 6/6 | Complete    | 2026-09-12 |
 | 3. 3D Lesson Parity & Progress Persistence | 0/0 | Not started | - |
 | 4. Accessibility & Release Pipeline Hardening | 0/0 | Not started | - |
 | 5. Dutch Voice-Over | 0/0 | Not started | - |
