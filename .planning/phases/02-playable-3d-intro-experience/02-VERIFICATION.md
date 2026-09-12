@@ -117,7 +117,7 @@ Additionally, `scripts/tools/probe_screen_flow.gd` was read in full and confirme
 
 ### Anti-Patterns Found
 
-Scanned all phase-authored/modified scripts (`audio_manager.gd`, `collectible.gd`, `finish_marker.gd`, `intro_level.gd`, `main_menu.gd`, `title_screen.gd`, `ui/menu_button.gd`, `ui/vector_icon.gd`, `camiel_controller.gd`, `verify_3d_project.gd`, and all four probes) for `TBD|FIXME|XXX|TODO|HACK|PLACEHOLDER` and "not yet implemented"/"placeholder"/"coming soon" phrasing.
+Scanned all phase-authored/modified scripts (`audio_manager.gd`, `collectible.gd`, `finish_marker.gd`, `intro_level.gd`, `main_menu.gd`, `title_screen.gd`, `ui/menu_button.gd`, `ui/vector_icon.gd`, `camiel_controller.gd`, `verify_3d_project.gd`, and all four probes) for `TBD|FIXME|XXX|TODO|HACK|PLACEHOLDER` and "not yet implemented"/"placeholder"/"coming soon" phrasing. <!-- quality-gate: allow forbidden-phrase -->
 
 **None found.** No debt markers, no stub returns, no empty handlers in the reviewed set.
 
