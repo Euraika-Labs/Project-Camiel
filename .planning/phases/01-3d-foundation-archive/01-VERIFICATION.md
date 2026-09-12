@@ -119,7 +119,7 @@ No orphaned requirements — REQUIREMENTS.md maps exactly FOUND-01 through FOUND
 
 ### Anti-Patterns Found
 
-Scanned all files touched by this phase (`project.godot`, `scenes/camiel.tscn`, `scenes/test_space.tscn`, `scripts/camiel_controller.gd`, `scripts/tools/probe_camiel_movement.gd`, `scripts/tools/verify_3d_project.gd`, `scripts/tools/run_headless_check.sh`, `scripts/tools/test_headless_check.sh`, `.github/workflows/ci.yml`, `.github/workflows/release.yml`, `CONTRIBUTING.md`, `tests/test_ci_workflows.py`, `assets/materials/ground.tres`, `.gitignore`, `export_presets.cfg`) for `TBD`, `FIXME`, `XXX`, `TODO`, `HACK`, `PLACEHOLDER`, and similar markers.
+Scanned all files touched by this phase (`project.godot`, `scenes/camiel.tscn`, `scenes/test_space.tscn`, `scripts/camiel_controller.gd`, `scripts/tools/probe_camiel_movement.gd`, `scripts/tools/verify_3d_project.gd`, `scripts/tools/run_headless_check.sh`, `scripts/tools/test_headless_check.sh`, `.github/workflows/ci.yml`, `.github/workflows/release.yml`, `CONTRIBUTING.md`, `tests/test_ci_workflows.py`, `assets/materials/ground.tres`, `.gitignore`, `export_presets.cfg`) for `TBD`, `FIXME`, `XXX`, `TODO`, `HACK`, `PLACEHOLDER`, and similar markers. <!-- quality-gate: allow forbidden-phrase -->
 
 None found.
 
