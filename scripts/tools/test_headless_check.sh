@@ -138,7 +138,7 @@ cat >"${WORK_DIR}/scenes/zz_runtime_error.tscn" <<'EOF'
 [node name="ZzRuntimeError" type="Node3D"]
 script = ExtResource("1")
 EOF
-sed -i.bak 's#run/main_scene="res://scenes/test_space.tscn"#run/main_scene="res://scenes/zz_runtime_error.tscn"#' "${WORK_DIR}/project.godot"
+sed -i.bak 's#run/main_scene=".*"#run/main_scene="res://scenes/zz_runtime_error.tscn"#' "${WORK_DIR}/project.godot"
 rm -f "${WORK_DIR}/project.godot.bak"
 assert_result "planted runtime script error fails" 1 "SCRIPT ERROR" -- \
 	bash "${CHECK_SCRIPT}"

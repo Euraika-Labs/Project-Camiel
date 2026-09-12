@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="1_mgrm8"]
+[ext_resource type="Script" path="res://scripts/title_screen.gd" id="2_dc4i4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="3_e54dn"]
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="4_3yumr"]
+
+[node name="TitleScreen" type="Control" unique_id=479593513]
+layout_mode = 3
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("1_mgrm8")
+script = ExtResource("2_dc4i4")
+
+[node name="Background" type="ColorRect" parent="." unique_id=2079004987]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.62, 0.82, 0.95, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=790428611]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer" unique_id=171522839]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="Content" type="VBoxContainer" parent="CenterContainer/MarginContainer" unique_id=1012789657]
+layout_mode = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/MarginContainer/Content" unique_id=2112343823]
+layout_mode = 2
+theme_type_variation = &"DisplayLabel"
+text = "Camiel"
+
+[node name="PlayButton" type="Button" parent="CenterContainer/MarginContainer/Content" unique_id=1313707963 instance=ExtResource("3_e54dn")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 112)
+layout_mode = 2
+theme = ExtResource("1_mgrm8")
+script = ExtResource("4_3yumr")
+label_text = "Spelen"

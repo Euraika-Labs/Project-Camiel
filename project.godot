@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Camiel alpha-v0.0.3"
-run/main_scene="res://scenes/test_space.tscn"
+run/main_scene="res://scenes/title_screen.tscn"
 config/features=PackedStringArray("4.7", "4.7.2")
 
 [audio]

@@ -1,0 +1,46 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="1_wu84c"]
+[ext_resource type="Script" path="res://scripts/main_menu.gd" id="2_8ln24"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="3_rtw2f"]
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="4_oa1go"]
+
+[node name="MainMenu" type="Control" unique_id=363801507]
+layout_mode = 3
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("1_wu84c")
+script = ExtResource("2_8ln24")
+
+[node name="Background" type="ColorRect" parent="." unique_id=358925816]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.62, 0.82, 0.95, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1047068865]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer" unique_id=1978740896]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="Content" type="VBoxContainer" parent="CenterContainer/MarginContainer" unique_id=589495484]
+layout_mode = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="StartButton" type="Button" parent="CenterContainer/MarginContainer/Content" unique_id=1313707963 instance=ExtResource("3_rtw2f")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 112)
+layout_mode = 2
+theme = ExtResource("1_wu84c")
+script = ExtResource("4_oa1go")
+label_text = "Start"
+icon_kind = "walk"
