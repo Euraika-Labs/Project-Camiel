@@ -14,6 +14,10 @@ var _fired_target := ""
 var _failed := false
 var _cases_run := 0
 
+var _finish_signal_count := 0
+var _level_transition_count := 0
+var _level_transition_target := ""
+
 
 func _initialize() -> void:
 	await _case_title_screen()
@@ -23,6 +27,9 @@ func _initialize() -> void:
 	if _failed:
 		return
 	_case_main_scene_is_title()
+	if _failed:
+		return
+	await _case_finish_marker()
 	if _failed:
 		return
 
@@ -136,6 +143,125 @@ func _case_title_screen() -> void:
 
 func _case_main_menu() -> void:
 	await _run_screen_case("main_menu", "res://scenes/main_menu.tscn", "%StartButton", "res://scenes/intro_level.tscn")
+
+
+func _on_finish_marker_finished_counted() -> void:
+	_finish_signal_count += 1
+
+
+func _on_level_transition_requested(target_path: String) -> void:
+	_level_transition_count += 1
+	_level_transition_target = target_path
+
+
+# Plan 02-04's cases: the finish marker's exactly-once contract (INTRO-04),
+# the "not gated on a non-player body" edge (T-02-16), and the win screen's
+# return-to-menu button carrying the same one-shot guard as the two flat
+# screens.
+func _case_finish_marker() -> void:
+	var case_name := "finish_marker"
+	var packed: PackedScene = load("res://scenes/intro_level.tscn")
+	if packed == null:
+		_fail(case_name, "could not load res://scenes/intro_level.tscn")
+		return
+
+	var level: Node3D = packed.instantiate()
+	root.add_child(level)
+	await process_frame
+	await process_frame
+
+	var finish_marker: Area3D = level.get_node("%FinishMarker")
+	var win_layer: CanvasLayer = level.get_node("%WinLayer")
+	var replay_button: Button = level.get_node("%ReplayButton")
+	var go_to_menu_button: Button = level.get_node("%GoToMenuButton")
+	var camiel: CharacterBody3D = level.get_node("Camiel")
+
+	_finish_signal_count = 0
+	finish_marker.finished.connect(_on_finish_marker_finished_counted)
+
+	if win_layer.visible:
+		_fail(case_name, "%WinLayer is visible before the finish marker ever fired")
+		return
+	if win_layer.process_mode != Node.PROCESS_MODE_ALWAYS:
+		_fail(case_name, "%%WinLayer.process_mode is %d, expected PROCESS_MODE_ALWAYS" % win_layer.process_mode)
+		return
+
+	var connections := finish_marker.get_signal_connection_list("finished")
+	if connections.size() != 2:
+		_fail(case_name, "%%FinishMarker.finished has %d connections, expected 2 (the level's handler and the probe's counter)" % connections.size())
+		return
+
+	camiel.teleport_to(finish_marker.global_position)
+	var frames_waited := 0
+	while _finish_signal_count == 0 and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+
+	if _finish_signal_count != 1:
+		_fail(case_name, "finished fired %d times within 120 physics frames, expected 1" % _finish_signal_count)
+		return
+	if not win_layer.visible:
+		_fail(case_name, "%WinLayer.visible is false after finished fired")
+		return
+	if not replay_button.has_focus():
+		_fail(case_name, "%ReplayButton does not hold focus after the win overlay appeared")
+		return
+
+	for _i in range(60):
+		await physics_frame
+	if _finish_signal_count != 1:
+		_fail(case_name, "finished fired again (count=%d) while Camiel kept overlapping for 60 further frames" % _finish_signal_count)
+		return
+
+	var intruder := StaticBody3D.new()
+	var intruder_shape := CollisionShape3D.new()
+	var intruder_box := BoxShape3D.new()
+	intruder_box.size = Vector3(0.2, 0.2, 0.2)
+	intruder_shape.shape = intruder_box
+	intruder.add_child(intruder_shape)
+	level.add_child(intruder)
+	intruder.global_position = finish_marker.global_position
+	for _i in range(10):
+		await physics_frame
+	if _finish_signal_count != 1:
+		_fail(case_name, "a non-player StaticBody3D placed inside the marker triggered it (count=%d)" % _finish_signal_count)
+		return
+	intruder.queue_free()
+
+	_level_transition_count = 0
+	_level_transition_target = ""
+	level.transition_requested.connect(_on_level_transition_requested)
+
+	go_to_menu_button.grab_focus()
+	_press_focused()
+	await process_frame
+	await process_frame
+
+	if _level_transition_count != 1:
+		_fail(case_name, "transition_requested fired %d times, expected 1" % _level_transition_count)
+		return
+	if _level_transition_target != "res://scenes/main_menu.tscn":
+		_fail(case_name, "transition_requested target was %s, expected res://scenes/main_menu.tscn" % _level_transition_target)
+		return
+
+	await _drain_scene_change()
+
+	go_to_menu_button.grab_focus()
+	_press_focused()
+	await process_frame
+	await process_frame
+
+	if _level_transition_count != 1:
+		_fail(case_name, "the _transitioning guard did not block a second press; count is %d" % _level_transition_count)
+		return
+
+	level.transition_requested.disconnect(_on_level_transition_requested)
+	finish_marker.finished.disconnect(_on_finish_marker_finished_counted)
+	level.queue_free()
+	await process_frame
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
 
 
 func _case_main_scene_is_title() -> void:

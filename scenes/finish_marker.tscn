@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/finish_marker.gd" id="1_0dvil"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ob7jb"]
+height = 3.0
+radius = 0.6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6kfse"]
+albedo_color = Color(0.45490196, 0.7764706, 0.6156863, 1)
+emission_enabled = true
+emission = Color(0.45490196, 0.7764706, 0.6156863, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="TorusMesh" id="TorusMesh_1v5qh"]
+material = SubResource("StandardMaterial3D_6kfse")
+inner_radius = 0.9
+outer_radius = 1.2
+
+[node name="FinishMarker" type="Area3D" unique_id=566999589]
+script = ExtResource("1_0dvil")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1073411105]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("CylinderShape3D_ob7jb")
+
+[node name="Mesh" type="MeshInstance3D" parent="." unique_id=888019258]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1.2, 0)
+mesh = SubResource("TorusMesh_1v5qh")

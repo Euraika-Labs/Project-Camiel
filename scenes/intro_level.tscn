@@ -1,8 +1,14 @@
 [gd_scene format=3]
 
 [ext_resource type="Material" path="res://assets/materials/ground.tres" id="1_jq56v"]
+[ext_resource type="Script" path="res://scripts/intro_level.gd" id="1_kclwk"]
 [ext_resource type="PackedScene" path="res://scenes/camiel.tscn" id="2_jjk5a"]
 [ext_resource type="Script" path="res://scripts/camiel_controller.gd" id="3_q6uy0"]
+[ext_resource type="PackedScene" path="res://scenes/finish_marker.tscn" id="5_bhot5"]
+[ext_resource type="Script" path="res://scripts/finish_marker.gd" id="6_4ioru"]
+[ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="7_jcxbg"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="8_n8fro"]
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="9_2oxm2"]
 
 [sub_resource type="Environment" id="Environment_aimfc"]
 background_mode = 1
@@ -55,7 +61,24 @@ size = Vector3(3, 0.4, 3)
 material = SubResource("StandardMaterial3D_bhot5")
 size = Vector3(3, 0.4, 3)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cgx0p"]
+content_margin_left = 32.0
+content_margin_top = 32.0
+content_margin_right = 32.0
+content_margin_bottom = 32.0
+bg_color = Color(1, 0.9647059, 0.9098039, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.84705883, 0.79607844, 0.6901961, 1)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
 [node name="IntroLevel" type="Node3D" unique_id=1870252191]
+script = ExtResource("1_kclwk")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=716390162]
 environment = SubResource("Environment_aimfc")
@@ -128,3 +151,71 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
 [node name="Camiel" type="CharacterBody3D" parent="." unique_id=1761816634 instance=ExtResource("2_jjk5a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
 script = ExtResource("3_q6uy0")
+
+[node name="FinishMarker" type="Area3D" parent="." unique_id=566999589 instance=ExtResource("5_bhot5")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -6)
+script = ExtResource("6_4ioru")
+
+[node name="WinLayer" type="CanvasLayer" parent="." unique_id=1682431681]
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+
+[node name="Scrim" type="Control" parent="WinLayer" unique_id=377588558]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme = ExtResource("7_jcxbg")
+
+[node name="ColorRect" type="ColorRect" parent="WinLayer/Scrim" unique_id=988767117]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.35)
+
+[node name="CenterContainer" type="CenterContainer" parent="WinLayer/Scrim" unique_id=410727627]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="WinPanel" type="PanelContainer" parent="WinLayer/Scrim/CenterContainer" unique_id=208177767]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_cgx0p")
+
+[node name="WinContent" type="VBoxContainer" parent="WinLayer/Scrim/CenterContainer/WinPanel" unique_id=1334751413]
+layout_mode = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="WinTitle" type="Label" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent" unique_id=2077373709]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "Goed zo!"
+horizontal_alignment = 1
+
+[node name="ButtonRow" type="HBoxContainer" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent" unique_id=512371767]
+layout_mode = 2
+theme_override_constants/separation = 48
+
+[node name="ReplayButton" type="Button" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent/ButtonRow" unique_id=1313707963 instance=ExtResource("8_n8fro")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 112)
+layout_mode = 2
+theme = ExtResource("7_jcxbg")
+script = ExtResource("9_2oxm2")
+label_text = "Nog een keer"
+icon_kind = "replay"
+
+[node name="GoToMenuButton" type="Button" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent/ButtonRow" unique_id=489977991 instance=ExtResource("8_n8fro")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 112)
+layout_mode = 2
+theme = ExtResource("7_jcxbg")
+script = ExtResource("9_2oxm2")
+label_text = "Naar menu"
+icon_kind = "home"
