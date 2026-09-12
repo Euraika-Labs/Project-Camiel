@@ -1,7 +1,7 @@
 ---
 phase: "2"
 slug: "playable-3d-intro-experience"
-status: draft
+status: approved
 design_system: "none (hand-built Godot Control scenes + one shared Theme resource)"
 shadcn_initialized: false
 preset: none
@@ -81,7 +81,16 @@ Exactly 4 sizes, exactly 2 weights, per the spacing/typography discipline this c
 | sm | 8px | `StyleBoxFlat` border widths, small internal padding |
 | md | 16px | Gap between a slider row's icon, label, and slider |
 | lg | 24px | Panel internal padding (`AudioPanel`, `WinPanel`); `VBoxContainer` separation between rows inside a panel |
-| xl | 32px | Gap between the primary button and the audio panel on the main menu; `CenterContainer` outer margin |
+| xl | 32px | Gap between the primary button and the audio panel on the main menu; screen outer margin |
+
+> **Token-to-node binding for the 32px screen outer margin.** `CenterContainer` in Godot 4
+> has **no** margin or padding theme property — it only centres its child, it does not inset
+> it. So the outer margin is **not** set on `CenterContainer`. Realize it by wrapping the
+> `Content` node in a `MarginContainer` and setting all four
+> `theme_override_constants/margin_left|right|top|bottom` to `32`. Node order is
+> `CenterContainer → MarginContainer → Content`. Do not approximate this with anchor offsets
+> on the root `Control`; the `MarginContainer` keeps the value in one place where a Phase 4
+> pass can retune it.
 | 2xl | 48px | Gap between the two win-screen buttons — an explicit exception above the 8-pt default, sized deliberately large so a near-miss tap cannot activate the neighboring button |
 | 3xl | 64px | Reserved for page-level top/bottom breathing room if a future screen needs it |
 
@@ -94,7 +103,17 @@ adult fingers, not toddlers holding a mouse or tapping a tablet with a parent's 
 | Control | Minimum size | Justification |
 |---------|--------------|----------------|
 | `menu_button` (all instances) | 280×112px | Roughly 2.5× the 44px mobile-accessibility baseline in each dimension. A 3-year-old's pointer control is imprecise; this size keeps the whole icon+label comfortably inside the reachable "aim zone" even with a shaky click or a fat-finger tap. |
-| `HSlider` (SFX / BGM) | 320×56px interactive area | Sliders are inherently harder to land precisely than buttons. This control is intended for the co-present adult (PROJECT.md: "parents and teachers act as secondary users who co-play"), so it does not need toddler-grade tolerance — but it still gets a fat 56px track so it is not a fiddly desktop-app-sized widget. |
+| `HSlider` (SFX / BGM) | 320×56px interactive area | Sliders are inherently harder to land precisely than buttons. This control is intended for the co-present adult (PROJECT.md: "parents and teachers act as secondary users who co-play"), so it does not need toddler-grade tolerance — but it still gets a fat 56px track so it is not a fiddly desktop-app-sized widget. **See the accepted-risk note below.** |
+
+> **Accepted risk — the 56px slider height is half the 112px button height on the same
+> screen.** This is a deliberate decision, not an oversight. D-25 places the SFX slider on the
+> main menu, which the child also navigates, and nothing prevents a child from tapping or
+> tab-focusing the slider directly. The asymmetry is accepted because the consequence of a
+> mis-hit is benign and instantly reversible — a volume change, audible immediately, with no
+> state lost and no screen transition — whereas the 112px targets guard actions that *do*
+> transition. If the Phase 2 closing playtest (D-30) shows a child fighting the sliders,
+> raising the track to 112px or moving the audio panel behind a parent-facing control is a
+> cheap follow-up. Phase 4 owns any broader accessibility retune.
 | Gap between adjacent interactive controls | ≥32px (48px between the two win-screen buttons) | Prevents a near-miss on one control from landing on its neighbor — the direct fix for "pointer-imprecision tolerance" (Design Priority 1). |
 
 ### Corner Radii
@@ -376,6 +395,14 @@ literal, whichever the executor finds cleaner.
 ---
 
 ## Dutch String Inventory
+
+> **Why the CTA labels are single words with no noun.** `Spelen` and `Start` would be flagged
+> as under-specified CTAs in an adult product. They are correct here: the audience is
+> **pre-reading**, so the label is not what carries the meaning — the icon is (Play triangle,
+> walking footprints), and every actionable control has one per Design Priority 2. The Dutch
+> text exists for the co-present adult, and for the child it is a shape they come to recognise.
+> Lengthening these to noun phrases would add words a three-year-old cannot read while making
+> the button wider for no gain. Recorded here so a future reviewer does not re-derive it.
 
 Exact strings, verbatim:
 
