@@ -16,6 +16,20 @@
 # would have passed on that code too, which is why the negative half comes
 # first here.
 #
+# Lesson 4 is lesson 1's rule over a second colour pair (D-43), so its case
+# drives two genuinely different task orders to completion -- one of them
+# interleaving a colour target into the middle of the counting task, which none
+# of lesson 1's three orders did -- and then proves two thirds of the counting
+# task finishes nothing. Lesson 5 is lesson 3's rule over four steps (D-44), so
+# its case is the ordered shape with a total of four and the label a child reads
+# at its last step is asserted as a literal.
+#
+# The last case exists because of the defect that ran the longest: nothing in
+# the archived game ever called the progress tracker's record function while the
+# project's own documentation claimed it did. After all five lessons have been
+# driven to real completions in this one process, that case reads the file back
+# and asserts an entry for every identifier the lesson table advertises.
+#
 # This probe drives real completions through the real ProgressTracker autoload,
 # which writes to the same user://progress.json a real child's history lives
 # at, so it moves any existing file aside before its cases and restores it on
@@ -33,17 +47,21 @@ const BACKUP_PATH := "user://progress.json.probe_backup"
 const LESSON_1_PATH := "res://scenes/lesson_1.tscn"
 const LESSON_2_PATH := "res://scenes/lesson_2.tscn"
 const LESSON_3_PATH := "res://scenes/lesson_3.tscn"
+const LESSON_4_PATH := "res://scenes/lesson_4.tscn"
 const LESSON_SELECT_PATH := "res://scenes/lesson_select.tscn"
+
+## The least two lesson colours may differ and still be two colours rather than
+## two shades of one. Measured as the straight-line distance between the two
+## RGB triples, so 0.35 is roughly "a child would not call these the same
+## colour". Load-bearing for the two colour lessons: a colour-recognition task
+## whose two colours are nearly the same teaches nothing while passing every
+## completion assertion in this file.
+const MIN_COLOUR_SEPARATION := 0.35
 
 ## A corner of the shared room that is at least 4 m from every target in every
 ## lesson this probe drives, used to take the character off a target so a later
 ## teleport onto it is a genuine fresh entry rather than a body that never left.
 const PARKING_SPOT := Vector3(5, 0.1, 5)
-
-## Every ordered lesson shares the shared display's three-step label form
-## (D-46), so the label a child must see after step N is derivable rather than
-## restated per lesson.
-const ORDERED_TOTAL := 3
 
 # ── Internal state ───────────────────────────────────────────────
 
@@ -83,6 +101,9 @@ func _initialize() -> void:
 	if _failed:
 		return
 	await _case_lesson_3_order_enforced()
+	if _failed:
+		return
+	await _case_lesson_4_any_order()
 	if _failed:
 		return
 
@@ -240,22 +261,25 @@ func _open_lesson(case_name: String, scene_path: String) -> Dictionary:
 	}
 
 
-## Collects lesson 1's five targets in a stable, named shape: the red target,
-## the blue target, and the counting objects in the order the scene declares
-## them. Iterating the counting group rather than naming three nodes keeps this
-## helper correct if a lesson ever counts to a different number.
-func _lesson_1_targets(case_name: String, lesson: Node) -> Dictionary:
-	var red: Area3D = lesson.get_node_or_null("%RedTarget")
-	if red == null:
-		_fail(case_name, "lesson 1 has no %RedTarget")
+## Collects a colour-and-counting lesson's five targets in a stable, named
+## shape: its two colour targets and the counting objects in the order the scene
+## declares them. Shared by lesson 1 and lesson 4 rather than copied, because
+## D-43 makes lesson 4 the same rule over a second colour pair -- so a
+## regression in that rule should fail both lessons' cases. Iterating the
+## counting group rather than naming three nodes keeps this helper correct if a
+## lesson ever counts to a different number.
+func _colour_count_targets(case_name: String, lesson: Node, first_name: String, second_name: String) -> Dictionary:
+	var first: Area3D = lesson.get_node_or_null("%%%s" % first_name)
+	if first == null:
+		_fail(case_name, "%s has no %%%s" % [lesson.name, first_name])
 		return {}
-	var blue: Area3D = lesson.get_node_or_null("%BlueTarget")
-	if blue == null:
-		_fail(case_name, "lesson 1 has no %BlueTarget")
+	var second: Area3D = lesson.get_node_or_null("%%%s" % second_name)
+	if second == null:
+		_fail(case_name, "%s has no %%%s" % [lesson.name, second_name])
 		return {}
 	var group: Node3D = lesson.get_node_or_null("%CountGroup")
 	if group == null:
-		_fail(case_name, "lesson 1 has no %CountGroup")
+		_fail(case_name, "%s has no %%CountGroup" % lesson.name)
 		return {}
 
 	var counts: Array[Area3D] = []
@@ -267,16 +291,16 @@ func _lesson_1_targets(case_name: String, lesson: Node) -> Dictionary:
 		_fail(case_name, "%%CountGroup holds %d counting targets, expected 3 -- counting to three means three objects" % counts.size())
 		return {}
 
-	return {"red": red, "blue": blue, "counts": counts}
+	return {"first": first, "second": second, "counts": counts}
 
 
 ## Connects this probe's own counter to every target's completion signal, so a
 ## case can wait on a specific target's touch landing rather than on a label
 ## changing -- the counting objects deliberately do not move the label until
 ## the third one is gathered.
-func _watch_targets(red: Area3D, blue: Area3D, counts: Array[Area3D]) -> void:
-	red.task_completed.connect(_on_target_completed_counted)
-	blue.task_completed.connect(_on_target_completed_counted)
+func _watch_targets(first: Area3D, second: Area3D, counts: Array[Area3D]) -> void:
+	first.task_completed.connect(_on_target_completed_counted)
+	second.task_completed.connect(_on_target_completed_counted)
 	for count_target: Area3D in counts:
 		count_target.task_completed.connect(_on_target_completed_counted)
 
@@ -384,24 +408,29 @@ func _assert_last_entry(case_name: String, lesson_id: String) -> bool:
 	return true
 
 
-## Drives one lesson-1 instance through an explicit sequence of touches, each
-## paired with the exact progress label a child must see after it, and asserts
-## the lesson finishes exactly once and only on the final touch. Pairing every
-## touch with its own expected label is what turns "the lesson eventually
-## finished" into "the lesson counted correctly at every step" -- an early
-## completion, or a counting object that wrongly counts on its own, fails on the
-## step it happened rather than being absorbed by a passing end state.
-func _drive_touch_sequence(case_name: String, opened: Dictionary, targets: Dictionary, sequence: Array) -> bool:
+## Drives one colour-and-counting lesson instance through an explicit sequence of
+## touches, each paired with the exact progress label a child must see after it,
+## and asserts the lesson finishes exactly once and only on the final touch.
+## Pairing every touch with its own expected label is what turns "the lesson
+## eventually finished" into "the lesson counted correctly at every step" -- an
+## early completion, or a counting object that wrongly counts on its own, fails
+## on the step it happened rather than being absorbed by a passing end state.
+##
+## Shared by lesson 1 and lesson 4 (D-43), so the all-three-any-order rule is
+## exercised through one driver and a regression in it fails both lessons.
+func _drive_touch_sequence(case_name: String, opened: Dictionary, targets: Dictionary, sequence: Array, lesson_id: String, total: int) -> bool:
 	var lesson: Node = opened["lesson"]
 	var camiel: CharacterBody3D = opened["camiel"]
 	var hud: CanvasLayer = opened["hud"]
 	var step_label: Label = opened["step_label"]
 
-	if step_label.text != "Stap: 0 / 3":
-		_fail(case_name, "the progress label reads %s at the start of the lesson, expected Stap: 0 / 3" % step_label.text)
+	if step_label.text != _step_label_text(0, total):
+		_fail(case_name, "the progress label reads %s at the start of the lesson, %s wanted" % [step_label.text, _step_label_text(0, total)])
 		return false
 	if hud.is_win_visible():
 		_fail(case_name, "the win panel is already visible before the lesson was played")
+		return false
+	if not await _assert_space_key_reaches_nothing(case_name, lesson, hud, step_label):
 		return false
 
 	_target_completed_count = 0
@@ -409,7 +438,7 @@ func _drive_touch_sequence(case_name: String, opened: Dictionary, targets: Dicti
 	_lesson_completed_count = 0
 	_lesson_completed_ids.clear()
 	_lesson_completed_times.clear()
-	_watch_targets(targets["red"], targets["blue"], targets["counts"])
+	_watch_targets(targets["first"], targets["second"], targets["counts"])
 	lesson.lesson_completed.connect(_on_lesson_completed_counted)
 
 	for i in sequence.size():
@@ -431,8 +460,8 @@ func _drive_touch_sequence(case_name: String, opened: Dictionary, targets: Dicti
 	if _lesson_completed_count != 1:
 		_fail(case_name, "lesson_completed fired %d times, expected exactly 1" % _lesson_completed_count)
 		return false
-	if _lesson_completed_ids[0] != "lesson_1":
-		_fail(case_name, "lesson_completed carried %s, expected lesson_1" % _lesson_completed_ids[0])
+	if _lesson_completed_ids[0] != lesson_id:
+		_fail(case_name, "lesson_completed carried %s, %s wanted" % [_lesson_completed_ids[0], lesson_id])
 		return false
 	if _lesson_completed_times[0] <= 0.0:
 		_fail(case_name, "lesson_completed carried an elapsed time of %s, expected greater than zero" % _lesson_completed_times[0])
@@ -443,7 +472,7 @@ func _drive_touch_sequence(case_name: String, opened: Dictionary, targets: Dicti
 	if camiel.is_physics_processing():
 		_fail(case_name, "the character's physics processing is still on after the lesson finished")
 		return false
-	if not _assert_last_entry(case_name, "lesson_1"):
+	if not _assert_last_entry(case_name, lesson_id):
 		return false
 
 	lesson.lesson_completed.disconnect(_on_lesson_completed_counted)
@@ -496,13 +525,33 @@ func _assert_win_return_is_one_shot(case_name: String, lesson: Node, win_back_bu
 ## returns is the order the case drives; the lesson's own script holds the same
 ## order as an array of the same nodes, and that is the only place either states
 ## it.
-## The exact label a child must see after step `current` of an ordered lesson,
-## built from its parts. Deliberately NOT the shared display's own format
-## string: that string exists in exactly one .gd file in this repository
+## The exact label a child must see after step `current` of a lesson whose total
+## is `total`, built from its parts. Deliberately NOT the shared display's own
+## format string: that string exists in exactly one .gd file in this repository
 ## (scripts/ui/lesson_hud.gd), and a probe that copied it would silently agree
 ## with the display about any change to it instead of catching one.
-func _step_label_text(current: int) -> String:
-	return "Stap: " + str(current) + " / " + str(ORDERED_TOTAL)
+##
+## The total is a parameter here for the same reason it is a parameter of the
+## display's own set_step (D-46): four of the five lessons have three tasks and
+## lesson 5 has four, so a probe helper that hardcoded three could not assert
+## lesson 5's label at all without asserting a number larger than its total.
+func _step_label_text(current: int, total: int) -> String:
+	return "Stap: " + str(current) + " / " + str(total)
+
+
+## Every target's own Label3D, in the order the targets were given. Read through
+## the node rather than the exported display_text because a target's label is
+## what a child actually sees, and the archived sequence target proved the two
+## can disagree: its error flash overwrote the label while the export stayed put.
+func _target_labels(case_name: String, targets: Array[Area3D]) -> Array[Label3D]:
+	var labels: Array[Label3D] = []
+	for target: Area3D in targets:
+		var label_3d: Label3D = target.get_node_or_null("Label")
+		if label_3d == null:
+			_fail(case_name, "%s has no Label child to read its displayed text from" % target.name)
+			return []
+		labels.append(label_3d)
+	return labels
 
 
 func _ordered_targets(case_name: String, lesson: Node, target_names: Array) -> Array[Area3D]:
@@ -569,13 +618,50 @@ func _assert_only_active(case_name: String, targets: Array[Area3D], live_index: 
 	return true
 
 
+## How far apart two lesson colours are, as the straight-line distance between
+## their RGB triples. Alpha is deliberately ignored: every lesson target is
+## opaque, and a difference in transparency is not a colour a child names.
+func _colour_separation(a: Color, b: Color) -> float:
+	return Vector3(a.r, a.g, a.b).distance_to(Vector3(b.r, b.g, b.b))
+
+
+## Reads one target's declared colour straight out of a lesson's packed scene,
+## without instantiating it. Used to compare one lesson's palette against
+## another's without standing up a second 3D room inside a case -- and it reads
+## the .tscn's own declared value, so a colour silently omitted from the scene
+## file (Godot drops a property equal to its script default when packing) fails
+## here rather than passing on a default nobody chose.
+func _scene_colour(case_name: String, scene_path: String, node_name: String) -> Color:
+	if not ResourceLoader.exists(scene_path):
+		_fail(case_name, "%s does not exist, so its palette cannot be compared against" % scene_path)
+		return Color.BLACK
+	var packed: PackedScene = load(scene_path)
+	if packed == null:
+		_fail(case_name, "%s did not load as a PackedScene" % scene_path)
+		return Color.BLACK
+	var state := packed.get_state()
+	for i in state.get_node_count():
+		if String(state.get_node_name(i)) != node_name:
+			continue
+		for j in state.get_node_property_count(i):
+			if String(state.get_node_property_name(i, j)) == "target_color":
+				return state.get_node_property_value(i, j)
+		_fail(case_name, "%s in %s declares no target_color of its own" % [node_name, scene_path])
+		return Color.BLACK
+	_fail(case_name, "%s holds no node named %s" % [scene_path, node_name])
+	return Color.BLACK
+
+
 ## The cue in an ordered lesson is never colour. Lesson 2 asks a child to tell a
-## circle from a square and lesson 3 asks them to read 1, 2, 3; either would
-## collapse into "touch the orange one" if the three targets were three colours.
-## So this asserts one shared colour across the whole lesson, and that the
-## targets are nonetheless distinguishable by something -- their shape or the
-## numeral they display.
-func _assert_colour_is_not_the_cue(case_name: String, targets: Array[Area3D], labels: Array[Label3D]) -> bool:
+## circle from a square, and lessons 3 and 5 ask them to read numerals; any of
+## them would collapse into "touch the orange one" if its targets were several
+## colours. So this asserts one shared colour across the whole lesson AND that
+## the named cue is the only property that varies: for a shape lesson every
+## target displays the same text, and for a numeral lesson every target is the
+## same shape. Requiring merely that the targets differ in *something* was too
+## weak -- it let a numeral lesson hand a child three different shapes and still
+## pass, so the shape rather than the number could be what they learned.
+func _assert_colour_is_not_the_cue(case_name: String, targets: Array[Area3D], labels: Array[Label3D], cue: String) -> bool:
 	var shapes: Array[String] = []
 	var texts: Array[String] = []
 	var shared_colour: Color = targets[0].target_color
@@ -593,11 +679,81 @@ func _assert_colour_is_not_the_cue(case_name: String, targets: Array[Area3D], la
 		distinct_shapes[shape] = true
 	for text: String in texts:
 		distinct_texts[text] = true
-	if distinct_shapes.size() < targets.size() and distinct_texts.size() < targets.size():
-		_fail(case_name, "the lesson's targets are %s in shape and %s in displayed text -- sharing one colour, a child would have nothing left to tell them apart by" % [shapes, texts])
+
+	if cue == "shape":
+		if distinct_shapes.size() != targets.size():
+			_fail(case_name, "this lesson's cue is shape but its targets are %s -- every target must be a different shape or a child cannot tell which is which" % [shapes])
+			return false
+		if distinct_texts.size() != 1:
+			_fail(case_name, "this lesson's cue is shape but its targets display %s -- a differing label would be a second, easier cue and the shape would stop being what is learned" % [texts])
+			return false
+	elif cue == "text":
+		if distinct_texts.size() != targets.size():
+			_fail(case_name, "this lesson's cue is the displayed numeral but its targets read %s -- every target must read differently" % [texts])
+			return false
+		if distinct_shapes.size() != 1:
+			_fail(case_name, "this lesson's cue is the displayed numeral but its targets are %s in shape -- a differing shape would be a second, easier cue and the numeral would stop being what is read" % [shapes])
+			return false
+	else:
+		_fail(case_name, "unknown cue %s; an ordered lesson's cue is its shape or its displayed numeral" % cue)
 		return false
 
-	print("[probe_lesson_order] %s shapes %s, texts %s, one shared colour %s" % [case_name, shapes, texts, shared_colour])
+	print("[probe_lesson_order] %s cue %s, shapes %s, texts %s, one shared colour %s" % [case_name, cue, shapes, texts, shared_colour])
+	return true
+
+
+## Lesson 4's cue IS colour -- it asks a child to tell yellow from green (D-43)
+## -- so the ordered lessons' assertion inverts rather than disappearing. Colour
+## must be the ONLY thing that separates its two colour targets: give them two
+## different shapes and the task quietly becomes "touch the round one", and every
+## completion assertion in this file would still pass. The counting objects are
+## held uniform in all three properties for the same reason, because the counting
+## task's cue is quantity -- three differently coloured balls are three things to
+## look at rather than three things to count -- and their shared colour is
+## required to be a real distance from both of the lesson's two colours, since a
+## third object in almost-yellow is exactly the trap a yellow-or-green lesson
+## must not set.
+func _assert_colour_is_the_cue(
+	case_name: String,
+	pair: Array[Area3D],
+	pair_labels: Array[Label3D],
+	counts: Array[Area3D],
+	count_labels: Array[Label3D]
+) -> bool:
+	var first_colour: Color = pair[0].target_color
+	var second_colour: Color = pair[1].target_color
+	var pair_gap := _colour_separation(first_colour, second_colour)
+	if pair_gap < MIN_COLOUR_SEPARATION:
+		_fail(case_name, "%s is %s and %s is %s, only %.3f apart -- at least %.2f wanted, or this colour lesson asks a child to tell two shades of one colour apart" % [pair[0].name, first_colour, pair[1].name, second_colour, pair_gap, MIN_COLOUR_SEPARATION])
+		return false
+	if String(pair[0].shape_kind) != String(pair[1].shape_kind):
+		_fail(case_name, "%s is a %s and %s is a %s -- this lesson's cue is colour, so its two colour targets must be the same shape or the child can answer by shape without ever looking at the colour" % [pair[0].name, pair[0].shape_kind, pair[1].name, pair[1].shape_kind])
+		return false
+	if pair_labels[0].text != pair_labels[1].text:
+		_fail(case_name, "%s displays %s and %s displays %s -- a differing label would be a second cue in a lesson whose cue is colour" % [pair[0].name, pair_labels[0].text, pair[1].name, pair_labels[1].text])
+		return false
+
+	var count_colour: Color = counts[0].target_color
+	var count_shape := String(counts[0].shape_kind)
+	var count_text := count_labels[0].text
+	for i in counts.size():
+		if counts[i].target_color != count_colour:
+			_fail(case_name, "%s is coloured %s while %s is %s -- the counting objects share one colour so the child counts them instead of sorting them" % [counts[i].name, counts[i].target_color, counts[0].name, count_colour])
+			return false
+		if String(counts[i].shape_kind) != count_shape:
+			_fail(case_name, "%s is a %s while %s is a %s -- the counting objects share one shape" % [counts[i].name, counts[i].shape_kind, counts[0].name, count_shape])
+			return false
+		if count_labels[i].text != count_text:
+			_fail(case_name, "%s displays %s while %s displays %s -- the counting objects carry no numerals; counting them is the task" % [counts[i].name, count_labels[i].text, counts[0].name, count_text])
+			return false
+
+	for target: Area3D in pair:
+		var gap := _colour_separation(count_colour, target.target_color)
+		if gap < MIN_COLOUR_SEPARATION:
+			_fail(case_name, "the counting objects are %s and %s is %s, only %.3f apart -- at least %.2f wanted, because a third object in one of the lesson's two colours is the trap this lesson must not set" % [count_colour, target.name, target.target_color, gap, MIN_COLOUR_SEPARATION])
+			return false
+
+	print("[probe_lesson_order] %s cue colour, pair %s / %s separated by %.3f, %d counting objects all %s %s labelled %s" % [case_name, first_colour, second_colour, pair_gap, counts.size(), count_shape, count_colour, "\"%s\"" % count_text])
 	return true
 
 
@@ -652,15 +808,34 @@ func _assert_space_key_reaches_nothing(case_name: String, lesson: Node, hud: Can
 ## after each refusal and again at the end, because the archived sequence target
 ## overwrote its own label with its order number on an error flash and lost the
 ## original text permanently.
+##
+## `total` is the lesson's own task total and `opening_label` / `closing_label`
+## are the two strings a child literally reads at the start and at the finish,
+## stated by each case rather than derived here. Stating them twice is the point:
+## the case's literal and this helper's reconstruction from parts are compared
+## against each other before either is compared against the screen, so a lesson
+## reshaped to fit a label, or a helper quietly agreeing with a wrong total,
+## fails on the first assertion instead of passing on a self-consistent mistake.
 func _drive_ordered_lesson(
 	case_name: String,
 	scene_path: String,
 	lesson_id: String,
 	target_names: Array,
 	out_of_turn_indices: Array,
-	label_texts: Array
+	label_texts: Array,
+	cue: String,
+	total: int,
+	opening_label: String,
+	closing_label: String
 ) -> bool:
 	var entries_before := _disk_entry_count()
+
+	if _step_label_text(0, total) != opening_label:
+		_fail(case_name, "this case expects the lesson to open at %s but a total of %d reads %s -- the case and the label form disagree about this lesson's own total" % [opening_label, total, _step_label_text(0, total)])
+		return false
+	if _step_label_text(total, total) != closing_label:
+		_fail(case_name, "this case expects the lesson to finish at %s but a total of %d reads %s" % [closing_label, total, _step_label_text(total, total)])
+		return false
 
 	var opened: Dictionary = await _open_lesson(case_name, scene_path)
 	if _failed:
@@ -674,9 +849,12 @@ func _drive_ordered_lesson(
 	var targets := _ordered_targets(case_name, lesson, target_names)
 	if _failed:
 		return false
+	if targets.size() != total:
+		_fail(case_name, "this lesson holds %d step targets but its total is %d -- an ordered lesson's total is the number of its steps, and a mismatch is a step number a child could see exceed the total" % [targets.size(), total])
+		return false
 
-	if step_label.text != _step_label_text(0):
-		_fail(case_name, "the progress label reads %s at the start of the lesson, %s wanted" % [step_label.text, _step_label_text(0)])
+	if step_label.text != opening_label:
+		_fail(case_name, "the progress label reads %s at the start of the lesson, %s wanted" % [step_label.text, opening_label])
 		return false
 	if hud.is_win_visible():
 		_fail(case_name, "the win panel is already visible before the lesson was played")
@@ -694,7 +872,7 @@ func _drive_ordered_lesson(
 			return false
 		labels.append(label_3d)
 
-	if not _assert_colour_is_not_the_cue(case_name, targets, labels):
+	if not _assert_colour_is_not_the_cue(case_name, targets, labels, cue):
 		return false
 	if not await _assert_space_key_reaches_nothing(case_name, lesson, hud, step_label):
 		return false
@@ -747,8 +925,8 @@ func _drive_ordered_lesson(
 		if _lesson_completed_count != 0:
 			_fail(case_name, "touching %s before its turn finished the whole lesson" % out_of_turn.name)
 			return false
-		if step_label.text != _step_label_text(0):
-			_fail(case_name, "the progress label moved to %s after a refused touch on %s, %s wanted" % [step_label.text, out_of_turn.name, _step_label_text(0)])
+		if step_label.text != opening_label:
+			_fail(case_name, "the progress label moved to %s after a refused touch on %s, %s wanted" % [step_label.text, out_of_turn.name, opening_label])
 			return false
 		if labels[index].text != text_before:
 			_fail(case_name, "refusing %s changed its own displayed text from %s to %s -- the archived sequence target destroyed its own label on an error flash" % [out_of_turn.name, text_before, labels[index].text])
@@ -765,7 +943,7 @@ func _drive_ordered_lesson(
 		if frames < 0:
 			_fail(case_name, "step %d (%s) never registered a touch within 120 physics frames" % [i + 1, targets[i].name])
 			return false
-		var wanted_label := _step_label_text(i + 1)
+		var wanted_label := _step_label_text(i + 1, total)
 		if step_label.text != wanted_label:
 			_fail(case_name, "after step %d (%s) the label reads %s, %s wanted" % [i + 1, targets[i].name, step_label.text, wanted_label])
 			return false
@@ -797,6 +975,9 @@ func _drive_ordered_lesson(
 		return false
 	if _lesson_completed_times[0] <= 0.0:
 		_fail(case_name, "lesson_completed carried an elapsed time of %s, greater than zero wanted" % _lesson_completed_times[0])
+		return false
+	if step_label.text != closing_label:
+		_fail(case_name, "the finished lesson's progress label reads %s, %s wanted -- the number a child is left looking at is the one this lesson's own total makes true" % [step_label.text, closing_label])
 		return false
 	if not hud.is_win_visible():
 		_fail(case_name, "the win panel is not visible after the lesson finished")
@@ -890,11 +1071,11 @@ func _case_lesson_1_count_first() -> void:
 	var step_label: Label = opened["step_label"]
 	var win_back_button: Button = opened["win_back_button"]
 
-	var targets := _lesson_1_targets(case_name, lesson)
+	var targets := _colour_count_targets(case_name, lesson, "RedTarget", "BlueTarget")
 	if _failed:
 		return
-	var red: Area3D = targets["red"]
-	var blue: Area3D = targets["blue"]
+	var red: Area3D = targets["first"]
+	var blue: Area3D = targets["second"]
 	var counts: Array[Area3D] = targets["counts"]
 
 	if step_label.text != "Stap: 0 / 3":
@@ -1034,18 +1215,18 @@ func _case_lesson_1_other_orders() -> void:
 	var first: Dictionary = await _open_lesson(case_name, LESSON_1_PATH)
 	if _failed:
 		return
-	var first_targets := _lesson_1_targets(case_name, first["lesson"])
+	var first_targets := _colour_count_targets(case_name, first["lesson"], "RedTarget", "BlueTarget")
 	if _failed:
 		return
 	var first_counts: Array[Area3D] = first_targets["counts"]
 	var first_sequence: Array = [
-		[first_targets["red"], "Stap: 1 / 3"],
+		[first_targets["first"], "Stap: 1 / 3"],
 		[first_counts[0], "Stap: 1 / 3"],
 		[first_counts[1], "Stap: 1 / 3"],
 		[first_counts[2], "Stap: 2 / 3"],
-		[first_targets["blue"], "Stap: 3 / 3"],
+		[first_targets["second"], "Stap: 3 / 3"],
 	]
-	if not await _drive_touch_sequence(case_name, first, first_targets, first_sequence):
+	if not await _drive_touch_sequence(case_name, first, first_targets, first_sequence, "lesson_1", 3):
 		return
 	first["lesson"].queue_free()
 	await _drain_scene_change()
@@ -1055,18 +1236,18 @@ func _case_lesson_1_other_orders() -> void:
 	var second: Dictionary = await _open_lesson(case_name, LESSON_1_PATH)
 	if _failed:
 		return
-	var second_targets := _lesson_1_targets(case_name, second["lesson"])
+	var second_targets := _colour_count_targets(case_name, second["lesson"], "RedTarget", "BlueTarget")
 	if _failed:
 		return
 	var second_counts: Array[Area3D] = second_targets["counts"]
 	var second_sequence: Array = [
-		[second_targets["blue"], "Stap: 1 / 3"],
-		[second_targets["red"], "Stap: 2 / 3"],
+		[second_targets["second"], "Stap: 1 / 3"],
+		[second_targets["first"], "Stap: 2 / 3"],
 		[second_counts[0], "Stap: 2 / 3"],
 		[second_counts[1], "Stap: 2 / 3"],
 		[second_counts[2], "Stap: 3 / 3"],
 	]
-	if not await _drive_touch_sequence(case_name, second, second_targets, second_sequence):
+	if not await _drive_touch_sequence(case_name, second, second_targets, second_sequence, "lesson_1", 3):
 		return
 	second["lesson"].queue_free()
 	await _drain_scene_change()
@@ -1109,11 +1290,11 @@ func _case_lesson_1_guards() -> void:
 	var hud: CanvasLayer = opened["hud"]
 	var step_label: Label = opened["step_label"]
 
-	var targets := _lesson_1_targets(case_name, lesson)
+	var targets := _colour_count_targets(case_name, lesson, "RedTarget", "BlueTarget")
 	if _failed:
 		return
-	var red: Area3D = targets["red"]
-	var blue: Area3D = targets["blue"]
+	var red: Area3D = targets["first"]
+	var blue: Area3D = targets["second"]
 	var counts: Array[Area3D] = targets["counts"]
 
 	_target_completed_count = 0
@@ -1251,7 +1432,11 @@ func _case_lesson_2_order_enforced() -> void:
 		"lesson_2",
 		["CircleTarget", "SquareTarget", "TriangleTarget"],
 		[1, 2],
-		["", "", ""]
+		["", "", ""],
+		"shape",
+		3,
+		"Stap: 0 / 3",
+		"Stap: 3 / 3"
 	):
 		return
 	if not await _assert_in_play_return_is_one_shot(case_name, LESSON_2_PATH):
@@ -1275,10 +1460,163 @@ func _case_lesson_3_order_enforced() -> void:
 		"lesson_3",
 		["Step1Target", "Step2Target", "Step3Target"],
 		[2, 1],
-		["1", "2", "3"]
+		["1", "2", "3"],
+		"text",
+		3,
+		"Stap: 0 / 3",
+		"Stap: 3 / 3"
 	):
 		return
 	if not await _assert_in_play_return_is_one_shot(case_name, LESSON_3_PATH):
+		return
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+## LESSON-04. Lesson 1's all-three-any-order rule over a second colour pair
+## (D-43), which exercises the D-36 fix a second time on a lesson the archive
+## never built at all: its whole script was `_ready(): pass` inside a scene that
+## told a child it was available.
+##
+## Two genuinely different orders are driven to real completions, because the
+## requirement is order-independence and one order proves nothing about it. The
+## second one interleaves a colour target into the MIDDLE of the counting task,
+## which none of lesson 1's three orders did -- a partly-gathered counting task
+## has to survive another task landing on top of it. Then, on a fresh instance,
+## two thirds of the counting task plus both colours is proved to finish nothing.
+func _case_lesson_4_any_order() -> void:
+	var case_name := "lesson_4_any_order"
+
+	# The new pair must be a real pair, and a different pair from lesson 1's --
+	# a second colour lesson in the first one's two colours would teach a child
+	# nothing they had not already been asked.
+	var lesson_1_red := _scene_colour(case_name, LESSON_1_PATH, "RedTarget")
+	if _failed:
+		return
+	var lesson_1_blue := _scene_colour(case_name, LESSON_1_PATH, "BlueTarget")
+	if _failed:
+		return
+
+	# --- Order 1: yellow, the three counting objects, then green. ---
+	var entries_before := _disk_entry_count()
+	var first: Dictionary = await _open_lesson(case_name, LESSON_4_PATH)
+	if _failed:
+		return
+	var first_targets := _colour_count_targets(case_name, first["lesson"], "YellowTarget", "GreenTarget")
+	if _failed:
+		return
+
+	var pair: Array[Area3D] = [first_targets["first"], first_targets["second"]]
+	var counts: Array[Area3D] = first_targets["counts"]
+	var pair_labels := _target_labels(case_name, pair)
+	if _failed:
+		return
+	var count_labels := _target_labels(case_name, counts)
+	if _failed:
+		return
+	if not _assert_colour_is_the_cue(case_name, pair, pair_labels, counts, count_labels):
+		return
+	for target: Area3D in pair:
+		for previous: Color in [lesson_1_red, lesson_1_blue]:
+			var gap := _colour_separation(target.target_color, previous)
+			if gap < MIN_COLOUR_SEPARATION:
+				_fail(case_name, "%s is %s, only %.3f from a colour lesson 1 already taught (%s) -- at least %.2f wanted, or this lesson is the first one repainted" % [target.name, target.target_color, gap, previous, MIN_COLOUR_SEPARATION])
+				return
+
+	var first_sequence: Array = [
+		[pair[0], "Stap: 1 / 3"],
+		[counts[0], "Stap: 1 / 3"],
+		[counts[1], "Stap: 1 / 3"],
+		[counts[2], "Stap: 2 / 3"],
+		[pair[1], "Stap: 3 / 3"],
+	]
+	if not await _drive_touch_sequence(case_name, first, first_targets, first_sequence, "lesson_4", 3):
+		return
+	if _disk_entry_count() != entries_before + 1:
+		_fail(case_name, "the progress file holds %d entries, %d wanted -- one completion appends exactly one entry (D-40)" % [_disk_entry_count(), entries_before + 1])
+		return
+	if not await _assert_win_return_is_one_shot(case_name, first["lesson"], first["win_back_button"]):
+		return
+	first["lesson"].queue_free()
+	await _drain_scene_change()
+
+	# --- Order 2: green, two counting objects, yellow, then the third counting
+	# object. The counting task is interrupted by a colour target here, so a
+	# lesson that reset or forgot a partly-gathered count fails on the last
+	# step rather than somewhere a passing end state could absorb. ---
+	var second: Dictionary = await _open_lesson(case_name, LESSON_4_PATH)
+	if _failed:
+		return
+	var second_targets := _colour_count_targets(case_name, second["lesson"], "YellowTarget", "GreenTarget")
+	if _failed:
+		return
+	var second_counts: Array[Area3D] = second_targets["counts"]
+	var second_sequence: Array = [
+		[second_targets["second"], "Stap: 1 / 3"],
+		[second_counts[2], "Stap: 1 / 3"],
+		[second_counts[0], "Stap: 1 / 3"],
+		[second_targets["first"], "Stap: 2 / 3"],
+		[second_counts[1], "Stap: 3 / 3"],
+	]
+	if not await _drive_touch_sequence(case_name, second, second_targets, second_sequence, "lesson_4", 3):
+		return
+	if _disk_entry_count() != entries_before + 2:
+		_fail(case_name, "the progress file holds %d entries after two completions, %d wanted" % [_disk_entry_count(), entries_before + 2])
+		return
+	second["lesson"].queue_free()
+	await _drain_scene_change()
+
+	# --- The negative: both colours plus two of three counting objects. Two
+	# thirds of a counting task is not two thirds of a task, it is no task at
+	# all, and the lesson must sit at two of three forever. ---
+	var third: Dictionary = await _open_lesson(case_name, LESSON_4_PATH)
+	if _failed:
+		return
+	var third_lesson: Node = third["lesson"]
+	var third_camiel: CharacterBody3D = third["camiel"]
+	var third_label: Label = third["step_label"]
+	var third_targets := _colour_count_targets(case_name, third_lesson, "YellowTarget", "GreenTarget")
+	if _failed:
+		return
+	var third_counts: Array[Area3D] = third_targets["counts"]
+
+	_target_completed_count = 0
+	_target_completed_ids.clear()
+	_lesson_completed_count = 0
+	_lesson_completed_ids.clear()
+	_lesson_completed_times.clear()
+	_watch_targets(third_targets["first"], third_targets["second"], third_counts)
+	third_lesson.lesson_completed.connect(_on_lesson_completed_counted)
+
+	var incomplete_entries_before := _disk_entry_count()
+	for target: Area3D in [third_targets["first"], third_targets["second"], third_counts[0], third_counts[1]]:
+		if await _touch_target(third_camiel, target) < 0:
+			_fail(case_name, "%s never registered a touch within 120 physics frames" % target.name)
+			return
+	await _park(third_camiel)
+	for _i in range(120):
+		await physics_frame
+
+	if _lesson_completed_count != 0:
+		_fail(case_name, "both colours and two of three counting objects finished the lesson; an unfinished counting task must not count (D-36, D-43)")
+		return
+	if third_label.text != "Stap: 2 / 3":
+		_fail(case_name, "after both colours and two of three counting objects the label reads %s, Stap: 2 / 3 wanted" % third_label.text)
+		return
+	if third["hud"].is_win_visible():
+		_fail(case_name, "the win panel appeared on a lesson that is two of three tasks done")
+		return
+	if _disk_entry_count() != incomplete_entries_before:
+		_fail(case_name, "the progress file grew from %d to %d entries without the lesson finishing" % [incomplete_entries_before, _disk_entry_count()])
+		return
+	print("[probe_lesson_order] %s two of three counting objects plus both colours: label %s, %d completions" % [case_name, third_label.text, _lesson_completed_count])
+
+	third_lesson.lesson_completed.disconnect(_on_lesson_completed_counted)
+	third_lesson.queue_free()
+	await _drain_scene_change()
+
+	if not await _assert_in_play_return_is_one_shot(case_name, LESSON_4_PATH):
 		return
 
 	_cases_run += 1
