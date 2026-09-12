@@ -45,6 +45,7 @@ func _initialize() -> void:
 	await _case_sfx_streams()
 	await _case_sfx_plays()
 	await _case_sfx_volume_isolation()
+	await _case_menu_sfx_slider()
 
 	if _cases_run == 0:
 		push_error("Audio bus probe ran no cases.")
@@ -261,3 +262,96 @@ func _case_sfx_volume_isolation() -> void:
 
 	_cases_run += 1
 	print("PASS sfx_volume_isolation")
+
+
+func _case_menu_sfx_slider() -> void:
+	var music_idx := AudioServer.get_bus_index(BUS_MUSIC)
+	var sfx_idx := AudioServer.get_bus_index(BUS_SFX)
+
+	var packed: PackedScene = load("res://scenes/main_menu.tscn")
+	var menu: Control = packed.instantiate()
+	root.add_child(menu)
+	await process_frame
+	await process_frame
+
+	var slider := menu.get_node_or_null("%SfxSlider") as HSlider
+	if slider == null:
+		push_error("main_menu.tscn has no %SfxSlider node.")
+		menu.queue_free()
+		quit(1)
+		return
+
+	if slider.min_value != 0 or slider.max_value != 100 or slider.step != 5:
+		push_error("%%SfxSlider range is %f-%f step %f, expected 0-100 step 5." % [slider.min_value, slider.max_value, slider.step])
+		menu.queue_free()
+		quit(1)
+		return
+
+	if slider.custom_minimum_size.x < 320.0 or slider.custom_minimum_size.y < 56.0:
+		push_error("%%SfxSlider custom_minimum_size is %s, expected at least (320, 56)." % slider.custom_minimum_size)
+		menu.queue_free()
+		quit(1)
+		return
+
+	# Read-back proof: set a non-default effects level before the menu opened,
+	# then assert the slider picked it up rather than its scene-file default.
+	_audio_manager.set_sfx_volume(0.35)
+	menu.queue_free()
+	await process_frame
+	packed = load("res://scenes/main_menu.tscn")
+	menu = packed.instantiate()
+	root.add_child(menu)
+	await process_frame
+	await process_frame
+	slider = menu.get_node("%SfxSlider") as HSlider
+
+	var expected_value := 0.35 * 100.0
+	if absf(slider.value - expected_value) > 2.5:
+		push_error("%%SfxSlider.value on open was %f, expected ~%f (read-back from AudioManager, not the scene default)." % [slider.value, expected_value])
+		menu.queue_free()
+		quit(1)
+		return
+
+	var music_before := AudioServer.get_bus_volume_db(music_idx)
+	slider.value = 50
+	await process_frame
+
+	var expected_db := linear_to_db(0.5)
+	if not is_equal_approx(AudioServer.get_bus_volume_db(sfx_idx), expected_db):
+		push_error("Moving %%SfxSlider to 50 set SFX bus volume_db to %f, expected %f." % [AudioServer.get_bus_volume_db(sfx_idx), expected_db])
+		menu.queue_free()
+		quit(1)
+		return
+	if not is_equal_approx(AudioServer.get_bus_volume_db(music_idx), music_before):
+		push_error("Moving %SfxSlider changed the Music bus volume_db.")
+		menu.queue_free()
+		quit(1)
+		return
+
+	slider.value = slider.min_value
+	await process_frame
+	if absf(_audio_manager.get_sfx_volume() - 0.0) > 0.01:
+		push_error("%%SfxSlider at minimum gave sfx volume %f, expected 0.0." % _audio_manager.get_sfx_volume())
+		menu.queue_free()
+		quit(1)
+		return
+
+	slider.value = slider.max_value
+	await process_frame
+	if absf(_audio_manager.get_sfx_volume() - 1.0) > 0.01:
+		push_error("%%SfxSlider at maximum gave sfx volume %f, expected 1.0." % _audio_manager.get_sfx_volume())
+		menu.queue_free()
+		quit(1)
+		return
+
+	# The Start control's own exactly-once activation path is covered by
+	# probe_screen_flow.gd, which instantiates this same (now audio-panel-
+	# bearing) scene and drives %StartButton through a real transition. Not
+	# re-tested here to avoid triggering an actual scene change from inside
+	# this probe's SceneTree.
+
+	_audio_manager.set_sfx_volume(0.8)
+	menu.queue_free()
+
+	_cases_run += 1
+	print("PASS menu_sfx_slider")

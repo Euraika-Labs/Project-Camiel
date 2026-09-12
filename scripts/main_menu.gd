@@ -17,6 +17,9 @@ func _ready() -> void:
 	%StartButton.pressed.connect(_on_start_button_pressed)
 	%StartButton.grab_focus()
 
+	%SfxSlider.value_changed.connect(_on_sfx_slider_value_changed)
+	%SfxSlider.set_value_no_signal(AudioManager.get_sfx_volume() * 100.0)
+
 
 func _on_start_button_pressed() -> void:
 	if _transitioning:
@@ -24,3 +27,7 @@ func _on_start_button_pressed() -> void:
 	_transitioning = true
 	transition_requested.emit(INTRO_LEVEL_PATH)
 	get_tree().change_scene_to_file.call_deferred(INTRO_LEVEL_PATH)
+
+
+func _on_sfx_slider_value_changed(value: float) -> void:
+	AudioManager.set_sfx_volume(value / 100.0)

@@ -4,10 +4,11 @@
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="2_8ln24"]
 [ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="3_rtw2f"]
 [ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="4_oa1go"]
+[ext_resource type="Script" path="res://scripts/ui/vector_icon.gd" id="5_8ln24"]
 
 [node name="MainMenu" type="Control" unique_id=363801507]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme = ExtResource("1_wu84c")
@@ -44,3 +45,34 @@ theme = ExtResource("1_wu84c")
 script = ExtResource("4_oa1go")
 label_text = "Start"
 icon_kind = "walk"
+
+[node name="AudioPanel" type="PanelContainer" parent="CenterContainer/MarginContainer/Content" unique_id=2087255942]
+layout_mode = 2
+
+[node name="AudioRows" type="VBoxContainer" parent="CenterContainer/MarginContainer/Content/AudioPanel" unique_id=2102474019]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="SfxRow" type="HBoxContainer" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows" unique_id=1561870240]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="SfxIcon" type="Control" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows/SfxRow" unique_id=474425996]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+script = ExtResource("5_8ln24")
+icon_kind = "speaker"
+
+[node name="SfxLabel" type="Label" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows/SfxRow" unique_id=1139773057]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+text = "Geluid"
+
+[node name="SfxSlider" type="HSlider" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows/SfxRow" unique_id=1095766806]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 56)
+layout_mode = 2
+step = 5.0
+value = 80.0
+tick_count = 6
+ticks_on_borders = true
