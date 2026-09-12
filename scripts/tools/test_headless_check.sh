@@ -23,9 +23,20 @@ trap cleanup EXIT
 echo "[setup] copying working tree to ${WORK_DIR}"
 rsync -a --exclude '.git/' --exclude '.godot/' --exclude '.planning/' --exclude '.pi/' "${REPO_ROOT}/" "${WORK_DIR}/"
 
+# Restores the copy to a known-good state before every case. Beyond the
+# original zz_*/project.godot reset, this also restores the audio bus layout
+# resource and every committed probe_*.gd (plus its .gd.uid sidecar) from
+# the real repository -- so a case that removes one of those (Case 12's
+# every-probe removal, Case 13's single-probe removal, Case 14's layout
+# removal) can never leak into a later case that assumes a complete tree.
 reset_copy() {
 	find "${WORK_DIR}/scripts" "${WORK_DIR}/scenes" -mindepth 1 -maxdepth 1 -name 'zz_*' -exec rm -rf {} +
 	cp "${REPO_ROOT}/project.godot" "${WORK_DIR}/project.godot"
+	cp "${REPO_ROOT}/default_bus_layout.tres" "${WORK_DIR}/default_bus_layout.tres"
+	local probe_file
+	for probe_file in "${REPO_ROOT}"/scripts/tools/probe_*.gd "${REPO_ROOT}"/scripts/tools/probe_*.gd.uid; do
+		cp "${probe_file}" "${WORK_DIR}/scripts/tools/$(basename "${probe_file}")"
+	done
 }
 
 # assert_result NAME EXPECTED_EXIT SUBSTRING... -- COMMAND...
@@ -216,7 +227,61 @@ find "${WORK_DIR}/scripts/tools" -maxdepth 1 -type f -name 'probe_*.gd.uid' -exe
 assert_result "zero behaviour probes fails" 1 "no behaviour probes found" -- \
 	bash "${CHECK_SCRIPT}"
 
-# --- Case 13: generic ERROR: during import fails (CR-02) ---
+# --- Case 13: removing one named probe while others remain still passes (known gap) ---
+# scripts/tools/run_headless_check.sh's non-vacuity guard (proven by Case 12
+# above) only fails when the probe_*.gd glob matches NOTHING at all. With
+# four probes now committed (probe_audio_buses.gd, probe_camiel_movement.gd,
+# probe_menu_button.gd, probe_screen_flow.gd), deleting any ONE of them
+# still leaves the glob non-empty, so the check goes on to report
+# "Headless check passed." with a whole file's worth of assertions silently
+# never having run. This case is not a fix -- it is a permanent, executable
+# record of that gap, named for what it documents rather than for a
+# guarantee the project does not have.
+#
+# The recommended fix is a fixed list of required probe base names
+# (a REQUIRED_PROBES allow-list) checked by name inside
+# run_headless_check.sh, independently of how many other probe_*.gd files
+# happen to exist. That fix is deliberately NOT implemented in this phase:
+# it changes the check's own contract and is a larger change than this
+# phase's scope (see 02-VALIDATION.md, "Probe-presence guard gap"). Whoever
+# implements the allow-list should expect this case to invert -- it should
+# then assert the check FAILS when probe_screen_flow.gd is missing, not
+# that it passes.
+reset_copy
+rm -f "${WORK_DIR}/scripts/tools/probe_screen_flow.gd" "${WORK_DIR}/scripts/tools/probe_screen_flow.gd.uid"
+assert_result "removing one named probe (probe_screen_flow.gd) while others remain still passes -- known gap in the probe-presence guard" 0 "Headless check passed." -- \
+	bash "${CHECK_SCRIPT}"
+
+# --- Case 14: inert inline audio bus configuration fails, naming the audio probe ---
+# The [audio_bus_layout] block once written directly inside project.godot is
+# inert in Godot 4.7.2 (VF6, 02-RESEARCH.md): AudioServer.get_bus_count()
+# stays at 1 at runtime no matter what buses that section declares. The only
+# mechanism that actually creates buses is a committed
+# res://default_bus_layout.tres resource (VF7). This case removes that
+# working resource and plants the old inline Master/SFX section back into
+# project.godot (the exact shape this file carried before plan 02-01, see
+# git history), and requires the check to go red, attributing the failure
+# to probe_audio_buses.gd specifically -- not to some other unrelated step.
+# A future contributor who adds a third bus the old (inline) way would
+# otherwise get a silent no-op; this case turns that into a red build.
+reset_copy
+rm -f "${WORK_DIR}/default_bus_layout.tres"
+cat >>"${WORK_DIR}/project.godot" <<'EOF'
+
+[audio_bus_layout]
+
+bus/0/name="Master"
+bus/0/volume_db=0.0
+bus/0/send=""
+bus/1/name="SFX"
+bus/1/volume_db=0.0
+bus/1/send="Master"
+EOF
+assert_result "inert inline audio bus configuration (no layout resource) fails, naming the audio probe" 1 "CHECK FAILED" "probe probe_audio_buses.gd" -- \
+	bash "${CHECK_SCRIPT}"
+cp "${REPO_ROOT}/default_bus_layout.tres" "${WORK_DIR}/default_bus_layout.tres"
+
+# --- Case 15: generic ERROR: during import fails (CR-02) ---
 # The import step's log scan omitted the generic `ERROR:` pattern used by
 # every other step (main scene, verifier, probes), so an engine-level import
 # failure phrased as `ERROR: ...` (not `SCRIPT ERROR:`/`Parse Error:`) was
