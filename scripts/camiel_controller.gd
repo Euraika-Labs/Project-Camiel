@@ -9,7 +9,13 @@ signal returned_to_safe_spot(position: Vector3)
 
 enum SteeringMode { CAMERA_RELATIVE, TURN_AND_WALK }
 
-@export var steering_mode: SteeringMode = SteeringMode.TURN_AND_WALK
+# Camera-relative is the shipped steering mode: the stick direction is the
+# direction Camiel goes, which is what a five-year-old expects from a pad.
+# Turn-and-walk stays available behind --steering=turn_and_walk because it is
+# easier for a child who steers with two hands on a keyboard, but it is not the
+# default. probe_camiel_movement.gd's steering_default case pins this value, so
+# it cannot drift back silently -- it already did once.
+@export var steering_mode: SteeringMode = SteeringMode.CAMERA_RELATIVE
 @export var walk_speed := 2.5
 @export var acceleration := 12.0
 @export var deceleration := 16.0
