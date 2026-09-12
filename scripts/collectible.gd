@@ -20,6 +20,7 @@ signal collected
 var _touched := false
 var _rest_height := 0.0
 var _elapsed := 0.0
+var _pickup_tween: Tween
 
 
 func _ready() -> void:
@@ -62,15 +63,23 @@ func _apply_pickup() -> void:
 
 
 func _play_pickup_feedback() -> void:
-	var tween := create_tween()
-	tween.tween_property(_mesh, "scale", Vector3.ONE * 1.15, 0.15)
-	tween.tween_property(_mesh, "transparency", 1.0, 0.15)
-	tween.tween_callback(hide)
+	if _pickup_tween != null and _pickup_tween.is_valid():
+		_pickup_tween.kill()
+	_pickup_tween = create_tween()
+	_pickup_tween.tween_property(_mesh, "scale", Vector3.ONE * 1.15, 0.15)
+	_pickup_tween.tween_property(_mesh, "transparency", 1.0, 0.15)
+	_pickup_tween.tween_callback(hide)
 
 
 ## Clears the one-shot latch and restores the mesh to its pre-pickup state
 ## so a replayed lap meets the collectible exactly as it first appeared.
+## Kills any in-flight pickup tween first -- otherwise a replay during the
+## ~0.3s pickup-feedback window would let the tween's own queued
+## tween_callback(hide) fire after this reset's show(), leaving the
+## collectible re-armed but permanently invisible (WR-01).
 func reset() -> void:
+	if _pickup_tween != null and _pickup_tween.is_valid():
+		_pickup_tween.kill()
 	_touched = false
 	_elapsed = 0.0
 	_mesh.scale = Vector3.ONE

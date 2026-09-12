@@ -38,6 +38,9 @@ func _initialize() -> void:
 	await _case_collectible()
 	if _failed:
 		return
+	await _case_collectible_reset_cancels_tween()
+	if _failed:
+		return
 	await _case_win_buttons()
 	if _failed:
 		return
@@ -386,6 +389,87 @@ func _case_collectible() -> void:
 		_fail(case_name, "a non-player StaticBody3D placed inside the collectible triggered it (count=%d)" % _collected_signal_count)
 		return
 	intruder.queue_free()
+
+	collectible.collected.disconnect(_on_collected_counted)
+	level.queue_free()
+	await process_frame
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+# WR-01 fix verification (02-REVIEW.md): Collectible.reset() must cancel any
+# in-flight pickup tween, or the tween's own queued tween_callback(hide)
+# fires after this reset's show() and leaves the collectible re-armed but
+# permanently invisible. The shipped level geometry puts the collectible and
+# finish marker ~5.6m apart -- far more than the 0.3s tween can be outrun --
+# so replay can never race the tween through normal play. This case drives
+# reset() directly, immediately after the pickup deferred-call fires, so the
+# race is exercised regardless of level geometry.
+func _case_collectible_reset_cancels_tween() -> void:
+	var case_name := "collectible_reset_cancels_tween"
+	var packed: PackedScene = load("res://scenes/intro_level.tscn")
+	if packed == null:
+		_fail(case_name, "could not load res://scenes/intro_level.tscn")
+		return
+
+	var level: Node3D = packed.instantiate()
+	root.add_child(level)
+	await process_frame
+	await process_frame
+
+	var collectible: Area3D = level.get_node("%Collectible")
+	var camiel: CharacterBody3D = level.get_node("Camiel")
+	var player_spawn: Marker3D = level.get_node("PlayerSpawn")
+
+	_collected_signal_count = 0
+	collectible.collected.connect(_on_collected_counted)
+
+	camiel.teleport_to(collectible.global_position)
+	var frames_waited := 0
+	while _collected_signal_count == 0 and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+
+	if _collected_signal_count != 1:
+		_fail(case_name, "collected fired %d times within 120 physics frames, expected 1" % _collected_signal_count)
+		return
+	if not collectible.visible:
+		_fail(case_name, "%Collectible is already hidden immediately after pickup, before the reset race can be tested")
+		return
+
+	# Move Camiel off the trigger volume before calling reset() -- reset()
+	# flips monitoring back to true, and if the physics server had not yet
+	# settled on Camiel's departure, that would fire a second, genuine
+	# body_entered pickup of its own (a separate confound from the race this
+	# case exists to prove). A couple of physics frames is enough for the
+	# broadphase to catch up while staying far inside the tween's 18-frame
+	# (0.3s) window.
+	camiel.teleport_to(player_spawn.global_position)
+	await physics_frame
+	await physics_frame
+
+	# reset() right now, while the 0.3s pickup-feedback tween created moments
+	# ago is still running -- exactly the replay-during-pickup race WR-01
+	# describes. A reset() that does not kill the tween leaves the tween's
+	# own queued tween_callback(hide) to fire later and undo this show().
+	collectible.reset()
+	if not collectible.visible:
+		_fail(case_name, "%Collectible.reset() did not restore visibility immediately")
+		return
+
+	# The pickup tween's own duration is 0.3s (18 physics frames at the
+	# probe's fixed 60fps). Wait well past that so an unkilled tween's
+	# queued hide() would have fired by now.
+	for _i in range(40):
+		await physics_frame
+
+	if not collectible.visible:
+		_fail(case_name, "%Collectible went invisible again after reset() -- the pickup tween's queued hide() fired late because reset() did not cancel it (WR-01)")
+		return
+	if not collectible.monitoring:
+		_fail(case_name, "%Collectible.monitoring is false after reset(), expected true")
+		return
 
 	collectible.collected.disconnect(_on_collected_counted)
 	level.queue_free()
