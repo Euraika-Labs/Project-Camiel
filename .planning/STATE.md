@@ -4,16 +4,16 @@ milestone: v0.0.4
 current_phase: 02
 current_phase_name: Playable 3D Intro Experience
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-09-12T15:57:21.802Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-09-12T18:27:47.457Z"
 last_activity: 2026-09-12
 last_activity_desc: Phase 02 execution started
-state_head: ef4146c7e58a08db1492f48e38877c3bb3769d17
+state_head: 28ddd56a7603b58c388701a00ea3824b563f581c
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 12
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -65,6 +65,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P05 | 25min | 2 tasks | 4 files |
 | Phase 01 P06 | 185min | 3 tasks | 3 files |
 | Phase 02 P01 | 30min | 2 tasks | 13 files |
+| Phase 02 P02 | 35min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Recent decisions affecting current work:
 - [Phase 01]: [Phase 01-06]: FOUND-06 closed - tests/test_ci_workflows.py's silent PyYAML skipUnless fallback replaced with a hard import, and the repository-hygiene CI job now installs PyYAML before running tests
 - [Phase 02]: AudioManager._exit_tree() drains 250ms real time (gated on whether audio ever played) to work around a Godot 4.7.2 engine race releasing AudioStreamOggVorbis playback objects only on the headless null-audio driver's real-time mix cadence
 - [Phase 02]: Headless tool scripts (probe_*.gd) must fetch autoloads via root.get_node_or_null() rather than the bare global identifier, which only resolves for a normal scene boot, not a --script SceneTree entrypoint
+- [Phase 02]: [Phase 02-02]: Split the six menu-button icons across the tracer/expansion pair — Task 1 implements only "play" (matching its own tested behavior), Task 2 completes walk/replay/home/speaker/music_note, per Task 2's explicit "remaining five kinds" wording
+- [Phase 02]: [Phase 02-02]: Label's mouse_filter is written explicitly in menu_button.tscn even though it equals Label's own class default, so all three tap-through nodes show MOUSE_FILTER_IGNORE in the saved scene text, not just two of three
 
 ### Pending Todos
 
@@ -110,6 +113,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-12T15:57:21.787Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-09-12T18:27:47.442Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
