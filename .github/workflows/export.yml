@@ -10,13 +10,20 @@ on:
 permissions:
   contents: read
 
-# Sanitize GITHUB_REF_NAME for use in paths (branch names can contain /)
+# Sanitize GITHUB_REF_NAME for use in paths (branch names can contain /).
+# NOTE: GitHub Actions has NO `replace()` expression function. Its function set is
+# closed: contains, startsWith, endsWith, format, join, toJSON, fromJSON, hashFiles
+# plus the status functions. A previous revision used replace(replace(...)), which is
+# a workflow-validation error — the whole file failed to load and every run completed
+# with ZERO jobs, so "Export Windows build" silently never ran while remaining a
+# required status check. Do not reintroduce replace(); use format() or sanitize in a
+# shell step writing to $GITHUB_ENV.
 env:
-  GODOT_VERSION: 4.6.4
+  GODOT_VERSION: 4.7.2
   GODOT_STATUS: stable
-  GODOT_TEMPLATE_VERSION: 4.6.4.stable
+  GODOT_TEMPLATE_VERSION: 4.7.2.stable
   REF_SLUG: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || github.ref_name }}
-  REF_CLEAN: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || contains(github.ref, 'refs/tags/') && github.ref_name || replace(replace(github.ref_name, '/', '-'), ' ', '-') }}
+  REF_CLEAN: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || contains(github.ref, 'refs/tags/') && github.ref_name || format('run-{0}', github.run_number) }}
 
 jobs:
   # ── Quality gate ────────────────────────────────────────────────
