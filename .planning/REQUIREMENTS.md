@@ -28,7 +28,7 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 - [ ] **INTRO-03**: A child can collect a 3D collectible object in the intro level; the pickup sound effect plays exactly once per pickup
 - [ ] **INTRO-04**: Reaching the 3D finish marker triggers the win screen, driven by a single signal-driven code path rather than a direct cross-script call
 - [ ] **INTRO-05**: The win screen shows two buttons, "Nog een keer" (replay) and "Naar menu", each with an icon, activated by tap, click, or Enter on the focused button, through one code path
-- [ ] **INTRO-06**: Background music loops continuously in the intro level and lesson scenes, and the SFX volume control has an audible effect
+- [x] **INTRO-06**: Background music loops continuously in the intro level and lesson scenes, and the SFX volume control has an audible effect
 
 ### 3D Lesson Parity & Progress Persistence
 
@@ -136,7 +136,7 @@ Which phases cover which requirements.
 | INTRO-03 | Phase 2 | Pending |
 | INTRO-04 | Phase 2 | Pending |
 | INTRO-05 | Phase 2 | Pending |
-| INTRO-06 | Phase 2 | Pending |
+| INTRO-06 | Phase 2 | Complete |
 | LESSON-01 | Phase 3 | Pending |
 | LESSON-02 | Phase 3 | Pending |
 | LESSON-03 | Phase 3 | Pending |

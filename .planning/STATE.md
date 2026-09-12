@@ -4,16 +4,16 @@ milestone: v0.0.4
 current_phase: 02
 current_phase_name: Playable 3D Intro Experience
 status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-09-12T19:13:01.961Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-09-12T19:30:45.000Z"
 last_activity: 2026-09-12
-last_activity_desc: Phase 02 execution started
-state_head: 1e1c3117d9552a217631b6339eae3ca421bdc360
+last_activity_desc: Phase 02 Plan 05 executed (main menu audio panel and sliders)
+state_head: 068c1e5a1575e262dd818275b45db65d795a30e0
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 ## Current Position
 
 Phase: 02 (Playable 3D Intro Experience) — EXECUTING
-Plan: 4 of 6
-Status: Ready to execute
-Last activity: 2026-09-12 — Phase 02 execution started
+Plan: 5 of 6
+Status: Ready to execute 02-06
+Last activity: 2026-09-12 — Phase 02 Plan 05 executed (main menu audio panel and sliders)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -68,6 +68,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P02 | 35min | 2 tasks | 8 files |
 | Phase 02 P03 | 19min | 2 tasks | 13 files |
 | Phase 02 P04 | 20min | 3 tasks | 10 files |
+| Phase 02 P05 | 30min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -97,10 +98,12 @@ Recent decisions affecting current work:
 - [Phase 02]: [Phase 02]: [Phase 02-03]: project.godot's run/main_scene retarget applied as a direct one-line text edit, not ProjectSettings.save() — save() silently dropped the unrelated renderer/rendering_method.web line on this pass
 - [Phase 02]: [Phase 02-04]: CanvasLayer has no modulate property in Godot 4.7.2 — the win overlay's fade-in target moved to its child %Scrim Control instead
 - [Phase 02]: [Phase 02-04]: Area3D forbids toggling monitoring synchronously inside its own body_entered callback; collectible.gd defers monitoring off, the pickup tween, and the collected signal together as one call_deferred step
+- [Phase 02]: [Phase 02-05]: Godot's GDScript loader enforces singleton resource identity per path regardless of ResourceLoader.CACHE_MODE_IGNORE, so packing two icon nodes that both load vector_icon.gd always dedupes to one ext_resource; the scene generator's post-processing step splits it into two declarations pointing at the same file so each icon row owns its own
+- [Phase 02]: [Phase 02-05]: Per 02-VALIDATION.md's "Probe-presence guard gap", the REQUIRED_PROBES named-probe allow-list for run_headless_check.sh is deliberately left unimplemented this phase; test_headless_check.sh Case 13 records the current weakness (removing one named probe while others remain still passes) as a known, honestly-named gap rather than a guarantee
 
 ### Pending Todos
 
-None yet.
+- Implement a `REQUIRED_PROBES` named-probe allow-list in `scripts/tools/run_headless_check.sh` so removing a single named probe fails the check by name, not only when the whole `probe_*.gd` glob is empty. Recorded by plan 02-05 (`02-05-SUMMARY.md`) as an executable, documented gap (`test_headless_check.sh` Case 13) rather than a fix, per `02-VALIDATION.md`'s explicit scoping.
 
 ### Blockers/Concerns
 
@@ -119,6 +122,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-12T19:13:01.943Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-09-12T19:30:45.000Z
+Stopped at: Completed 02-05-PLAN.md
 Resume file: None
