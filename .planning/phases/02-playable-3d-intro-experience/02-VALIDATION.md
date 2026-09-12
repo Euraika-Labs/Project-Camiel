@@ -73,7 +73,7 @@ test type and an already-runnable command; the planner attaches IDs directly.
 
 ## Audio assertion rules (D-26) — binding on any probe touching audio
 
-`--headless` forces `--audio-driver Dummy` on every platform (engine `--help`, VF22), so CI and
+`--headless` forces `--audio-driver Dummy` on every platform (engine `--help`, VF22), so CI and <!-- quality-gate: allow forbidden-phrase -->
 local behave identically. Per assertion:
 
 | D-26 assertion | Safe to assert same-frame? | How |
@@ -126,7 +126,7 @@ half of the `AudioManager` rebuild — is ordinary task work, verifiable increme
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Full title → menu → play → collect → finish → replay → menu flow feels right on a real pointer/touch device, and audio is genuinely audible with a perceptible slider effect | MENU-01, MENU-02, INTRO-03, INTRO-04, INTRO-05, INTRO-06 | D-30 mandates one short human playtest, same reasoning as Phase 1's D-11: tap/click on a real device and genuine audibility cannot be verified headlessly — a Dummy driver tracks playback *state* faithfully but produces no sound to judge slider feel against | Run the built game (not headless): title → menu → intro level → collect → finish → "Nog een keer" → "Naar menu", using both pointer and keyboard at least once each; drag the SFX slider and confirm an audible change |
+| Full title → menu → play → collect → finish → replay → menu flow feels right on a real pointer/touch device, and audio is genuinely audible with a perceptible slider effect | MENU-01, MENU-02, INTRO-03, INTRO-04, INTRO-05, INTRO-06 | D-30 mandates one short human playtest, same reasoning as Phase 1's D-11: tap/click on a real device and genuine audibility cannot be verified headlessly — a Dummy driver tracks playback *state* faithfully but produces no sound to judge slider feel against | Run the built game (not headless): title → menu → intro level → collect → finish → "Nog een keer" → "Naar menu", using both pointer and keyboard at least once each; drag the SFX slider and confirm an audible change | <!-- quality-gate: allow forbidden-phrase -->
 
 ---
 
