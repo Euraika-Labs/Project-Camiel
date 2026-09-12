@@ -112,13 +112,13 @@ Plans:
   4. Lesson 3 (3D sequence) only completes after its targets are activated in the defined order.
   5. Lessons 4 and 5 are real, completable 3D educational tasks, and completing any lesson (1-5) writes a matching entry (lesson_id, stars, time_seconds, completed_at) to user://progress.json, with no error from the progress-tracking system.
 
-**Plans**: 6 plans
+**Plans**: 1/6 plans executed
 **UI hint**: yes
 
 Plans:
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — Progress persistence: atomic write, fail-soft read, versioned append log, proved by re-reading the file from disk
+- [x] 03-01-PLAN.md — Progress persistence: atomic write, fail-soft read, versioned append log, proved by re-reading the file from disk
 - [ ] 03-02-PLAN.md — The shared lesson kit: one parametrized target with its activation gate, the shared room, and the one progress-label form
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -249,7 +249,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. 3D Foundation & Archive | 6/6 | Complete    | 2026-09-11 |
 | 2. Playable 3D Intro Experience | 6/6 | Complete    | 2026-09-12 |
-| 3. 3D Lesson Parity & Progress Persistence | 0/0 | Not started | - |
+| 3. 3D Lesson Parity & Progress Persistence | 1/6 | In Progress|  |
 | 4. Accessibility & Release Pipeline Hardening | 0/0 | Not started | - |
 | 5. Dutch Voice-Over | 0/0 | Not started | - |
 | 6. Mobile Touch Controls | 0/0 | Not started | - |

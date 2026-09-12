@@ -1,19 +1,19 @@
 ---
 gsd_state_version: "1.0"
 milestone: v0.0.4
-current_phase: 3
+current_phase: 03
 current_phase_name: 3D Lesson Parity & Progress Persistence
-status: planning
-stopped_at: context exhaustion at 75% (2026-09-12)
-last_updated: "2026-09-12T20:46:38.501Z"
+status: executing
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-09-12T21:55:28.079Z"
 last_activity: 2026-09-12
-last_activity_desc: Phase 02 complete, transitioned to Phase 3
-state_head: 6d794a1a4a811e2ad473ac0645021cacc05f40d5
+last_activity_desc: Phase 03 execution started
+state_head: 3cf0c631d89b18a8c979ce522cd4154a6fa6198b
 progress:
   total_phases: 10
   completed_phases: 0
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 18
+  completed_plans: 13
 ---
 
 # Project State
@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-11)
 
 **Core value:** A young child can go from the title screen through every lesson, entirely on their own, without hitting a bug or needing adult help — and their progress is remembered afterward.
-**Current focus:** Phase 02 — Playable 3D Intro Experience
+**Current focus:** Phase 03 — 3D Lesson Parity & Progress Persistence
 
 ## Current Position
 
-Phase: 3 — 3D Lesson Parity & Progress Persistence
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-12 — Phase 02 complete, transitioned to Phase 3
+Phase: 03 (3D Lesson Parity & Progress Persistence) — EXECUTING
+Plan: 2 of 6
+Status: Ready to execute
+Last activity: 2026-09-12 — Phase 03 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -71,6 +71,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P04 | 20min | 3 tasks | 10 files |
 | Phase 02 P05 | 30min | 3 tasks | 4 files |
 | Phase 02 P06 | 20 min | 1 tasks | 0 files |
+| Phase 03 P01 | 55min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,8 @@ Recent decisions affecting current work:
 - [Phase 02]: [Phase 02-05]: Godot's GDScript loader enforces singleton resource identity per path regardless of ResourceLoader.CACHE_MODE_IGNORE, so packing two icon nodes that both load vector_icon.gd always dedupes to one ext_resource; the scene generator's post-processing step splits it into two declarations pointing at the same file so each icon row owns its own
 - [Phase 02]: [Phase 02-05]: Per 02-VALIDATION.md's "Probe-presence guard gap", the REQUIRED_PROBES named-probe allow-list for run_headless_check.sh is deliberately left unimplemented this phase; test_headless_check.sh Case 13 records the current weakness (removing one named probe while others remain still passes) as a known, honestly-named gap rather than a guarantee
 - [Phase 02]: [Phase 02]: [Phase 02-06]: D-30 playtest verdict (verbatim): "it works but graphics are very basic" - no functional or tuning changes applied since no defect or adjustment was named; the graphics remark is out-of-scope feedback mapped to the already-deferred v2 MODEL-01
+- [Phase 03]: [Phase 03-01]: RED evidence for the corrupt-file recovery case was produced by temporarily reverting progress_tracker.gd to the archived bug's JSON.parse_string() call, confirming run_headless_check.sh goes CHECK FAILED on the exact ERROR: Parse JSON failed line even though recovery is correct, then reverted (byte-identical to the committed file)
+- [Phase 03]: [Phase 03-01]: Task 3's deliberate-failure exercise forced a false assertion to prove the probe's failure funnel restores a real save file; verified via a SHA-256 checksum of the pre-existing real progress.json matched before and after
 
 ### Pending Todos
 
@@ -129,6 +132,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-12T20:46:38.454Z
-Stopped at: context exhaustion at 75% (2026-09-12)
+Last session: 2026-09-12T21:55:28.057Z
+Stopped at: Completed 03-01-PLAN.md
 Resume file: None
