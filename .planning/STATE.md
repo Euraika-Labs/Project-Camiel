@@ -4,16 +4,16 @@ milestone: v0.0.4
 current_phase: 03
 current_phase_name: 3D Lesson Parity & Progress Persistence
 status: executing
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-09-12T22:49:13.882Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-09-12T23:19:54.109Z"
 last_activity: 2026-09-12
 last_activity_desc: Phase 03 execution started
-state_head: 8b9cdf6835ccda54f86593dcbc4921091f919142
+state_head: 57168f2cf8de124cd2a0edea7ed44470e461b857
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 18
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 ## Current Position
 
 Phase: 03 (3D Lesson Parity & Progress Persistence) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-09-12 — Phase 03 execution started
 
@@ -74,6 +74,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P01 | 55min | 2 tasks | 5 files |
 | Phase 03 P02 | 65min | 3 tasks | 9 files |
 | Phase 03 P03 | 75min | 3 tasks | 11 files |
+| Phase 03 P04 | ~50min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,9 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-03: const LESSONS holds exactly one row until each lesson's scene exists; the lesson-select probe loads every table entry, so a row added before its scene fails loudly (D-33, Pitfall 7)
 - [Phase 03]: 03-03: lesson 1's counting task is three objects that together mark ONE of three tasks, keeping D-36's check at three and D-46's label at three steps while still making the child count
 - [Phase 03]: 03-03: the bare autoload name ProgressTracker does resolve inside a scene's own script under a --script entry point; the plan's contingency lookup was unnecessary
+- [Phase 03]: Lessons 2 and 3 enforce order structurally: an array of the target nodes is read to activate the next one, and neither orchestrator compares an arriving identifier at all (D-37)
+- [Phase 03]: Each ordered lesson's probe case drives three distinct orders -- two different wrong-first touches proved to refuse and complete nothing, then the correct order -- because a correct-order-only case would pass on the archived defect
+- [Phase 03]: The lesson table holds exactly three appended rows, one per scene that exists; no row, disabled button or not-yet-available caption for lessons 4 and 5
 
 ### Pending Todos
 
@@ -138,6 +142,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-12T22:49:13.839Z
-Stopped at: Completed 03-03-PLAN.md
+Last session: 2026-09-12T23:19:46.318Z
+Stopped at: Completed 03-04-PLAN.md
 Resume file: None
