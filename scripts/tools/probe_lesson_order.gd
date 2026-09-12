@@ -50,6 +50,11 @@ const LESSON_3_PATH := "res://scenes/lesson_3.tscn"
 const LESSON_4_PATH := "res://scenes/lesson_4.tscn"
 const LESSON_5_PATH := "res://scenes/lesson_5.tscn"
 const LESSON_SELECT_PATH := "res://scenes/lesson_select.tscn"
+const LESSON_SELECT_SCRIPT_PATH := "res://scripts/lesson_select.gd"
+
+## How many lessons this milestone promises a child (LESSON-06), stated so the
+## closing case cannot silently check a shorter table than the screen offers.
+const EXPECTED_LESSON_COUNT := 5
 
 ## The least two lesson colours may differ and still be two colours rather than
 ## two shades of one. Measured as the straight-line distance between the two
@@ -108,6 +113,10 @@ func _initialize() -> void:
 	if _failed:
 		return
 	await _case_lesson_5_order_enforced()
+	if _failed:
+		return
+	# Last, deliberately: it reads what the five cases above actually wrote.
+	await _case_all_five_lessons_on_disk()
 	if _failed:
 		return
 
@@ -1673,3 +1682,82 @@ func _case_lesson_5_order_enforced() -> void:
 
 	_cases_run += 1
 	print("PASS %s" % case_name)
+
+
+## PROGRESS-02 closed across every lesson, and the last word on the defect that
+## ran the longest: the archived progress tracker's record function was never
+## called by anything at all, while the project's own documentation said it was.
+## Every lesson above has just been driven to a real completion in this one
+## process, so this reads the file back off the disk and requires an entry for
+## every identifier the lesson-select table advertises.
+##
+## The expected set comes from that table rather than from a list written here,
+## so a sixth lesson added in a later phase is covered by this assertion the day
+## its row lands -- and a lesson whose script files its progress under an
+## identifier the table does not know fails here too, which no per-lesson case
+## can see because each of those only ever checks its own entry.
+func _case_all_five_lessons_on_disk() -> void:
+	var case_name := "all_five_lessons_on_disk"
+
+	var table_source: GDScript = load(LESSON_SELECT_SCRIPT_PATH)
+	if table_source == null:
+		_fail(case_name, "could not load %s to read the lesson table from" % LESSON_SELECT_SCRIPT_PATH)
+		return
+	var table: Array = table_source.get_script_constant_map().get("LESSONS", [])
+	if table.size() != EXPECTED_LESSON_COUNT:
+		_fail(case_name, "the lesson table holds %d entries, %d wanted -- this case's expected set is the table, so it must be the whole table" % [table.size(), EXPECTED_LESSON_COUNT])
+		return
+	var wanted: Dictionary = {}
+	for entry: Dictionary in table:
+		wanted[String(entry.get("id", ""))] = false
+
+	var data := _read_progress_file(case_name)
+	if _failed:
+		return
+	if not (data.get("entries") is Array):
+		_fail(case_name, "the progress file holds no entries array after five lessons were played")
+		return
+	var entries: Array = data["entries"]
+
+	# Every entry carries exactly the four fields PROGRESS-02 names and the one
+	# star count the tracker owns (D-41). A lesson that slipped a fifth field or
+	# its own rubric into a child's save file fails here, and the parent
+	# dashboard a later phase reads this file with never sees a surprise.
+	for i in entries.size():
+		var entry: Dictionary = entries[i]
+		if entry.size() != 4:
+			_fail(case_name, "entry %d carries %d fields (%s), exactly 4 wanted -- lesson_id, stars, time_seconds and completed_at" % [i, entry.size(), entry.keys()])
+			return
+		for field: String in ["lesson_id", "stars", "time_seconds", "completed_at"]:
+			if not entry.has(field):
+				_fail(case_name, "entry %d has no %s field; its fields are %s" % [i, field, entry.keys()])
+				return
+		if int(entry["stars"]) != 3:
+			_fail(case_name, "entry %d was saved with %s stars, 3 wanted -- the count is the tracker's own constant and no lesson has a rubric of its own (D-41)" % [i, entry["stars"]])
+			return
+		var found_id := String(entry["lesson_id"])
+		if not wanted.has(found_id):
+			_fail(case_name, "entry %d was filed under %s, which the lesson table does not offer -- a lesson is saving its progress under an identifier no button can ever read back" % [i, found_id])
+			return
+		wanted[found_id] = true
+
+	var missing: Array[String] = []
+	for lesson_id: String in wanted:
+		if not bool(wanted[lesson_id]):
+			missing.append(lesson_id)
+	if not missing.is_empty():
+		_fail(case_name, "after every lesson was driven to a real completion the progress file holds no entry for %s -- that lesson's completion is never recorded, which is exactly what the archived game shipped for its entire life" % [missing])
+		return
+
+	var found_ids: Array[String] = []
+	for lesson_id: String in wanted:
+		found_ids.append(lesson_id)
+	found_ids.sort()
+	print("[probe_lesson_order] %s %d entries on disk covering all %d identifiers: %s" % [case_name, entries.size(), found_ids.size(), found_ids])
+
+	_cases_run += 1
+	# This one case states its success line as a literal rather than building it
+	# from case_name like its siblings, so the line the whole phase's gate is
+	# checked for can be found by searching this file for it. A success line that
+	# only exists once the process has run is a poor thing to depend on.
+	print("PASS all_five_lessons_on_disk")

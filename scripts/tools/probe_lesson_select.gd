@@ -20,6 +20,13 @@ const LESSON_SELECT_PATH := "res://scenes/lesson_select.tscn"
 const MAIN_MENU_PATH := "res://scenes/main_menu.tscn"
 const INTRO_LEVEL_PATH := "res://scenes/intro_level.tscn"
 
+## How many lessons this milestone promises a child (LESSON-06). Asserted as a
+## number rather than inferred from the table, because every other assertion in
+## this file iterates the table and would therefore pass just as happily on a
+## table holding four -- which is what shipped in the archive, where the screen
+## that should have offered five offered one.
+const EXPECTED_LESSON_COUNT := 5
+
 # ── Internal state ───────────────────────────────────────────────
 
 var _failed := false
@@ -245,6 +252,37 @@ func _case_lesson_table_drives_buttons() -> void:
 	var table := _read_table(case_name, screen)
 	if _failed:
 		return
+	if table.size() != EXPECTED_LESSON_COUNT:
+		_fail(case_name, "the lesson table holds %d entries, %d wanted -- the screen offers exactly the lessons this milestone promises" % [table.size(), EXPECTED_LESSON_COUNT])
+		return
+
+	# Every entry's identifier, path and label must be its own. A copied row
+	# pointing a second button at an existing lesson passes every other
+	# assertion in this file -- the button is built, its label and icon match
+	# its entry, its path loads and instantiates as a 3D node -- while a child
+	# taps two different buttons and arrives at the same lesson twice.
+	var seen_ids := {}
+	var seen_paths := {}
+	var seen_labels := {}
+	for entry: Dictionary in table:
+		var seen_id := String(entry.get("id", ""))
+		var seen_path := String(entry.get("path", ""))
+		var seen_label := String(entry.get("label", ""))
+		if seen_id.is_empty() or seen_path.is_empty() or seen_label.is_empty():
+			_fail(case_name, "a table entry is missing its identifier, path or label: %s" % [entry])
+			return
+		if seen_ids.has(seen_id):
+			_fail(case_name, "two table entries carry the identifier %s; a lesson's identifier is what its saved progress is filed under, so a duplicate loses one lesson's history into another's" % seen_id)
+			return
+		if seen_paths.has(seen_path):
+			_fail(case_name, "two table entries point at %s; one of the buttons opens the wrong lesson" % seen_path)
+			return
+		if seen_labels.has(seen_label):
+			_fail(case_name, "two table entries are labelled %s; a child cannot tell the two buttons apart" % seen_label)
+			return
+		seen_ids[seen_id] = true
+		seen_paths[seen_path] = true
+		seen_labels[seen_label] = true
 
 	var grid: GridContainer = screen.get_node_or_null("%LessonGrid")
 	if grid == null:
