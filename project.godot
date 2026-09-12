@@ -18,14 +18,9 @@ config/features=PackedStringArray("4.7", "4.7.2")
 
 audio/enable_audio_on_mobile=true
 
-[audio_bus_layout]
+[autoload]
 
-bus/0/name="Master"
-bus/0/volume_db=0.0
-bus/0/send=""
-bus/1/name="SFX"
-bus/1/volume_db=0.0
-bus/1/send="Master"
+AudioManager="*res://scripts/audio_manager.gd"
 
 [display]
 
