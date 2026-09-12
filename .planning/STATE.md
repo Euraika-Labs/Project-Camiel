@@ -4,16 +4,16 @@ milestone: v0.0.4
 current_phase: 03
 current_phase_name: 3D Lesson Parity & Progress Persistence
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-09-12T21:55:28.079Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-09-12T22:11:43.350Z"
 last_activity: 2026-09-12
 last_activity_desc: Phase 03 execution started
-state_head: 3cf0c631d89b18a8c979ce522cd4154a6fa6198b
+state_head: c1c3d3acc5d14b309d0cc6f1420508f60644833e
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 18
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 ## Current Position
 
 Phase: 03 (3D Lesson Parity & Progress Persistence) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-09-12 — Phase 03 execution started
 
@@ -72,6 +72,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P05 | 30min | 3 tasks | 4 files |
 | Phase 02 P06 | 20 min | 1 tasks | 0 files |
 | Phase 03 P01 | 55min | 2 tasks | 5 files |
+| Phase 03 P02 | 65min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,7 @@ Recent decisions affecting current work:
 - [Phase 02]: [Phase 02]: [Phase 02-06]: D-30 playtest verdict (verbatim): "it works but graphics are very basic" - no functional or tuning changes applied since no defect or adjustment was named; the graphics remark is out-of-scope feedback mapped to the already-deferred v2 MODEL-01
 - [Phase 03]: [Phase 03-01]: RED evidence for the corrupt-file recovery case was produced by temporarily reverting progress_tracker.gd to the archived bug's JSON.parse_string() call, confirming run_headless_check.sh goes CHECK FAILED on the exact ERROR: Parse JSON failed line even though recovery is correct, then reverted (byte-identical to the committed file)
 - [Phase 03]: [Phase 03-01]: Task 3's deliberate-failure exercise forced a false assertion to prove the probe's failure funnel restores a real save file; verified via a SHA-256 checksum of the pre-existing real progress.json matched before and after
+- [Phase 03]: [Phase 03-02]: D-37/D-38's activation gate shipped inside lesson_target.gd's Task 1 commit rather than a separate Task 3 diff, since the gate is one branch inside the same _on_body_entered method Task 1 also writes; RED evidence for Task 3's negative case was produced by temporarily removing the gate branch, confirming the failure, then restoring the file byte-identical
 
 ### Pending Todos
 
@@ -132,6 +134,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-12T21:55:28.057Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-09-12T22:11:43.322Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
