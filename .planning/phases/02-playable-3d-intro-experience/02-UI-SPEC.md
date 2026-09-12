@@ -82,6 +82,8 @@ Exactly 4 sizes, exactly 2 weights, per the spacing/typography discipline this c
 | md | 16px | Gap between a slider row's icon, label, and slider |
 | lg | 24px | Panel internal padding (`AudioPanel`, `WinPanel`); `VBoxContainer` separation between rows inside a panel |
 | xl | 32px | Gap between the primary button and the audio panel on the main menu; screen outer margin |
+| 2xl | 48px | Gap between the two win-screen buttons — an explicit exception above the 8-pt default, sized deliberately large so a near-miss tap cannot activate the neighboring button |
+| 3xl | 64px | Reserved for page-level top/bottom breathing room if a future screen needs it |
 
 > **Token-to-node binding for the 32px screen outer margin.** `CenterContainer` in Godot 4
 > has **no** margin or padding theme property — it only centres its child, it does not inset
@@ -91,8 +93,6 @@ Exactly 4 sizes, exactly 2 weights, per the spacing/typography discipline this c
 > `CenterContainer → MarginContainer → Content`. Do not approximate this with anchor offsets
 > on the root `Control`; the `MarginContainer` keeps the value in one place where a Phase 4
 > pass can retune it.
-| 2xl | 48px | Gap between the two win-screen buttons — an explicit exception above the 8-pt default, sized deliberately large so a near-miss tap cannot activate the neighboring button |
-| 3xl | 64px | Reserved for page-level top/bottom breathing room if a future screen needs it |
 
 **Exception:** hit-target minimums (below) exceed the usual 44px mobile baseline. This
 audience is age ~3 with imprecise pointer control (Design Priority 1); 44px is a baseline for
@@ -104,6 +104,7 @@ adult fingers, not toddlers holding a mouse or tapping a tablet with a parent's 
 |---------|--------------|----------------|
 | `menu_button` (all instances) | 280×112px | Roughly 2.5× the 44px mobile-accessibility baseline in each dimension. A 3-year-old's pointer control is imprecise; this size keeps the whole icon+label comfortably inside the reachable "aim zone" even with a shaky click or a fat-finger tap. |
 | `HSlider` (SFX / BGM) | 320×56px interactive area | Sliders are inherently harder to land precisely than buttons. This control is intended for the co-present adult (PROJECT.md: "parents and teachers act as secondary users who co-play"), so it does not need toddler-grade tolerance — but it still gets a fat 56px track so it is not a fiddly desktop-app-sized widget. **See the accepted-risk note below.** |
+| Gap between adjacent interactive controls | ≥32px (48px between the two win-screen buttons) | Prevents a near-miss on one control from landing on its neighbor — the direct fix for "pointer-imprecision tolerance" (Design Priority 1). |
 
 > **Accepted risk — the 56px slider height is half the 112px button height on the same
 > screen.** This is a deliberate decision, not an oversight. D-25 places the SFX slider on the
@@ -114,7 +115,6 @@ adult fingers, not toddlers holding a mouse or tapping a tablet with a parent's 
 > transition. If the Phase 2 closing playtest (D-30) shows a child fighting the sliders,
 > raising the track to 112px or moving the audio panel behind a parent-facing control is a
 > cheap follow-up. Phase 4 owns any broader accessibility retune.
-| Gap between adjacent interactive controls | ≥32px (48px between the two win-screen buttons) | Prevents a near-miss on one control from landing on its neighbor — the direct fix for "pointer-imprecision tolerance" (Design Priority 1). |
 
 ### Corner Radii
 
