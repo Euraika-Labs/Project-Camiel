@@ -48,6 +48,7 @@ const LESSON_1_PATH := "res://scenes/lesson_1.tscn"
 const LESSON_2_PATH := "res://scenes/lesson_2.tscn"
 const LESSON_3_PATH := "res://scenes/lesson_3.tscn"
 const LESSON_4_PATH := "res://scenes/lesson_4.tscn"
+const LESSON_5_PATH := "res://scenes/lesson_5.tscn"
 const LESSON_SELECT_PATH := "res://scenes/lesson_select.tscn"
 
 ## The least two lesson colours may differ and still be two colours rather than
@@ -104,6 +105,9 @@ func _initialize() -> void:
 	if _failed:
 		return
 	await _case_lesson_4_any_order()
+	if _failed:
+		return
+	await _case_lesson_5_order_enforced()
 	if _failed:
 		return
 
@@ -1617,6 +1621,54 @@ func _case_lesson_4_any_order() -> void:
 	await _drain_scene_change()
 
 	if not await _assert_in_play_return_is_one_shot(case_name, LESSON_4_PATH):
+		return
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+## LESSON-05, and the one place this phase's two label decisions could have
+## produced a visibly wrong number in front of a child. Lesson 5 is lesson 3's
+## activation pattern over FOUR steps (D-44) while D-46 asked that one progress
+## label form cover every lesson, and the resolution is that the total is a
+## parameter: the very first assertion here is that this lesson opens at
+## `Stap: 0 / 4`. A lesson reshaped down to three scored sub-tasks to fit a
+## three-step label fails there, a label form hardcoded to three fails there,
+## and neither survives to the end of the case to be argued about.
+##
+## The negative half leads with the FOURTH step and then the third -- two wrong
+## first guesses no other lesson's case uses, so one shared bug in the shared
+## activation gate cannot hide behind one shared wrong touch.
+func _case_lesson_5_order_enforced() -> void:
+	var case_name := "lesson_5_order_enforced"
+
+	# Two sequence lessons in one colour would be one room a child visits twice.
+	var previous_sequence_colour := _scene_colour(case_name, LESSON_3_PATH, "Step1Target")
+	if _failed:
+		return
+	var own_colour := _scene_colour(case_name, LESSON_5_PATH, "Step1Target")
+	if _failed:
+		return
+	var gap := _colour_separation(own_colour, previous_sequence_colour)
+	if gap < MIN_COLOUR_SEPARATION:
+		_fail(case_name, "this lesson is %s and the other sequence lesson is %s, only %.3f apart -- at least %.2f wanted, so the two sequence lessons read as two rooms" % [own_colour, previous_sequence_colour, gap, MIN_COLOUR_SEPARATION])
+		return
+	print("[probe_lesson_order] %s colour %s is %.3f from the other sequence lesson's %s" % [case_name, own_colour, gap, previous_sequence_colour])
+
+	if not await _drive_ordered_lesson(
+		case_name,
+		LESSON_5_PATH,
+		"lesson_5",
+		["Step1Target", "Step2Target", "Step3Target", "Step4Target"],
+		[3, 2],
+		["1", "2", "3", "4"],
+		"text",
+		4,
+		"Stap: 0 / 4",
+		"Stap: 4 / 4"
+	):
+		return
+	if not await _assert_in_play_return_is_one_shot(case_name, LESSON_5_PATH):
 		return
 
 	_cases_run += 1

@@ -29,6 +29,7 @@ const LESSONS: Array[Dictionary] = [
 	{"id": "lesson_2", "path": "res://scenes/lesson_2.tscn", "label": "Les 2", "icon": "lesson_shapes"},
 	{"id": "lesson_3", "path": "res://scenes/lesson_3.tscn", "label": "Les 3", "icon": "lesson_sequence"},
 	{"id": "lesson_4", "path": "res://scenes/lesson_4.tscn", "label": "Les 4", "icon": "lesson_colors"},
+	{"id": "lesson_5", "path": "res://scenes/lesson_5.tscn", "label": "Les 5", "icon": "lesson_sequence"},
 ]
 
 const MENU_BUTTON_PATH := "res://scenes/ui/menu_button.tscn"
