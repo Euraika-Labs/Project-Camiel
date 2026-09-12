@@ -13,10 +13,13 @@ const SFX_BUS := "SFX"
 # ── Default asset paths ──────────────────────────────────────────
 
 const BGM_PATH := "res://assets/audio/bgm_ambient.ogg"
+const SFX_COLLECT_PATH := "res://assets/audio/sfx_collect.ogg"
+const SFX_FINISH_PATH := "res://assets/audio/sfx_finish.ogg"
 
 # ── Internal state ───────────────────────────────────────────────
 
 var _bgm_player: AudioStreamPlayer
+var _sfx_player: AudioStreamPlayer
 var _music_bus_index := -1
 var _sfx_bus_index := -1
 
@@ -43,6 +46,9 @@ func _ready() -> void:
 	set_bgm_volume(0.6)
 	_start_default_music.call_deferred()
 
+	_sfx_player = _get_or_create_player("SFX", SFX_BUS)
+	set_sfx_volume(0.8)
+
 
 func _exit_tree() -> void:
 	if not _played_audio:
@@ -50,6 +56,8 @@ func _exit_tree() -> void:
 
 	if _bgm_player != null:
 		_bgm_player.stop()
+	if _sfx_player != null:
+		_sfx_player.stop()
 
 	OS.delay_msec(_EXIT_DRAIN_MS)
 
@@ -106,6 +114,53 @@ func get_bgm_volume() -> float:
 ## True when the background music player reports it is currently playing.
 func is_music_playing() -> bool:
 	return _bgm_player != null and _bgm_player.playing
+
+
+## Play a one-shot SFX. Supported event names: "collect", "finish". Pass
+## custom_path to bypass the event lookup and play an arbitrary stream.
+func play_sfx(event: String, custom_path: String = "") -> void:
+	var path := custom_path
+	if path.is_empty():
+		match event:
+			"collect":
+				path = SFX_COLLECT_PATH
+			"finish":
+				path = SFX_FINISH_PATH
+
+	if path.is_empty() or not ResourceLoader.exists(path):
+		push_warning("[AudioManager] SFX not found for event: ", event)
+		return
+
+	var stream := load(path) as AudioStream
+	if stream == null:
+		push_warning("[AudioManager] Could not load SFX: ", path)
+		return
+
+	if _sfx_player == null or not _sfx_player.is_inside_tree():
+		push_warning("[AudioManager] SFX player not ready: ", path)
+		return
+
+	_sfx_player.stream = stream
+	_sfx_player.play()
+	_played_audio = true
+
+
+## Set the SFX bus volume. Linear 0.0-1.0, clamped before conversion to dB.
+func set_sfx_volume(linear: float) -> void:
+	_apply_bus_volume(_sfx_bus_index, linear)
+
+
+## Read back the current SFX bus volume as a linear 0.0-1.0 value.
+func get_sfx_volume() -> float:
+	if _sfx_bus_index < 0:
+		return 0.0
+
+	return db_to_linear(AudioServer.get_bus_volume_db(_sfx_bus_index))
+
+
+## True when the SFX player reports it is currently playing.
+func is_sfx_playing() -> bool:
+	return _sfx_player != null and _sfx_player.playing
 
 
 # ── Internal helpers ─────────────────────────────────────────────

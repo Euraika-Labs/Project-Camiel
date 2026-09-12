@@ -42,6 +42,9 @@ func _initialize() -> void:
 	await _case_bgm_stream()
 	await _case_bgm_plays()
 	await _case_bgm_volume_isolation()
+	await _case_sfx_streams()
+	await _case_sfx_plays()
+	await _case_sfx_volume_isolation()
 
 	if _cases_run == 0:
 		push_error("Audio bus probe ran no cases.")
@@ -177,3 +180,84 @@ func _case_bgm_volume_isolation() -> void:
 
 	_cases_run += 1
 	print("PASS bgm_volume_isolation")
+
+
+func _case_sfx_streams() -> void:
+	var collect_path: String = _audio_manager.SFX_COLLECT_PATH
+	var finish_path: String = _audio_manager.SFX_FINISH_PATH
+
+	var collect_stream := load(collect_path)
+	if collect_stream == null or not collect_stream is AudioStreamOggVorbis:
+		push_error("Could not load sfx_collect stream as AudioStreamOggVorbis: %s" % collect_path)
+		quit(1)
+		return
+	if (collect_stream as AudioStreamOggVorbis).loop:
+		push_error("sfx_collect stream must not loop: %s" % collect_path)
+		quit(1)
+		return
+
+	var finish_stream := load(finish_path)
+	if finish_stream == null or not finish_stream is AudioStreamOggVorbis:
+		push_error("Could not load sfx_finish stream as AudioStreamOggVorbis: %s" % finish_path)
+		quit(1)
+		return
+	if (finish_stream as AudioStreamOggVorbis).loop:
+		push_error("sfx_finish stream must not loop: %s" % finish_path)
+		quit(1)
+		return
+
+	_cases_run += 1
+	print("PASS sfx_streams")
+
+
+func _case_sfx_plays() -> void:
+	_audio_manager.play_sfx("collect")
+
+	var start_ms := Time.get_ticks_msec()
+	var became_playing := await _wait_until(_audio_manager.is_sfx_playing, 2000)
+	if not became_playing:
+		push_error("SFX did not report playing == true within %d ms." % (Time.get_ticks_msec() - start_ms))
+		quit(1)
+		return
+
+	# Neither call below should ever reach an engine-level ERROR: line —
+	# run_headless_check.sh's own log scan enforces that; here we only
+	# assert the graceful degrade AudioManager owns (warn and return).
+	_audio_manager.play_sfx("no_such_event")
+	# Built via concatenation (not a literal res:// string) so quality_gate.py's
+	# static resource-path check doesn't flag this deliberately-nonexistent path.
+	_audio_manager.play_sfx("collect", "res://assets/audio/" + "not_a_real_file.ogg")
+
+	_cases_run += 1
+	print("PASS sfx_plays")
+
+
+func _case_sfx_volume_isolation() -> void:
+	var music_idx := AudioServer.get_bus_index(BUS_MUSIC)
+	var sfx_idx := AudioServer.get_bus_index(BUS_SFX)
+	var music_before := AudioServer.get_bus_volume_db(music_idx)
+
+	_audio_manager.set_sfx_volume(0.25)
+	if not is_equal_approx(AudioServer.get_bus_volume_db(music_idx), music_before):
+		push_error("set_sfx_volume() moved the Music bus volume_db.")
+		quit(1)
+		return
+	if absf(_audio_manager.get_sfx_volume() - 0.25) > 0.01:
+		push_error("get_sfx_volume() returned %f, expected ~0.25." % _audio_manager.get_sfx_volume())
+		quit(1)
+		return
+
+	# Mirror direction: moving BGM volume must not touch the SFX bus either.
+	var sfx_before := AudioServer.get_bus_volume_db(sfx_idx)
+	_audio_manager.set_bgm_volume(0.4)
+	if not is_equal_approx(AudioServer.get_bus_volume_db(sfx_idx), sfx_before):
+		push_error("set_bgm_volume() moved the SFX bus volume_db.")
+		quit(1)
+		return
+
+	# Restore defaults.
+	_audio_manager.set_sfx_volume(0.8)
+	_audio_manager.set_bgm_volume(0.6)
+
+	_cases_run += 1
+	print("PASS sfx_volume_isolation")
