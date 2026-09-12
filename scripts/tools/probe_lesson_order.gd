@@ -8,6 +8,14 @@
 # only ever drove colours-first would prove nothing about the defect being
 # fixed.
 #
+# Lessons 2 and 3 are the mirror image: their rules are written as negatives
+# (LESSON-02, LESSON-03), so their cases lead with an out-of-turn touch and
+# assert it refused and completed NOTHING before they ever drive the correct
+# order. The archived lesson_2.gd declared an order array and never read it, so
+# every order completed the lesson -- a case that only drove the correct order
+# would have passed on that code too, which is why the negative half comes
+# first here.
+#
 # This probe drives real completions through the real ProgressTracker autoload,
 # which writes to the same user://progress.json a real child's history lives
 # at, so it moves any existing file aside before its cases and restores it on
@@ -23,12 +31,18 @@ const PROGRESS_TMP_PATH := "user://progress.json.tmp"
 const BACKUP_PATH := "user://progress.json.probe_backup"
 
 const LESSON_1_PATH := "res://scenes/lesson_1.tscn"
+const LESSON_2_PATH := "res://scenes/lesson_2.tscn"
 const LESSON_SELECT_PATH := "res://scenes/lesson_select.tscn"
 
-## A corner of the shared room that is far from every one of lesson 1's five
-## targets, used to take the character off a target so a later teleport onto it
-## is a genuine fresh entry rather than a body that never left.
+## A corner of the shared room that is at least 4 m from every target in every
+## lesson this probe drives, used to take the character off a target so a later
+## teleport onto it is a genuine fresh entry rather than a body that never left.
 const PARKING_SPOT := Vector3(5, 0.1, 5)
+
+## Every ordered lesson shares the shared display's three-step label form
+## (D-46), so the label a child must see after step N is derivable rather than
+## restated per lesson.
+const ORDERED_TOTAL := 3
 
 # ── Internal state ───────────────────────────────────────────────
 
@@ -44,6 +58,11 @@ var _lesson_completed_times: Array[float] = []
 var _transition_count := 0
 var _transition_target := ""
 
+## One refusal counter per target node name. Separate counters rather than one
+## total, because "the square refused" and "something refused" are different
+## claims and only the first one proves the gate refused the right target.
+var _rejection_counts: Dictionary = {}
+
 
 # ── Lifecycle ────────────────────────────────────────────────────
 
@@ -57,6 +76,9 @@ func _initialize() -> void:
 	if _failed:
 		return
 	await _case_lesson_1_guards()
+	if _failed:
+		return
+	await _case_lesson_2_order_enforced()
 	if _failed:
 		return
 
@@ -124,6 +146,18 @@ func _on_lesson_completed_counted(lesson_id: String, time_seconds: float) -> voi
 func _on_transition_requested_counted(target_path: String) -> void:
 	_transition_count += 1
 	_transition_target = target_path
+
+
+## The refusal counter, bound to the refusing target's node name at connection
+## time (this project's convention for passing context from a signal). The
+## `rejected` signal carries no arguments precisely so the target stays silent
+## about its own identity; the binding is what lets a case name it.
+func _on_target_rejected_counted(target_name: String) -> void:
+	_rejection_counts[target_name] = int(_rejection_counts.get(target_name, 0)) + 1
+
+
+func _rejections(target: Area3D) -> int:
+	return int(_rejection_counts.get(String(target.name), 0))
 
 
 # ── Helpers ──────────────────────────────────────────────────────
@@ -448,6 +482,391 @@ func _assert_win_return_is_one_shot(case_name: String, lesson: Node, win_back_bu
 		return false
 
 	lesson.transition_requested.disconnect(_on_transition_requested_counted)
+	return true
+
+
+# ── Ordered-lesson helpers (LESSON-02, LESSON-03) ────────────────
+
+## Collects an ordered lesson's targets by the unique names its own scene
+## declares, in the order that lesson's rule requires them. The array this
+## returns is the order the case drives; the lesson's own script holds the same
+## order as an array of the same nodes, and that is the only place either states
+## it.
+## The exact label a child must see after step `current` of an ordered lesson,
+## built from its parts. Deliberately NOT the shared display's own format
+## string: that string exists in exactly one .gd file in this repository
+## (scripts/ui/lesson_hud.gd), and a probe that copied it would silently agree
+## with the display about any change to it instead of catching one.
+func _step_label_text(current: int) -> String:
+	return "Stap: " + str(current) + " / " + str(ORDERED_TOTAL)
+
+
+func _ordered_targets(case_name: String, lesson: Node, target_names: Array) -> Array[Area3D]:
+	var targets: Array[Area3D] = []
+	for raw_name: String in target_names:
+		var target: Area3D = lesson.get_node_or_null("%%%s" % raw_name)
+		if target == null:
+			_fail(case_name, "%s has no %%%s" % [lesson.name, raw_name])
+			return []
+		targets.append(target)
+	return targets
+
+
+## Connects this probe's own counters: one shared completion counter across
+## every target, and one refusal counter per target. The orchestrator
+## deliberately does not listen for a refusal, so after this every completion
+## signal carries exactly two connections and every refusal signal exactly one
+## -- the numbers the connection-count assertions below are written against.
+func _watch_ordered_targets(targets: Array[Area3D]) -> void:
+	for target: Area3D in targets:
+		target.task_completed.connect(_on_target_completed_counted)
+		target.rejected.connect(_on_target_rejected_counted.bind(String(target.name)))
+
+
+## Takes the character right off every target and waits for the area exits to
+## register, so the next teleport is a genuine fresh entry.
+func _park(camiel: CharacterBody3D) -> void:
+	camiel.teleport_to(PARKING_SPOT)
+	for _i in range(10):
+		await physics_frame
+
+
+## Teleports the character onto a target whose turn has NOT come and waits,
+## bounded, for that target's own refusal signal. Returns the frames waited, or
+## -1 when no refusal arrived -- which is the failure the archived lesson had.
+func _touch_for_refusal(camiel: CharacterBody3D, target: Area3D) -> int:
+	var before := _rejections(target)
+	camiel.teleport_to(target.global_position)
+	var frames_waited := 0
+	while _rejections(target) == before and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+	if _rejections(target) != before + 1:
+		return -1
+	return frames_waited
+
+
+## Asserts exactly one of an ordered lesson's targets reports itself active, and
+## that it is the one whose turn it is -- or that none is, once the lesson is
+## over. This is what D-37 means in practice: a target whose turn has not come
+## is not merely refused after the fact, it is not live at all.
+func _assert_only_active(case_name: String, targets: Array[Area3D], live_index: int) -> bool:
+	var live_name := "nothing"
+	if live_index >= 0:
+		live_name = String(targets[live_index].name)
+	for i in targets.size():
+		var is_live: bool = targets[i].is_active()
+		if i == live_index and not is_live:
+			_fail(case_name, "%s is the target whose turn it is, but it reports itself inactive" % targets[i].name)
+			return false
+		if i != live_index and is_live:
+			_fail(case_name, "%s reports itself active while the only live target should be %s -- exactly one target is live at a time (D-37)" % [targets[i].name, live_name])
+			return false
+	return true
+
+
+## The cue in an ordered lesson is never colour. Lesson 2 asks a child to tell a
+## circle from a square and lesson 3 asks them to read 1, 2, 3; either would
+## collapse into "touch the orange one" if the three targets were three colours.
+## So this asserts one shared colour across the whole lesson, and that the
+## targets are nonetheless distinguishable by something -- their shape or the
+## numeral they display.
+func _assert_colour_is_not_the_cue(case_name: String, targets: Array[Area3D], labels: Array[Label3D]) -> bool:
+	var shapes: Array[String] = []
+	var texts: Array[String] = []
+	var shared_colour: Color = targets[0].target_color
+	for i in targets.size():
+		var own_colour: Color = targets[i].target_color
+		if own_colour != shared_colour:
+			_fail(case_name, "%s is coloured %s while %s is %s -- every target in an ordered lesson shares one colour so hue cannot be the cue" % [targets[i].name, own_colour, targets[0].name, shared_colour])
+			return false
+		shapes.append(String(targets[i].shape_kind))
+		texts.append(labels[i].text)
+
+	var distinct_shapes := {}
+	var distinct_texts := {}
+	for shape: String in shapes:
+		distinct_shapes[shape] = true
+	for text: String in texts:
+		distinct_texts[text] = true
+	if distinct_shapes.size() < targets.size() and distinct_texts.size() < targets.size():
+		_fail(case_name, "the lesson's targets are %s in shape and %s in displayed text -- sharing one colour, a child would have nothing left to tell them apart by" % [shapes, texts])
+		return false
+
+	print("[probe_lesson_order] %s shapes %s, texts %s, one shared colour %s" % [case_name, shapes, texts, shared_colour])
+	return true
+
+
+## `jump` and the engine's `ui_accept` are both bound to the space key in this
+## project's input map, and menu_button.gd forces FOCUS_ALL in its own ready
+## callback, so a scene-file override is silently undone. This asserts the
+## consequence rather than the setting: no control holds focus during play and
+## several accept presses change nothing at all.
+func _assert_space_key_reaches_nothing(case_name: String, lesson: Node, hud: CanvasLayer, step_label: Label) -> bool:
+	var in_play_back_button: Button = hud.get_node_or_null("%BackButton")
+	if in_play_back_button == null:
+		_fail(case_name, "the shared display has no %BackButton")
+		return false
+	if in_play_back_button.focus_mode != Control.FOCUS_NONE:
+		_fail(case_name, "the in-play return control's focus mode is %d, FOCUS_NONE wanted" % in_play_back_button.focus_mode)
+		return false
+	var focus_owner := lesson.get_viewport().gui_get_focus_owner()
+	if focus_owner != null:
+		_fail(case_name, "%s already holds keyboard focus during play; the space key would reach it on every jump" % focus_owner.name)
+		return false
+
+	var label_before := step_label.text
+	_transition_count = 0
+	_transition_target = ""
+	lesson.transition_requested.connect(_on_transition_requested_counted)
+	for _i in 3:
+		_press_focused()
+		await process_frame
+	await process_frame
+	if _transition_count != 0:
+		_fail(case_name, "pressing the accept action during play requested %d transitions, 0 wanted -- jump and ui_accept share the space key" % _transition_count)
+		return false
+	if step_label.text != label_before:
+		_fail(case_name, "the progress label moved from %s to %s when the accept action was pressed during play" % [label_before, step_label.text])
+		return false
+	if hud.is_win_visible():
+		_fail(case_name, "the win panel appeared when the accept action was pressed during play")
+		return false
+	lesson.transition_requested.disconnect(_on_transition_requested_counted)
+	return true
+
+
+## Drives one ordered lesson end to end: the negative half first, then the
+## correct order, then the disk. Shared by the lesson 2 and lesson 3 cases
+## because the two lessons enforce their order through the same structure, so a
+## regression in that structure should fail both cases rather than one. The
+## lessons' own orchestrators stay independent scripts (D-35); only this probe
+## shares code.
+##
+## `out_of_turn_indices` names the targets touched before their turn, and
+## `label_texts` the text each target displays -- asserted before the refusals,
+## after each refusal and again at the end, because the archived sequence target
+## overwrote its own label with its order number on an error flash and lost the
+## original text permanently.
+func _drive_ordered_lesson(
+	case_name: String,
+	scene_path: String,
+	lesson_id: String,
+	target_names: Array,
+	out_of_turn_indices: Array,
+	label_texts: Array
+) -> bool:
+	var entries_before := _disk_entry_count()
+
+	var opened: Dictionary = await _open_lesson(case_name, scene_path)
+	if _failed:
+		return false
+	var lesson: Node = opened["lesson"]
+	var camiel: CharacterBody3D = opened["camiel"]
+	var hud: CanvasLayer = opened["hud"]
+	var step_label: Label = opened["step_label"]
+	var win_back_button: Button = opened["win_back_button"]
+
+	var targets := _ordered_targets(case_name, lesson, target_names)
+	if _failed:
+		return false
+
+	if step_label.text != _step_label_text(0):
+		_fail(case_name, "the progress label reads %s at the start of the lesson, %s wanted" % [step_label.text, _step_label_text(0)])
+		return false
+	if hud.is_win_visible():
+		_fail(case_name, "the win panel is already visible before the lesson was played")
+		return false
+
+	# Every target's own displayed text, before anything at all happens.
+	var labels: Array[Label3D] = []
+	for i in targets.size():
+		var label_3d: Label3D = targets[i].get_node_or_null("Label")
+		if label_3d == null:
+			_fail(case_name, "%s has no Label child to read its displayed text from" % targets[i].name)
+			return false
+		if label_3d.text != String(label_texts[i]):
+			_fail(case_name, "%s displays %s, %s wanted" % [targets[i].name, label_3d.text, label_texts[i]])
+			return false
+		labels.append(label_3d)
+
+	if not _assert_colour_is_not_the_cue(case_name, targets, labels):
+		return false
+	if not await _assert_space_key_reaches_nothing(case_name, lesson, hud, step_label):
+		return false
+
+	_target_completed_count = 0
+	_target_completed_ids.clear()
+	_lesson_completed_count = 0
+	_lesson_completed_ids.clear()
+	_lesson_completed_times.clear()
+	_rejection_counts.clear()
+	_watch_ordered_targets(targets)
+	lesson.lesson_completed.connect(_on_lesson_completed_counted)
+
+	# Two listeners on every completion (the lesson's handler and this probe's
+	# counter) and exactly one on every refusal (this probe's counter alone).
+	# A future extra listener changes these numbers, and the numbers are in the
+	# messages so the change is obvious rather than mysterious.
+	for target: Area3D in targets:
+		var completion_links := target.get_signal_connection_list("task_completed").size()
+		if completion_links != 2:
+			_fail(case_name, "%s.task_completed has %d connections, 2 wanted (the lesson's own handler and this probe's counter)" % [target.name, completion_links])
+			return false
+		var refusal_links := target.get_signal_connection_list("rejected").size()
+		if refusal_links != 1:
+			_fail(case_name, "%s.rejected has %d connections, 1 wanted (this probe's counter alone -- the orchestrator listens for completion only)" % [target.name, refusal_links])
+			return false
+
+	if not _assert_only_active(case_name, targets, 0):
+		return false
+
+	# --- The negative half, first. A touch out of turn refuses, completes
+	# nothing, moves the label not at all, and leaves the target's own text
+	# alone. This is the assertion that would have caught the archived defect. ---
+	for raw_index in out_of_turn_indices:
+		var index := int(raw_index)
+		var out_of_turn: Area3D = targets[index]
+		var text_before := labels[index].text
+		await _park(camiel)
+		var refusal_frames := await _touch_for_refusal(camiel, out_of_turn)
+		if refusal_frames < 0:
+			_fail(case_name, "touching %s before its turn refused %d times within 120 physics frames, exactly 1 wanted -- a wrong-order touch that is never refused is the archived defect" % [out_of_turn.name, _rejections(out_of_turn)])
+			return false
+		print("[probe_lesson_order] %s out-of-turn refusal on %s: %d frames" % [case_name, out_of_turn.name, refusal_frames])
+		if _rejections(out_of_turn) != 1:
+			_fail(case_name, "%s refused %d times for one touch, exactly 1 wanted" % [out_of_turn.name, _rejections(out_of_turn)])
+			return false
+		if _target_completed_count != 0:
+			_fail(case_name, "touching %s before its turn completed %d tasks, 0 wanted" % [out_of_turn.name, _target_completed_count])
+			return false
+		if _lesson_completed_count != 0:
+			_fail(case_name, "touching %s before its turn finished the whole lesson" % out_of_turn.name)
+			return false
+		if step_label.text != _step_label_text(0):
+			_fail(case_name, "the progress label moved to %s after a refused touch on %s, %s wanted" % [step_label.text, out_of_turn.name, _step_label_text(0)])
+			return false
+		if labels[index].text != text_before:
+			_fail(case_name, "refusing %s changed its own displayed text from %s to %s -- the archived sequence target destroyed its own label on an error flash" % [out_of_turn.name, text_before, labels[index].text])
+			return false
+		if not _assert_only_active(case_name, targets, 0):
+			return false
+
+	# --- Now the correct order, one target at a time, each paired with the
+	# exact label a child must see after it and with the single target that must
+	# be live next. ---
+	for i in targets.size():
+		await _park(camiel)
+		var frames := await _touch_target(camiel, targets[i])
+		if frames < 0:
+			_fail(case_name, "step %d (%s) never registered a touch within 120 physics frames" % [i + 1, targets[i].name])
+			return false
+		var wanted_label := _step_label_text(i + 1)
+		if step_label.text != wanted_label:
+			_fail(case_name, "after step %d (%s) the label reads %s, %s wanted" % [i + 1, targets[i].name, step_label.text, wanted_label])
+			return false
+		if i < targets.size() - 1 and _lesson_completed_count != 0:
+			_fail(case_name, "the lesson finished at step %d of %d, before its order was walked to the end" % [i + 1, targets.size()])
+			return false
+		var next_live := i + 1
+		if next_live >= targets.size():
+			next_live = -1
+		if not _assert_only_active(case_name, targets, next_live):
+			return false
+
+	# A target that was refused once is still exactly one refusal later: the
+	# wrong first guess cost the child nothing, and it did not repeat.
+	for raw_index in out_of_turn_indices:
+		var index := int(raw_index)
+		if _rejections(targets[index]) != 1:
+			_fail(case_name, "%s refused %d times across the whole run, exactly 1 wanted -- a wrong first guess must not cost a child the target" % [targets[index].name, _rejections(targets[index])])
+			return false
+
+	await process_frame
+	await process_frame
+
+	if _lesson_completed_count != 1:
+		_fail(case_name, "lesson_completed fired %d times, exactly 1 wanted" % _lesson_completed_count)
+		return false
+	if _lesson_completed_ids[0] != lesson_id:
+		_fail(case_name, "lesson_completed carried %s, %s wanted" % [_lesson_completed_ids[0], lesson_id])
+		return false
+	if _lesson_completed_times[0] <= 0.0:
+		_fail(case_name, "lesson_completed carried an elapsed time of %s, greater than zero wanted" % _lesson_completed_times[0])
+		return false
+	if not hud.is_win_visible():
+		_fail(case_name, "the win panel is not visible after the lesson finished")
+		return false
+	if camiel.is_physics_processing():
+		_fail(case_name, "the character's physics processing is still on after the lesson finished")
+		return false
+
+	for i in targets.size():
+		if labels[i].text != String(label_texts[i]):
+			_fail(case_name, "%s displays %s after the whole run, %s wanted" % [targets[i].name, labels[i].text, label_texts[i]])
+			return false
+
+	if not _assert_last_entry(case_name, lesson_id):
+		return false
+	var entries_after := _disk_entry_count()
+	if entries_after != entries_before + 1:
+		_fail(case_name, "the progress file holds %d entries, %d wanted -- one completion appends exactly one entry (D-40)" % [entries_after, entries_before + 1])
+		return false
+
+	if not await _assert_win_return_is_one_shot(case_name, lesson, win_back_button):
+		return false
+
+	lesson.lesson_completed.disconnect(_on_lesson_completed_counted)
+	lesson.queue_free()
+	await _drain_scene_change()
+	return true
+
+
+## D-34's other half, on a fresh unfinished lesson: the control that is live
+## during play also goes to lesson-select, through one guarded, deferred
+## transition. Plan 03-03 found this half genuinely unwired while the win
+## panel's half worked, so it is driven per lesson rather than assumed.
+func _assert_in_play_return_is_one_shot(case_name: String, scene_path: String) -> bool:
+	var opened: Dictionary = await _open_lesson(case_name, scene_path)
+	if _failed:
+		return false
+	var lesson: Node = opened["lesson"]
+	var hud: CanvasLayer = opened["hud"]
+
+	# Deliberately unreachable by the space key, so drive its own signal rather
+	# than synthesising a keyboard press -- the same way the lesson-kit probe
+	# proves the control still works while proving the keyboard cannot reach it.
+	var in_play_back_button: Button = hud.get_node_or_null("%BackButton")
+	if in_play_back_button == null:
+		_fail(case_name, "the shared display has no %BackButton")
+		return false
+
+	_transition_count = 0
+	_transition_target = ""
+	lesson.transition_requested.connect(_on_transition_requested_counted)
+
+	in_play_back_button.pressed.emit()
+	await process_frame
+	await process_frame
+	if _transition_count != 1:
+		_fail(case_name, "the in-play return control requested %d transitions, 1 wanted" % _transition_count)
+		return false
+	if _transition_target != LESSON_SELECT_PATH:
+		_fail(case_name, "the in-play return control carried %s, %s wanted -- neither of a lesson's return controls goes to the main menu (D-34)" % [_transition_target, LESSON_SELECT_PATH])
+		return false
+
+	await _drain_scene_change()
+
+	in_play_back_button.pressed.emit()
+	await process_frame
+	await process_frame
+	if _transition_count != 1:
+		_fail(case_name, "the in-play return control's one-shot guard did not block a second activation; count is %d" % _transition_count)
+		return false
+
+	lesson.transition_requested.disconnect(_on_transition_requested_counted)
+	lesson.queue_free()
+	await _drain_scene_change()
 	return true
 
 
@@ -806,6 +1225,33 @@ func _case_lesson_1_guards() -> void:
 	lesson.lesson_completed.disconnect(_on_lesson_completed_counted)
 	lesson.queue_free()
 	await _drain_scene_change()
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+## LESSON-02 proved from the wrong end first. The square and then the triangle
+## are each touched before their turn: each must refuse, complete nothing and
+## leave the label where it was. Only then is circle, square, triangle driven --
+## and the square it completes is the very target it refused a moment earlier, so
+## a child's wrong first guess is shown to have cost them nothing.
+##
+## Three distinct orders are therefore really driven here, not one: square-first,
+## triangle-first, and the correct one. The archived lesson_2.gd would have
+## passed a correct-order-only case, which is exactly why it does not exist.
+func _case_lesson_2_order_enforced() -> void:
+	var case_name := "lesson_2_order_enforced"
+	if not await _drive_ordered_lesson(
+		case_name,
+		LESSON_2_PATH,
+		"lesson_2",
+		["CircleTarget", "SquareTarget", "TriangleTarget"],
+		[1, 2],
+		["", "", ""]
+	):
+		return
+	if not await _assert_in_play_return_is_one_shot(case_name, LESSON_2_PATH):
+		return
 
 	_cases_run += 1
 	print("PASS %s" % case_name)

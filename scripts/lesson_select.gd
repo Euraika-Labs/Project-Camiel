@@ -26,6 +26,7 @@ signal transition_requested(target_path: String)
 ## advertise a lesson that is not there.
 const LESSONS: Array[Dictionary] = [
 	{"id": "lesson_1", "path": "res://scenes/lesson_1.tscn", "label": "Les 1", "icon": "lesson_colors"},
+	{"id": "lesson_2", "path": "res://scenes/lesson_2.tscn", "label": "Les 2", "icon": "lesson_shapes"},
 ]
 
 const MENU_BUTTON_PATH := "res://scenes/ui/menu_button.tscn"
