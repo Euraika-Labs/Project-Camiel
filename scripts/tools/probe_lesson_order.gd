@@ -32,6 +32,7 @@ const BACKUP_PATH := "user://progress.json.probe_backup"
 
 const LESSON_1_PATH := "res://scenes/lesson_1.tscn"
 const LESSON_2_PATH := "res://scenes/lesson_2.tscn"
+const LESSON_3_PATH := "res://scenes/lesson_3.tscn"
 const LESSON_SELECT_PATH := "res://scenes/lesson_select.tscn"
 
 ## A corner of the shared room that is at least 4 m from every target in every
@@ -79,6 +80,9 @@ func _initialize() -> void:
 	if _failed:
 		return
 	await _case_lesson_2_order_enforced()
+	if _failed:
+		return
+	await _case_lesson_3_order_enforced()
 	if _failed:
 		return
 
@@ -1251,6 +1255,30 @@ func _case_lesson_2_order_enforced() -> void:
 	):
 		return
 	if not await _assert_in_play_return_is_one_shot(case_name, LESSON_2_PATH):
+		return
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+## LESSON-03, on lesson 2's shape over three numbered targets. The third target
+## is touched first here rather than the second, so the two ordered lessons are
+## not driven by the same wrong guess, and the assertion that its numeral still
+## reads 3 afterwards is a direct regression test for a recorded defect: the
+## archived sequence_target.gd's error flash overwrote a target's own label with
+## str(order_number) and lost the original text permanently.
+func _case_lesson_3_order_enforced() -> void:
+	var case_name := "lesson_3_order_enforced"
+	if not await _drive_ordered_lesson(
+		case_name,
+		LESSON_3_PATH,
+		"lesson_3",
+		["Step1Target", "Step2Target", "Step3Target"],
+		[2, 1],
+		["1", "2", "3"]
+	):
+		return
+	if not await _assert_in_play_return_is_one_shot(case_name, LESSON_3_PATH):
 		return
 
 	_cases_run += 1

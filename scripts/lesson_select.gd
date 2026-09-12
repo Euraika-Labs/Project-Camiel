@@ -27,6 +27,7 @@ signal transition_requested(target_path: String)
 const LESSONS: Array[Dictionary] = [
 	{"id": "lesson_1", "path": "res://scenes/lesson_1.tscn", "label": "Les 1", "icon": "lesson_colors"},
 	{"id": "lesson_2", "path": "res://scenes/lesson_2.tscn", "label": "Les 2", "icon": "lesson_shapes"},
+	{"id": "lesson_3", "path": "res://scenes/lesson_3.tscn", "label": "Les 3", "icon": "lesson_sequence"},
 ]
 
 const MENU_BUTTON_PATH := "res://scenes/ui/menu_button.tscn"

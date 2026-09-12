@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/lesson_3.gd" id="1_v6op3"]
+[ext_resource type="PackedScene" path="res://scenes/lesson_room.tscn" id="2_y6rbu"]
+[ext_resource type="PackedScene" path="res://scenes/camiel.tscn" id="3_ybhy2"]
+[ext_resource type="Script" path="res://scripts/camiel_controller.gd" id="4_0o7pm"]
+[ext_resource type="PackedScene" path="res://scenes/ui/lesson_hud.tscn" id="5_kw8h4"]
+[ext_resource type="Script" path="res://scripts/ui/lesson_hud.gd" id="6_5ugj1"]
+[ext_resource type="PackedScene" path="res://scenes/lesson_target.tscn" id="7_l3kop"]
+[ext_resource type="Script" path="res://scripts/lesson_target.gd" id="8_itb76"]
+
+[node name="Lesson3" type="Node3D" unique_id=1013624667]
+script = ExtResource("1_v6op3")
+
+[node name="LessonRoom" type="Node3D" parent="." unique_id=1248342695 instance=ExtResource("2_y6rbu")]
+
+[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=1271368917]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 4.5)
+
+[node name="Camiel" type="CharacterBody3D" parent="." unique_id=1761816634 instance=ExtResource("3_ybhy2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 4.5)
+script = ExtResource("4_0o7pm")
+
+[node name="Hud" type="CanvasLayer" parent="." unique_id=851995517 instance=ExtResource("5_kw8h4")]
+unique_name_in_owner = true
+process_mode = 3
+script = ExtResource("6_5ugj1")
+
+[node name="Step1Target" type="Area3D" parent="." unique_id=429791032 instance=ExtResource("7_l3kop")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0.5, 1.8)
+script = ExtResource("8_itb76")
+task_id = "step_1"
+target_color = Color(0.13, 0.35, 0.82, 1)
+display_text = "1"
+requires_activation = true
+
+[node name="Step2Target" type="Area3D" parent="." unique_id=1837154088 instance=ExtResource("7_l3kop")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0.5, 0.2)
+script = ExtResource("8_itb76")
+task_id = "step_2"
+target_color = Color(0.13, 0.35, 0.82, 1)
+display_text = "2"
+requires_activation = true
+
+[node name="Step3Target" type="Area3D" parent="." unique_id=72878936 instance=ExtResource("7_l3kop")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0.5, -3.4)
+script = ExtResource("8_itb76")
+task_id = "step_3"
+target_color = Color(0.13, 0.35, 0.82, 1)
+display_text = "3"
+requires_activation = true
