@@ -46,6 +46,8 @@ func _initialize() -> void:
 	await _case_sfx_plays()
 	await _case_sfx_volume_isolation()
 	await _case_menu_sfx_slider()
+	await _case_menu_bgm_slider()
+	await _case_menu_focus_order()
 
 	if _cases_run == 0:
 		push_error("Audio bus probe ran no cases.")
@@ -355,3 +357,132 @@ func _case_menu_sfx_slider() -> void:
 
 	_cases_run += 1
 	print("PASS menu_sfx_slider")
+
+
+func _case_menu_bgm_slider() -> void:
+	var music_idx := AudioServer.get_bus_index(BUS_MUSIC)
+	var sfx_idx := AudioServer.get_bus_index(BUS_SFX)
+
+	_audio_manager.set_bgm_volume(0.42)
+	var packed: PackedScene = load("res://scenes/main_menu.tscn")
+	var menu: Control = packed.instantiate()
+	root.add_child(menu)
+	await process_frame
+	await process_frame
+
+	var slider := menu.get_node_or_null("%BgmSlider") as HSlider
+	if slider == null:
+		push_error("main_menu.tscn has no %BgmSlider node.")
+		menu.queue_free()
+		quit(1)
+		return
+
+	if slider.min_value != 0 or slider.max_value != 100 or slider.step != 5:
+		push_error("%%BgmSlider range is %f-%f step %f, expected 0-100 step 5." % [slider.min_value, slider.max_value, slider.step])
+		menu.queue_free()
+		quit(1)
+		return
+
+	if slider.custom_minimum_size.x < 320.0 or slider.custom_minimum_size.y < 56.0:
+		push_error("%%BgmSlider custom_minimum_size is %s, expected at least (320, 56)." % slider.custom_minimum_size)
+		menu.queue_free()
+		quit(1)
+		return
+
+	var expected_value := 0.42 * 100.0
+	if absf(slider.value - expected_value) > 2.5:
+		push_error("%%BgmSlider.value on open was %f, expected ~%f (read-back from AudioManager, not the scene default)." % [slider.value, expected_value])
+		menu.queue_free()
+		quit(1)
+		return
+
+	var sfx_before := AudioServer.get_bus_volume_db(sfx_idx)
+	slider.value = 50
+	await process_frame
+
+	var expected_db := linear_to_db(0.5)
+	if not is_equal_approx(AudioServer.get_bus_volume_db(music_idx), expected_db):
+		push_error("Moving %%BgmSlider to 50 set Music bus volume_db to %f, expected %f." % [AudioServer.get_bus_volume_db(music_idx), expected_db])
+		menu.queue_free()
+		quit(1)
+		return
+	if not is_equal_approx(AudioServer.get_bus_volume_db(sfx_idx), sfx_before):
+		push_error("Moving %BgmSlider changed the SFX bus volume_db.")
+		menu.queue_free()
+		quit(1)
+		return
+
+	_audio_manager.set_bgm_volume(0.6)
+	menu.queue_free()
+
+	_cases_run += 1
+	print("PASS menu_bgm_slider")
+
+
+func _case_menu_focus_order() -> void:
+	var packed: PackedScene = load("res://scenes/main_menu.tscn")
+	var menu: Control = packed.instantiate()
+	root.add_child(menu)
+	await process_frame
+	await process_frame
+
+	var start_button: Control = menu.get_node_or_null("%StartButton")
+	var sfx_slider: Control = menu.get_node_or_null("%SfxSlider")
+	var bgm_slider: Control = menu.get_node_or_null("%BgmSlider")
+	if start_button == null or sfx_slider == null or bgm_slider == null:
+		push_error("menu_focus_order: one of %StartButton/%SfxSlider/%BgmSlider is missing.")
+		menu.queue_free()
+		quit(1)
+		return
+
+	if not start_button.has_focus():
+		push_error("menu_focus_order: %StartButton does not hold focus on open.")
+		menu.queue_free()
+		quit(1)
+		return
+
+	var expectations := {
+		start_button: {"down": sfx_slider, "up": null},
+		sfx_slider: {"down": bgm_slider, "up": start_button},
+		bgm_slider: {"down": null, "up": sfx_slider},
+	}
+	for control: Control in expectations.keys():
+		var expected_down: Variant = expectations[control]["down"]
+		var expected_up: Variant = expectations[control]["up"]
+
+		var down_path: NodePath = control.focus_neighbor_bottom
+		var down_node: Node = control.get_node_or_null(down_path) if not down_path.is_empty() else null
+		if expected_down != null and down_node != expected_down:
+			push_error("menu_focus_order: %s's downward focus neighbour is %s, expected %s." % [control.name, down_node, expected_down])
+			menu.queue_free()
+			quit(1)
+			return
+
+		var up_path: NodePath = control.focus_neighbor_top
+		var up_node: Node = control.get_node_or_null(up_path) if not up_path.is_empty() else null
+		if expected_up != null and up_node != expected_up:
+			push_error("menu_focus_order: %s's upward focus neighbour is %s, expected %s." % [control.name, up_node, expected_up])
+			menu.queue_free()
+			quit(1)
+			return
+
+		var next_path: NodePath = control.focus_next
+		var next_node: Node = control.get_node_or_null(next_path) if not next_path.is_empty() else null
+		if expected_down != null and next_node != expected_down:
+			push_error("menu_focus_order: %s's focus_next is %s, expected %s." % [control.name, next_node, expected_down])
+			menu.queue_free()
+			quit(1)
+			return
+
+		var prev_path: NodePath = control.focus_previous
+		var prev_node: Node = control.get_node_or_null(prev_path) if not prev_path.is_empty() else null
+		if expected_up != null and prev_node != expected_up:
+			push_error("menu_focus_order: %s's focus_previous is %s, expected %s." % [control.name, prev_node, expected_up])
+			menu.queue_free()
+			quit(1)
+			return
+
+	menu.queue_free()
+
+	_cases_run += 1
+	print("PASS menu_focus_order")

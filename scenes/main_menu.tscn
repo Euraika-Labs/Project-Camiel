@@ -5,12 +5,15 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="3_rtw2f"]
 [ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="4_oa1go"]
 [ext_resource type="Script" path="res://scripts/ui/vector_icon.gd" id="5_8ln24"]
+[ext_resource type="Script" path="res://scripts/ui/vector_icon.gd" id="6_bgm01"]
 
 [node name="MainMenu" type="Control" unique_id=363801507]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme = ExtResource("1_wu84c")
 script = ExtResource("2_8ln24")
 
@@ -41,6 +44,8 @@ alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 112)
 layout_mode = 2
+focus_neighbor_bottom = NodePath("../AudioPanel/AudioRows/SfxRow/SfxSlider")
+focus_next = NodePath("../AudioPanel/AudioRows/SfxRow/SfxSlider")
 theme = ExtResource("1_wu84c")
 script = ExtResource("4_oa1go")
 label_text = "Start"
@@ -72,7 +77,37 @@ text = "Geluid"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(320, 56)
 layout_mode = 2
+focus_neighbor_top = NodePath("../../../../StartButton")
+focus_neighbor_bottom = NodePath("../../BgmRow/BgmSlider")
+focus_next = NodePath("../../BgmRow/BgmSlider")
+focus_previous = NodePath("../../../../StartButton")
 step = 5.0
 value = 80.0
+tick_count = 6
+ticks_on_borders = true
+
+[node name="BgmRow" type="HBoxContainer" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows" unique_id=1269776210]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="BgmIcon" type="Control" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows/BgmRow" unique_id=1102805902]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+script = ExtResource("6_bgm01")
+icon_kind = "music_note"
+
+[node name="BgmLabel" type="Label" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows/BgmRow" unique_id=515609273]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+text = "Muziek"
+
+[node name="BgmSlider" type="HSlider" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows/BgmRow" unique_id=1865827561]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 56)
+layout_mode = 2
+focus_neighbor_top = NodePath("../../SfxRow/SfxSlider")
+focus_previous = NodePath("../../SfxRow/SfxSlider")
+step = 5.0
+value = 60.0
 tick_count = 6
 ticks_on_borders = true

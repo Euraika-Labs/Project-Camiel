@@ -20,6 +20,9 @@ func _ready() -> void:
 	%SfxSlider.value_changed.connect(_on_sfx_slider_value_changed)
 	%SfxSlider.set_value_no_signal(AudioManager.get_sfx_volume() * 100.0)
 
+	%BgmSlider.value_changed.connect(_on_bgm_slider_value_changed)
+	%BgmSlider.set_value_no_signal(AudioManager.get_bgm_volume() * 100.0)
+
 
 func _on_start_button_pressed() -> void:
 	if _transitioning:
@@ -31,3 +34,7 @@ func _on_start_button_pressed() -> void:
 
 func _on_sfx_slider_value_changed(value: float) -> void:
 	AudioManager.set_sfx_volume(value / 100.0)
+
+
+func _on_bgm_slider_value_changed(value: float) -> void:
+	AudioManager.set_bgm_volume(value / 100.0)
