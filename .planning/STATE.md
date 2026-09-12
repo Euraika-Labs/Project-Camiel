@@ -1,19 +1,19 @@
 ---
 gsd_state_version: "1.0"
 milestone: v0.0.4
-current_phase: 2
+current_phase: 02
 current_phase_name: Playable 3D Intro Experience
-status: planned
-stopped_at: Phase 02 planned (6 plans, 4 waves), ready to execute
-last_updated: "2026-09-12T15:25:37.836Z"
-last_activity: 2026-09-11
-last_activity_desc: Phase 02 planning complete — plans verified by checker
-state_head: 9b562d1b189e07b53f9780836adad888a09503d4
+status: executing
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-09-12T15:57:21.802Z"
+last_activity: 2026-09-12
+last_activity_desc: Phase 02 execution started
+state_head: ef4146c7e58a08db1492f48e38877c3bb3769d17
 progress:
   total_phases: 9
-  completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
+  completed_phases: 0
+  total_plans: 12
+  completed_plans: 7
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 
 ## Current Position
 
-Phase: 2 — Playable 3D Intro Experience
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-11 — Phase 01 complete, transitioned to Phase 2
+Phase: 02 (Playable 3D Intro Experience) — EXECUTING
+Plan: 2 of 6
+Status: Ready to execute
+Last activity: 2026-09-12 — Phase 02 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -64,6 +64,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P04 | 35min | 2 tasks | 7 files |
 | Phase 01 P05 | 25min | 2 tasks | 4 files |
 | Phase 01 P06 | 185min | 3 tasks | 3 files |
+| Phase 02 P01 | 30min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Recent decisions affecting current work:
 - [Phase 01]: [Phase 01-05]: CI and release workflows pinned to Godot 4.7.2, with SHA512 verification added on every engine/export-template download and the 2D-era verifier/quit-after smoke test replaced by scripts/tools/run_headless_check.sh in both workflows; CONTRIBUTING.md updated to match.
 - [Phase 01]: [Phase 01-06]: D-11 playtest verdict (verbatim): "switch to turn-and-walk" - scripts/camiel_controller.gd steering_mode default changed from CAMERA_RELATIVE to TURN_AND_WALK; no tunable values changed since no feel/tuning complaint was raised
 - [Phase 01]: [Phase 01-06]: FOUND-06 closed - tests/test_ci_workflows.py's silent PyYAML skipUnless fallback replaced with a hard import, and the repository-hygiene CI job now installs PyYAML before running tests
+- [Phase 02]: AudioManager._exit_tree() drains 250ms real time (gated on whether audio ever played) to work around a Godot 4.7.2 engine race releasing AudioStreamOggVorbis playback objects only on the Dummy driver's real-time mix cadence
+- [Phase 02]: Headless tool scripts (probe_*.gd) must fetch autoloads via root.get_node_or_null() rather than the bare global identifier, which only resolves for a normal scene boot, not a --script SceneTree entrypoint
 
 ### Pending Todos
 
@@ -107,6 +110,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-11T18:14:32.869Z
-Stopped at: Phase 02 planned (6 plans, 4 waves), ready to execute
+Last session: 2026-09-12T15:57:21.787Z
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
