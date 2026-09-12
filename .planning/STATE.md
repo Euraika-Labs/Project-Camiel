@@ -4,16 +4,16 @@ milestone: v0.0.4
 current_phase: 02
 current_phase_name: Playable 3D Intro Experience
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-09-12T18:27:47.457Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-09-12T18:48:23.922Z"
 last_activity: 2026-09-12
 last_activity_desc: Phase 02 execution started
-state_head: 28ddd56a7603b58c388701a00ea3824b563f581c
+state_head: 31a3d06381d0d115b12a2ac9ca76a259bdfa3217
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 12
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 ## Current Position
 
 Phase: 02 (Playable 3D Intro Experience) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-09-12 — Phase 02 execution started
 
@@ -66,6 +66,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P06 | 185min | 3 tasks | 3 files |
 | Phase 02 P01 | 30min | 2 tasks | 13 files |
 | Phase 02 P02 | 35min | 2 tasks | 8 files |
+| Phase 02 P03 | 19min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,8 @@ Recent decisions affecting current work:
 - [Phase 02]: Headless tool scripts (probe_*.gd) must fetch autoloads via root.get_node_or_null() rather than the bare global identifier, which only resolves for a normal scene boot, not a --script SceneTree entrypoint
 - [Phase 02]: [Phase 02-02]: Split the six menu-button icons across the tracer/expansion pair — Task 1 implements only "play" (matching its own tested behavior), Task 2 completes walk/replay/home/speaker/music_note, per Task 2's explicit "remaining five kinds" wording
 - [Phase 02]: [Phase 02-02]: Label's mouse_filter is written explicitly in menu_button.tscn even though it equals Label's own class default, so all three tap-through nodes show MOUSE_FILTER_IGNORE in the saved scene text, not just two of three
+- [Phase 02]: [Phase 02-03]: Camiel already joins the player group via camiel_controller.gd's own ready callback; intro_level.tscn's Camiel instance carries no scene-instance group override — resolves 02-UI-SPEC.md Open Question 1 by confirming the recommended default, not adding one
+- [Phase 02]: [Phase 02]: [Phase 02-03]: project.godot's run/main_scene retarget applied as a direct one-line text edit, not ProjectSettings.save() — save() silently dropped the unrelated renderer/rendering_method.web line on this pass
 
 ### Pending Todos
 
@@ -113,6 +116,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-12T18:27:47.442Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-09-12T18:48:23.908Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None

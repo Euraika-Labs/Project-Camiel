@@ -23,8 +23,8 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 
 ### 3D Intro Level
 
-- [ ] **INTRO-01**: In the intro level, Camiel moves freely in 3D space (forward, back, left, right) under keyboard control, with a camera that follows Camiel
-- [ ] **INTRO-02**: Camiel can jump in the intro level
+- [x] **INTRO-01**: In the intro level, Camiel moves freely in 3D space (forward, back, left, right) under keyboard control, with a camera that follows Camiel
+- [x] **INTRO-02**: Camiel can jump in the intro level
 - [ ] **INTRO-03**: A child can collect a 3D collectible object in the intro level; the pickup sound effect plays exactly once per pickup
 - [ ] **INTRO-04**: Reaching the 3D finish marker triggers the win screen, driven by a single signal-driven code path rather than a direct cross-script call
 - [ ] **INTRO-05**: The win screen shows two buttons, "Nog een keer" (replay) and "Naar menu", each with an icon, activated by tap, click, or Enter on the focused button, through one code path
@@ -131,8 +131,8 @@ Which phases cover which requirements.
 | FOUND-06 | Phase 1 | Complete |
 | MENU-01 | Phase 2 | Pending |
 | MENU-02 | Phase 2 | Pending |
-| INTRO-01 | Phase 2 | Pending |
-| INTRO-02 | Phase 2 | Pending |
+| INTRO-01 | Phase 2 | Complete |
+| INTRO-02 | Phase 2 | Complete |
 | INTRO-03 | Phase 2 | Pending |
 | INTRO-04 | Phase 2 | Pending |
 | INTRO-05 | Phase 2 | Pending |
