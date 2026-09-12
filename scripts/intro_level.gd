@@ -26,6 +26,7 @@ const MAIN_MENU_PATH := "res://scenes/main_menu.tscn"
 # ── Node references ──────────────────────────────────────────────
 
 @onready var _camiel: CharacterBody3D = $Camiel
+@onready var _player_spawn: Marker3D = $PlayerSpawn
 
 # ── Private state ────────────────────────────────────────────────
 
@@ -75,7 +76,15 @@ func _on_go_to_menu_button_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(MAIN_MENU_PATH)
 
 
-## Completed in plan 02-04 Task 3 (in-place replay reset). Declared and wired
-## now so the connection is real from this commit rather than dangling.
+## Resets the level in place (D-28): no scene change, no scene reload — the
+## same level instance keeps running. Repeatable by design, so this handler
+## carries no one-shot guard; that guard belongs only on handlers that
+## change scene.
 func _on_replay_button_pressed() -> void:
 	replay_requested.emit()
+	%WinLayer.visible = false
+	%Scrim.modulate.a = 1.0
+	_camiel.set_physics_process(true)
+	_camiel.teleport_to(_player_spawn.global_position)
+	%Collectible.reset()
+	%FinishMarker.reset()

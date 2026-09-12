@@ -19,6 +19,7 @@ var _level_transition_count := 0
 var _level_transition_target := ""
 var _collected_signal_count := 0
 var _drain_audio_manager: Node = null
+var _replay_signal_count := 0
 
 
 func _initialize() -> void:
@@ -35,6 +36,9 @@ func _initialize() -> void:
 	if _failed:
 		return
 	await _case_collectible()
+	if _failed:
+		return
+	await _case_win_buttons()
 	if _failed:
 		return
 
@@ -384,6 +388,157 @@ func _case_collectible() -> void:
 	intruder.queue_free()
 
 	collectible.collected.disconnect(_on_collected_counted)
+	level.queue_free()
+	await process_frame
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+func _on_replay_requested_counted() -> void:
+	_replay_signal_count += 1
+
+
+# Plan 02-04 Task 3: the in-place replay reset (D-28), the explicit
+# ReplayButton -> GoToMenuButton focus order (D-14), and each win button
+# proved one-shot independently — including a second lap after a replay,
+# so a child who replays is never left in a level with no ending.
+func _case_win_buttons() -> void:
+	var case_name := "win_buttons"
+	var packed: PackedScene = load("res://scenes/intro_level.tscn")
+	if packed == null:
+		_fail(case_name, "could not load res://scenes/intro_level.tscn")
+		return
+
+	var level: Node3D = packed.instantiate()
+	root.add_child(level)
+	await process_frame
+	await process_frame
+
+	var finish_marker: Area3D = level.get_node("%FinishMarker")
+	var collectible: Area3D = level.get_node("%Collectible")
+	var win_layer: CanvasLayer = level.get_node("%WinLayer")
+	var replay_button: Button = level.get_node("%ReplayButton")
+	var go_to_menu_button: Button = level.get_node("%GoToMenuButton")
+	var camiel: CharacterBody3D = level.get_node("Camiel")
+	var player_spawn: Marker3D = level.get_node("PlayerSpawn")
+
+	camiel.teleport_to(finish_marker.global_position)
+	var frames_waited := 0
+	while not win_layer.visible and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+	if not win_layer.visible:
+		_fail(case_name, "%WinLayer never became visible after teleporting Camiel onto the finish marker")
+		return
+
+	if not replay_button.has_focus():
+		_fail(case_name, "%ReplayButton does not hold focus when the overlay appears")
+		return
+
+	var neighbor_path: NodePath = replay_button.focus_neighbor_right
+	if neighbor_path.is_empty():
+		_fail(case_name, "%ReplayButton.focus_neighbor_right is not set")
+		return
+	if replay_button.get_node(neighbor_path) != go_to_menu_button:
+		_fail(case_name, "%ReplayButton's declared next-focus neighbour does not resolve to %GoToMenuButton")
+		return
+
+	_replay_signal_count = 0
+	level.replay_requested.connect(_on_replay_requested_counted)
+	var scene_before := current_scene
+
+	_press_focused()
+	await process_frame
+	await process_frame
+
+	if _replay_signal_count != 1:
+		_fail(case_name, "replay_requested fired %d times, expected 1" % _replay_signal_count)
+		return
+	if win_layer.visible:
+		_fail(case_name, "%WinLayer is still visible after replay")
+		return
+	if not collectible.monitoring:
+		_fail(case_name, "%Collectible.monitoring is false after replay")
+		return
+	if not collectible.visible:
+		_fail(case_name, "%Collectible is not visible after replay")
+		return
+	var distance_from_spawn := camiel.global_position.distance_to(player_spawn.global_position)
+	if distance_from_spawn > 0.05:
+		_fail(case_name, "Camiel is %.3f m from PlayerSpawn after replay, expected within 0.05m" % distance_from_spawn)
+		return
+	if camiel.velocity.length() > 0.01:
+		_fail(case_name, "Camiel's velocity length is %.4f after replay, expected under 0.01" % camiel.velocity.length())
+		return
+	if not camiel.is_physics_processing():
+		_fail(case_name, "Camiel's physics processing is still off after replay")
+		return
+	if current_scene != scene_before:
+		_fail(case_name, "current_scene changed during replay; replay must not change scene")
+		return
+	if not level.is_inside_tree():
+		_fail(case_name, "the level instance left the tree during replay")
+		return
+
+	# Prove the second lap: replay re-armed the finish marker too, so a
+	# child who replays is not left in a level with no ending.
+	camiel.teleport_to(finish_marker.global_position)
+	frames_waited = 0
+	while not win_layer.visible and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+	if not win_layer.visible:
+		_fail(case_name, "%WinLayer did not become visible a second time after a replayed lap")
+		return
+
+	# Prove the replay button's own activation count independently of the
+	# return-to-menu button.
+	replay_button.grab_focus()
+	_press_focused()
+	await process_frame
+	await process_frame
+	if _replay_signal_count != 2:
+		_fail(case_name, "replay_requested fired %d times total, expected 2 after a second press" % _replay_signal_count)
+		return
+
+	# Re-trigger the win once more to test the return-to-menu button on its
+	# own, independent of the replay button's own count.
+	camiel.teleport_to(finish_marker.global_position)
+	frames_waited = 0
+	while not win_layer.visible and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+	if not win_layer.visible:
+		_fail(case_name, "%WinLayer did not become visible a third time before testing the return-to-menu button")
+		return
+
+	_level_transition_count = 0
+	_level_transition_target = ""
+	level.transition_requested.connect(_on_level_transition_requested)
+
+	go_to_menu_button.grab_focus()
+	_press_focused()
+	await process_frame
+	await process_frame
+
+	if _level_transition_count != 1:
+		_fail(case_name, "transition_requested fired %d times, expected 1" % _level_transition_count)
+		return
+
+	await _drain_scene_change()
+
+	go_to_menu_button.grab_focus()
+	_press_focused()
+	await process_frame
+	await process_frame
+
+	if _level_transition_count != 1:
+		_fail(case_name, "the _transitioning guard did not block a second press; count is %d" % _level_transition_count)
+		return
+
+	level.transition_requested.disconnect(_on_level_transition_requested)
+	level.replay_requested.disconnect(_on_replay_requested_counted)
 	level.queue_free()
 	await process_frame
 
