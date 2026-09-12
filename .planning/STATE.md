@@ -5,12 +5,12 @@ current_phase: 3
 current_phase_name: 3D Lesson Parity & Progress Persistence
 status: planning
 stopped_at: Phase 02 complete, ready to plan Phase 3
-last_updated: "2026-09-12T20:14:25.709Z"
+last_updated: "2026-09-12T20:15:24.410Z"
 last_activity: 2026-09-12
 last_activity_desc: Phase 02 complete, transitioned to Phase 3
-state_head: 39b8f664bc59b46597eb093263766e9a64a4b19f
+state_head: 5ec1197edd977a455fa1732d1c6ea4de71684bf2
 progress:
-  total_phases: 9
+  total_phases: 10
   completed_phases: 1
   total_plans: 12
   completed_plans: 12
@@ -114,6 +114,10 @@ Recent decisions affecting current work:
 - Renderer choice (Forward Plus vs. Compatibility) is an open question Phase 1 must settle before any 3D visuals are built.
 - Camera and control scheme for free 3D movement is an open question for Phase 1, the phase that first builds movement.
 - Design of Lessons 4 and 5 is an open question for Phase 3, the phase that builds lesson parity.
+
+### Roadmap Evolution
+
+- Phase 03.1 inserted after Phase 3: Camiel 3D model and animations (MODEL-01 pulled forward from v2); placed before the accessibility phase so WCAG contrast is judged on real art, and before later phases so collision/camera proportions are tuned once
 
 ## Deferred Items
 

@@ -87,7 +87,7 @@ Deferred to a future milestone. Tracked but not in this roadmap.
 
 ### Character Art
 
-- **MODEL-01**: Camiel's real 3D model and animations replace the primitive-shape placeholder; the model's source (AI-generated from the existing 2D art vs. made/commissioned) is an open decision not yet settled
+- **MODEL-01**: Camiel's real 3D model and animations replace the primitive-shape placeholder; the model's source (AI-generated from the existing 2D art vs. made/commissioned) is an open decision not yet settled. **Pulled forward from v2 into this milestone as Phase 03.1** after the Phase 2 playtest, placed before the accessibility phase so contrast is judged on real art and before later phases so proportions are tuned once. The archived 2D drawings remain retrievable from tag `archive/2d-alpha-v0.0.3` as source material.
 
 ### Platform Expansion
 
@@ -112,7 +112,7 @@ Explicitly excluded from this milestone. Documented to prevent scope creep.
 | Feature | Reason |
 |---------|--------|
 | Multiplayer or online features | Camiel is an offline, single-player, single-device experience by design |
-| Real (non-primitive) 3D art and animations for Camiel and lesson props | v1 ships with primitive shapes per a locked decision; see v2 `MODEL-01` |
+| Real (non-primitive) 3D art for lesson props | Lesson props stay primitive this milestone; Camiel himself is now in scope via `MODEL-01` (Phase 03.1) |
 | Android APK export / macOS code-signing hardening | v2 (`PLAT-01`, `PLAT-02`, `REL-01`) |
 | Git LFS / asset repository restructuring | Tech debt tracked in `.planning/codebase/CONCERNS.md`; does not block the milestone success metric |
 | Parent dashboard extensions beyond the documented read-only single-child viewer | v2 (`DASH-EXT-01`, `DASH-EXT-02`) |
@@ -137,6 +137,7 @@ Which phases cover which requirements.
 | INTRO-04 | Phase 2 | Complete |
 | INTRO-05 | Phase 2 | Complete |
 | INTRO-06 | Phase 2 | Complete |
+| MODEL-01 | Phase 03.1 | Pending |
 | LESSON-01 | Phase 3 | Pending |
 | LESSON-02 | Phase 3 | Pending |
 | LESSON-03 | Phase 3 | Pending |

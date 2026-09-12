@@ -14,6 +14,7 @@ This roadmap replaces the 2D-stabilization plan after the project pivoted to a f
 - [x] **Phase 1: 3D Foundation & Archive** - The 2D game is archived and removed, and a thin playable 3D slice runs on a clean project baseline (completed 2026-09-11)
 - [x] **Phase 2: Playable 3D Intro Experience** - Title screen through the 3D intro level (move, jump, collect, reach goal, win screen) works by tap, click, or keyboard (completed 2026-09-12)
 - [ ] **Phase 3: 3D Lesson Parity & Progress Persistence** - Lessons 1-5 are reachable in 3D, correct, and record progress to disk
+- [ ] **Phase 03.1: Camiel 3D Model & Animations** - Camiel's real 3D model and animations replace the primitive-shape placeholder (INSERTED)
 - [ ] **Phase 4: Accessibility & Release Pipeline Hardening** - WCAG AA contrast, a working high-contrast toggle, and a release pipeline that produces exactly one correct release
 - [ ] **Phase 5: Dutch Voice-Over** - Spoken Dutch audio cues guide pre-reading children through every screen and lesson
 - [ ] **Phase 6: Mobile Touch Controls** - Production-quality analog, multi-touch controls available in every level and lesson
@@ -117,6 +118,20 @@ Plans:
 **Open Questions** (owned by this phase — do not decide during roadmapping):
 
 - Design of Lessons 4 and 5 (they were empty placeholders in 2D). Their concrete educational concept is undecided and must be settled while this phase is discussed.
+
+### Phase 03.1: Camiel 3D model and animations replace the primitive-shape placeholder (INSERTED)
+
+**Goal**: Camiel's real 3D model and animations replace the primitive-shape placeholder, so every later phase is built and judged against final proportions and final art.
+**Depends on**: Phase 3
+**Requirements**: MODEL-01
+**Success Criteria** (what must be TRUE):
+
+  1. Camiel's primitive capsule-and-nose placeholder is replaced by a real 3D model in every scene that instances him.
+  2. The model's collision shape, camera spring-arm length and jump clearance are retuned to the new proportions, and the existing movement probe still passes against both the test space and the intro level.
+  3. Walk, idle and jump animations play and are driven by the same InputMap actions the controller already uses, with no new raw key polling.
+  4. The headless project check stays green, including the behaviour probes, with no new import errors.
+
+**Plans**: Not yet planned
 
 ### Phase 4: Accessibility & Release Pipeline Hardening
 
