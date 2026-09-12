@@ -83,7 +83,6 @@ func _on_go_to_menu_button_pressed() -> void:
 func _on_replay_button_pressed() -> void:
 	replay_requested.emit()
 	%WinLayer.visible = false
-	%Scrim.modulate.a = 1.0
 	_camiel.set_physics_process(true)
 	_camiel.teleport_to(_player_spawn.global_position)
 	%Collectible.reset()
