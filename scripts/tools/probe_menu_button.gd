@@ -28,6 +28,18 @@ func _initialize() -> void:
 	await _case_defaults()
 	if _failed:
 		return
+	await _case_all_icon_kinds()
+	if _failed:
+		return
+	await _case_live_redraw()
+	if _failed:
+		return
+	await _case_tap_through()
+	if _failed:
+		return
+	await _case_theme_states()
+	if _failed:
+		return
 
 	print("Menu button probe passed.")
 	quit(0)
@@ -223,3 +235,117 @@ func _case_defaults() -> void:
 
 	button.queue_free()
 	print("PASS defaults")
+
+
+const ALL_ICON_KINDS := ["play", "walk", "replay", "home", "speaker", "music_note"]
+
+
+func _case_all_icon_kinds() -> void:
+	var icon_script: GDScript = load("res://scripts/ui/vector_icon.gd")
+	var icon: Control = icon_script.new()
+	var tolerance := 1.0
+
+	for kind: String in ALL_ICON_KINDS:
+		var shapes: Array[Dictionary] = icon.get_icon_shapes(kind, Vector2(64, 64))
+		if shapes.is_empty():
+			icon.free()
+			_fail("all_icon_kinds", "get_icon_shapes(\"%s\", ...) returned no shapes" % kind)
+			return
+		for shape: Dictionary in shapes:
+			for point: Vector2 in _shape_extreme_points(shape):
+				if point.x < -tolerance or point.x > 64.0 + tolerance or point.y < -tolerance or point.y > 64.0 + tolerance:
+					icon.free()
+					_fail("all_icon_kinds", "%s shape coordinate %s lies outside the 64x64 rectangle" % [kind, point])
+					return
+
+	var unknown_shapes: Array[Dictionary] = icon.get_icon_shapes("this_kind_does_not_exist", Vector2(64, 64))
+	icon.free()
+	if not unknown_shapes.is_empty():
+		_fail("all_icon_kinds", "an unrecognised icon kind returned %d shapes, expected 0" % unknown_shapes.size())
+		return
+
+	print("PASS all_icon_kinds")
+
+
+func _case_live_redraw() -> void:
+	var button := _load_button()
+	if button == null:
+		_fail("live_redraw", "menu button scene failed to load")
+		return
+
+	root.add_child(button)
+	await process_frame
+	await process_frame
+
+	var icon: Control = button.get_node("%Icon")
+	for kind: String in ALL_ICON_KINDS:
+		icon.icon_kind = kind
+		icon.queue_redraw()
+		await process_frame
+
+	button.queue_free()
+	print("PASS live_redraw")
+
+
+func _case_tap_through() -> void:
+	var button := _load_button()
+	if button == null:
+		_fail("tap_through", "menu button scene failed to load")
+		return
+
+	root.add_child(button)
+	await process_frame
+	await process_frame
+
+	var content: Control = button.get_node("Content")
+	var icon: Control = button.get_node("%Icon")
+	var label: Control = button.get_node("%Label")
+
+	if content.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+		_fail("tap_through", "Content.mouse_filter is not MOUSE_FILTER_IGNORE")
+		button.queue_free()
+		return
+	if icon.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+		_fail("tap_through", "%%Icon.mouse_filter is not MOUSE_FILTER_IGNORE")
+		button.queue_free()
+		return
+	if label.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+		_fail("tap_through", "%%Label.mouse_filter is not MOUSE_FILTER_IGNORE")
+		button.queue_free()
+		return
+
+	if button.custom_minimum_size.x < 280.0 or button.custom_minimum_size.y < 112.0:
+		_fail("tap_through", "custom_minimum_size %s is smaller than 280x112" % button.custom_minimum_size)
+		button.queue_free()
+		return
+
+	button.queue_free()
+	print("PASS tap_through")
+
+
+func _case_theme_states() -> void:
+	var theme: Theme = load("res://assets/theme/ui_theme.tres")
+	if theme == null:
+		_fail("theme_states", "could not load res://assets/theme/ui_theme.tres")
+		return
+
+	for state_name: String in ["normal", "hover", "pressed", "focus"]:
+		if not theme.has_stylebox(state_name, "Button"):
+			_fail("theme_states", "Button theme has no '%s' stylebox" % state_name)
+			return
+
+	var focus_box: StyleBox = theme.get_stylebox("focus", "Button")
+	if not (focus_box is StyleBoxFlat):
+		_fail("theme_states", "Button 'focus' stylebox is not a StyleBoxFlat")
+		return
+
+	var focus_flat := focus_box as StyleBoxFlat
+	var accent := Color("ed9e4d")
+	if not focus_flat.border_color.is_equal_approx(accent):
+		_fail("theme_states", "focus stylebox border color %s does not match accent %s" % [focus_flat.border_color, accent])
+		return
+	if focus_flat.border_width_left != 4 or focus_flat.border_width_top != 4 or focus_flat.border_width_right != 4 or focus_flat.border_width_bottom != 4:
+		_fail("theme_states", "focus stylebox border width is not 4 on all sides")
+		return
+
+	print("PASS theme_states")
