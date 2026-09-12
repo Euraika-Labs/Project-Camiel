@@ -4,16 +4,16 @@ milestone: v0.0.4
 current_phase: 02
 current_phase_name: Playable 3D Intro Experience
 status: executing
-stopped_at: Completed 02-05-PLAN.md
-last_updated: "2026-09-12T19:30:45.000Z"
+stopped_at: Completed 02-06-PLAN.md (Phase 02 complete)
+last_updated: "2026-09-12T19:47:53.081Z"
 last_activity: 2026-09-12
 last_activity_desc: Phase 02 Plan 05 executed (main menu audio panel and sliders)
-state_head: 068c1e5a1575e262dd818275b45db65d795a30e0
+state_head: d56201b20d14de0eb2e34979ea9f2fc11e23c145
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 ## Current Position
 
 Phase: 02 (Playable 3D Intro Experience) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute 02-06
 Last activity: 2026-09-12 — Phase 02 Plan 05 executed (main menu audio panel and sliders)
 
@@ -69,6 +69,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P03 | 19min | 2 tasks | 13 files |
 | Phase 02 P04 | 20min | 3 tasks | 10 files |
 | Phase 02 P05 | 30min | 3 tasks | 4 files |
+| Phase 02 P06 | 20 min | 1 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,7 @@ Recent decisions affecting current work:
 - [Phase 02]: [Phase 02-04]: Area3D forbids toggling monitoring synchronously inside its own body_entered callback; collectible.gd defers monitoring off, the pickup tween, and the collected signal together as one call_deferred step
 - [Phase 02]: [Phase 02-05]: Godot's GDScript loader enforces singleton resource identity per path regardless of ResourceLoader.CACHE_MODE_IGNORE, so packing two icon nodes that both load vector_icon.gd always dedupes to one ext_resource; the scene generator's post-processing step splits it into two declarations pointing at the same file so each icon row owns its own
 - [Phase 02]: [Phase 02-05]: Per 02-VALIDATION.md's "Probe-presence guard gap", the REQUIRED_PROBES named-probe allow-list for run_headless_check.sh is deliberately left unimplemented this phase; test_headless_check.sh Case 13 records the current weakness (removing one named probe while others remain still passes) as a known, honestly-named gap rather than a guarantee
+- [Phase 02]: [Phase 02]: [Phase 02-06]: D-30 playtest verdict (verbatim): "it works but graphics are very basic" - no functional or tuning changes applied since no defect or adjustment was named; the graphics remark is out-of-scope feedback mapped to the already-deferred v2 MODEL-01
 
 ### Pending Todos
 
@@ -122,6 +124,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-12T19:30:45.000Z
-Stopped at: Completed 02-05-PLAN.md
+Last session: 2026-09-12T19:47:53.065Z
+Stopped at: Completed 02-06-PLAN.md (Phase 02 complete)
 Resume file: None

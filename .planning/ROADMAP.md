@@ -76,7 +76,7 @@ Plans:
   4. Reaching the 3D finish marker shows the win screen with two buttons, "Nog een keer" (replay) and "Naar menu", each with an icon, activated by tap, click, or Enter on the focused button, through one code path.
   5. Background music loops continuously and the SFX volume control has an audible effect.
 
-**Plans**: 5/6 plans executed
+**Plans**: 6/6 plans executed
 **UI hint**: yes
 
 Plans:
@@ -96,7 +96,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 02-06-PLAN.md — Final gate and the D-30 playtest of the whole loop
+- [x] 02-06-PLAN.md — Final gate and the D-30 playtest of the whole loop
 
 ### Phase 3: 3D Lesson Parity & Progress Persistence
 
@@ -211,7 +211,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 3D Foundation & Archive | 6/6 | Complete    | 2026-09-11 |
-| 2. Playable 3D Intro Experience | 5/6 | In Progress|  |
+| 2. Playable 3D Intro Experience | 6/6 | In Progress|  |
 | 3. 3D Lesson Parity & Progress Persistence | 0/0 | Not started | - |
 | 4. Accessibility & Release Pipeline Hardening | 0/0 | Not started | - |
 | 5. Dutch Voice-Over | 0/0 | Not started | - |

@@ -18,16 +18,16 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 
 ### Title Screen & Main Menu
 
-- [ ] **MENU-01**: The title screen's Play control transitions to the main menu exactly once, whether triggered by tap, click, or keyboard
-- [ ] **MENU-02**: The main menu's Start control responds to tap or click as well as keyboard, through one code path
+- [x] **MENU-01**: The title screen's Play control transitions to the main menu exactly once, whether triggered by tap, click, or keyboard
+- [x] **MENU-02**: The main menu's Start control responds to tap or click as well as keyboard, through one code path
 
 ### 3D Intro Level
 
 - [x] **INTRO-01**: In the intro level, Camiel moves freely in 3D space (forward, back, left, right) under keyboard control, with a camera that follows Camiel
 - [x] **INTRO-02**: Camiel can jump in the intro level
-- [ ] **INTRO-03**: A child can collect a 3D collectible object in the intro level; the pickup sound effect plays exactly once per pickup
-- [ ] **INTRO-04**: Reaching the 3D finish marker triggers the win screen, driven by a single signal-driven code path rather than a direct cross-script call
-- [ ] **INTRO-05**: The win screen shows two buttons, "Nog een keer" (replay) and "Naar menu", each with an icon, activated by tap, click, or Enter on the focused button, through one code path
+- [x] **INTRO-03**: A child can collect a 3D collectible object in the intro level; the pickup sound effect plays exactly once per pickup
+- [x] **INTRO-04**: Reaching the 3D finish marker triggers the win screen, driven by a single signal-driven code path rather than a direct cross-script call
+- [x] **INTRO-05**: The win screen shows two buttons, "Nog een keer" (replay) and "Naar menu", each with an icon, activated by tap, click, or Enter on the focused button, through one code path
 - [x] **INTRO-06**: Background music loops continuously in the intro level and lesson scenes, and the SFX volume control has an audible effect
 
 ### 3D Lesson Parity & Progress Persistence
@@ -129,13 +129,13 @@ Which phases cover which requirements.
 | FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Complete |
-| MENU-01 | Phase 2 | Pending |
-| MENU-02 | Phase 2 | Pending |
+| MENU-01 | Phase 2 | Complete |
+| MENU-02 | Phase 2 | Complete |
 | INTRO-01 | Phase 2 | Complete |
 | INTRO-02 | Phase 2 | Complete |
-| INTRO-03 | Phase 2 | Pending |
-| INTRO-04 | Phase 2 | Pending |
-| INTRO-05 | Phase 2 | Pending |
+| INTRO-03 | Phase 2 | Complete |
+| INTRO-04 | Phase 2 | Complete |
+| INTRO-05 | Phase 2 | Complete |
 | INTRO-06 | Phase 2 | Complete |
 | LESSON-01 | Phase 3 | Pending |
 | LESSON-02 | Phase 3 | Pending |
