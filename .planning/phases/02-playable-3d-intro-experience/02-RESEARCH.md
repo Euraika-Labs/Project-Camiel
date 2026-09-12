@@ -139,6 +139,8 @@ abbreviated for readability; exact invocations used `mktemp -d` scratch dirs.
 | VF19 | `linear_to_db()` / `db_to_linear()` are valid global GDScript functions in 4.7.2 (needed for `AudioManager.set_bgm_volume`/`set_sfx_volume`'s linear-to-dB conversion, matching the archived API contract). | `linear_to_db(0.8)`, `db_to_linear(-1.9382)` | `linear_to_db(0.8) = -1.93820026016113`; `db_to_linear(-1.94) ≈ 0.8` |
 | VF20 | `AudioStreamPlayer` node has **no `loop` property but does have a `bus: String` property** used to route to a named bus (`"Music"`, `"SFX"`); routing by bus **name**, not by manually resolved index, is what the archived code already does and what still works. | Same property-list scan as VF5, plus VF9's player which set `.bus = "Music"` and produced correct isolated volume behavior in VF8 | `bus` present in property list (type `String`); `player.bus = "Music"` then playing through that bus was reflected correctly in `AudioServer.set_bus_volume_db` targeting. |
 | VF21 | Camiel's existing `teleport_to(target: Vector3)` method (Phase 1, `camiel_controller.gd`) already resets `velocity = Vector3.ZERO` and snaps the camera — it is the correct, already-tested primitive for the win-screen "Nog een keer" replay reset; no new reset code needs to be hand-rolled for position/velocity. | `Read` of `scripts/camiel_controller.gd` (this repo) | `scripts/camiel_controller.gd:163-171`: `func teleport_to(target: Vector3) -> void: global_position = target; velocity = Vector3.ZERO; _snap_camera_behind()` |
+| VF22 | **`--headless` always forces the `Dummy` audio driver, on every platform — this resolves Assumption A1 below.** Godot's own `--help` text defines `--headless` as `(--display-driver headless --audio-driver Dummy)`; there is no separate "headless-but-real-driver" code path to worry about, on macOS or Linux. Every audio test in this document (VF5, VF8, VF9, VF20) was already run with `--headless` and therefore already exercised the real `Dummy` driver, on this machine, not a macOS-only shortcut. (`ProjectSettings.get_setting("audio/driver/driver")` prints the project's *configured preference* — `"CoreAudio"` on this machine's default — and does **not** reflect the actually-active runtime driver forced by `--headless`; querying it is a red herring, not evidence of which driver initialized. `AudioServer.get_driver_name()` is the correct call — it reported `"Dummy"` in every test below.) Re-ran the exact VF9 scenario with `--audio-driver Dummy` passed explicitly (redundant with `--headless`, done to remove any doubt) and got identical results. **Caveat added after further testing (VF23): the specific number `0.00290249427781` reported here is a frozen value, not a genuinely-advancing position — see VF23, which corrects the "nonzero and advancing" characterization below.** | `"$GODOT" --help \| grep -A1 'audio-driver'` ; `"$GODOT" --headless --audio-driver Dummy --fixed-fps 60 --script zz_dummy_probe.gd` (explicit stream: genuine-Vorbis `tone.ogg`, `stream.loop = true`, `player.play()`) | `--help`: `--headless  ... Enable headless mode (--display-driver headless --audio-driver Dummy).` Probe: `playing right after play(): true` / `playing after 30 physics frames: true` / `playback_position after 30 frames: 0.00290249427781`. |
+| VF23 | **Correction, prompted by the coordinator's independent finding — `get_playback_position()` does not advance per-frame under Dummy; it is frozen for dozens of consecutive polls and only jumps in discrete steps tied to real wall-clock elapsed time, not physics-frame count.** Confirmed for both `AudioStreamWAV` (8-bit mono, matching the coordinator's exact repro shape) and genuine `AudioStreamOggVorbis`. With no artificial delay between polls (bare `await physics_frame` loop, `--fixed-fps 60`), position stayed at one constant value for 60 consecutive frames straight (WAV: frozen at `0.00580499`; Ogg: frozen at `0.00290249`, matching VF22 exactly). Adding a real 5ms `OS.delay_msec()` between polls revealed the actual mechanism: position advances in discrete steps roughly every ~93ms of *real* elapsed time (`0.00580499` → `0.09868481` at ~33ms real-elapsed → `0.19156462` at ~131ms → `0.28444445` at ~237ms), i.e. tied to the Dummy driver's mix-buffer cadence in wall-clock time, not to `--fixed-fps`-simulated frame count. **I could not reproduce the coordinator's specific "`playing` false at t0/t3, true only at t12" transition, or any negative `get_playback_position()` reading, despite trying 4 configurations: (1) a bare `SceneTree` probe with the node properly settled one frame before `play()` — `playing` was `true` and position non-negative from the very first sample; (2) the same but calling `play()` in the exact same call as `add_child()` with no settling frame — this instead threw `ERROR: Playback can only happen when a node is inside the scene tree` and `playing` stayed permanently `false` (a hard usage error, not a transient lag); (3) an `AudioManager`-shaped pattern where a freshly-`add_child`'d player's own `_ready()` immediately calls `.play()` on itself (mirroring this document's `AudioManager` skeleton exactly) — same result as (1); (4) real-time-paced polling — same result as (1), just with visible position jumps.** This is reported as an honest non-reproduction, not a refutation: the position-advance mechanism I did confirm (real-wall-clock-tied, not frame-tied) is exactly the kind of scheduling-sensitive behavior that could plausibly produce a brief false/negative transient window on a more heavily-loaded machine (e.g. CI) that my faster local loop skipped past between polls — the underlying cause (a real-time-driven mix thread queried from a `--fixed-fps`-accelerated, real-time-*unthrottled* poll loop, per VF11) is the same mechanism either way. **Practical conclusion, safe regardless of whose exact frame numbers apply on a given machine:** neither `playing` immediately after `.play()` nor `get_playback_position()` at any point in the first ~100ms of real time after `.play()` should be trusted at face value; see the Validation Architecture section's retry-loop pattern. | 4 scratch scripts, `--headless --fixed-fps 60`, both `AudioStreamWAV` (8-bit mono, 0.5s, matching the coordinator's setup) and genuine Vorbis `tone.ogg`; one variant added `OS.delay_msec(5)` between polls to correlate position jumps with real elapsed time (`Time.get_ticks_usec()`) | WAV, no delay, 60 samples: `t0..t59 playing=true pos=0.00580499` (constant, never changes). WAV, 5ms real delay between polls: `t0 (elapsed 0.010ms) playing=true pos=0.00580499` ... `t4 (elapsed 33.500ms) ... pos=0.09868481` ... `t17 (elapsed 131.410ms) ... pos=0.19156462` ... `t31 (elapsed 236.904ms) ... pos=0.28444445`. Ogg Vorbis, no delay, 60 samples: `t0..t59 playing=true pos=0.00290249` (constant). The "not inside tree" variant: `ERROR: Playback can only happen when a node is inside the scene tree` then `t0..t29 playing=false pos=0.0` for all 30 samples. No negative value observed in any run. |
 
 ---
 
@@ -146,7 +148,8 @@ abbreviated for readability; exact invocations used `mktemp -d` scratch dirs.
 
 | # | Claim | Confidence | Impact if wrong | How an executor would detect it |
 |---|-------|-----------|------------------|----------------------------------|
-| A1 | On Linux CI runners, `--headless` uses the `Dummy` audio driver rather than `CoreAudio` (this machine is macOS and reported `CoreAudio` even headless — VF9's caveat). The D-26 `playing == true` proxy assertion should still hold under `Dummy` because `AudioStreamPlayer.playing` is a logical playback-state flag tracked by the audio server layer, not a hardware-output readback — but this was not verified on Linux this session. | MEDIUM (consistent with documented Godot architecture, not independently reproduced on Linux) | If `Dummy` driver behaves differently and `playing` never becomes true, `probe_screen_flow.gd`'s CI run would false-fail even though local (macOS) runs pass. | Run the same probe once under Linux CI (or a Linux Godot binary) before trusting D-26's probe cross-platform; if it fails, the fallback proxy is `AudioStreamPlayer.get_playback_position() > 0` after N frames instead of `.playing`. |
+| A1 | **RESOLVED — no longer a cross-platform risk** — see VF22. `--headless` is documented by Godot's own `--help` text to force `--audio-driver Dummy` unconditionally, on every platform; there is no macOS-vs-Linux headless-audio divergence to worry about. Every audio assertion in this research (VF5, VF8, VF9, VF20, VF22, VF23) was already exercised under the real `Dummy` driver. Originally flagged MEDIUM pending cross-platform confirmation; the `--help` text plus the explicit `--audio-driver Dummy` re-run in VF22 make this HIGH. | HIGH (VF22) | — | — |
+| A6 | **`playing` and `get_playback_position()` timing immediately after `.play()` under Dummy is scheduling-sensitive and not fully characterized.** VF23 confirms position is not frame-granular (frozen for dozens of polls, jumps on a real-wall-clock cadence) in every configuration tested, but could not reproduce the coordinator's reported transient `playing == false` window or negative position reading, despite 4 attempts including one structurally identical to the real `AudioManager` pattern. The most likely explanation is genuine machine/load-dependent scheduling variance in a real-time-driven mix thread being polled from an unthrottled `--fixed-fps` loop (VF11's mechanism, applied here) — i.e. probably a real, intermittent race, just not one this session's hardware reproduced on demand. | MEDIUM — the mechanism is understood and independently corroborated, the exact transient is not | If the race is real but rare, a probe that asserts `playing` too early could pass on most CI runs and flake red on a slow/loaded runner — exactly the kind of intermittent failure that erodes trust in the check. If it never actually occurs on real CI hardware, the retry-loop guidance below (Validation Architecture) is simply unnecessary defensive code, not a functional cost. | Adopt the bounded real-time retry loop (Validation Architecture, below) regardless — it is safe whether or not the race is real, and cheap. If it never fires, `playing` will already be `true` on retry attempt 1. |
 | A2 | ffmpeg's `-c:a vorbis -strict -2` native encoder (used in VF4) produces files acceptable for shipping quality (not just "imports without error"). Only import-success and property values were checked, not perceived audio quality or file size at longer durations (D-24's placeholder files are 188 bytes / silent). | HIGH for "imports cleanly", LOW for "sounds acceptable" — untested | A regenerated placeholder that imports fine but is corrupted/silent/clipped would pass every headless assertion in this research and still fail the D-30 human playtest. | The D-30 human playtest is the backstop; also spot-check with `ffprobe generated.ogg` to confirm duration/channels look sane before committing. |
 | A3 | The `default_bus_layout.tres` fix (VF7) is additive — no code currently reads `audio/buses/default_bus_layout` from `project.godot`, so simply committing the `.tres` file at the default resource path is sufficient without also adding a `project.godot` key. Verified only that it works with the key *absent*; not verified that adding the key explicitly wouldn't be needed on some other engine build. | HIGH (directly verified, VF7) | Low risk — if wrong, the fix is a one-line addition to `project.godot`'s `[audio]` section (`buses/default_bus_layout="res://default_bus_layout.tres"`), easy to detect via VF6's exact bus-count probe. | Re-run VF6/VF7's `AudioServer.get_bus_count()` probe against the real repo after adding the file; if it still reports 1, add the explicit key. |
 | A4 | The exact byte-for-byte content the executor generates for the three replacement `.ogg` files (tone, duration, envelope) is left to Claude's Discretion per `02-CONTEXT.md`'s "Collectible rotation speed, emissive intensity, and pickup feedback timing" / general audio discretion — this research verifies the *pipeline* (ffmpeg → genuine Vorbis → Godot import → loop property), not specific musical content. | N/A — explicitly deferred, not a research gap | None; this is intentionally open | — |
@@ -783,4 +786,171 @@ to run D in a wave parallel with A even though D's *other* files, like `intro_le
 slider *nodes* are already fully specified by the UI-SPEC as part of `main_menu.tscn`'s
 initial build, and only the `AudioManager` *connection* (which requires B to exist) is the
 part that must wait.
+
+---
+
+## Validation Architecture
+
+> Seeds `02-VALIDATION.md` (plan-phase §5.5). Shape follows
+> `01-VALIDATION.md`/`templates/VALIDATION.md`; content below is Phase 2-specific.
+
+### Test Infrastructure
+
+| Property | Value |
+|----------|-------|
+| **Framework** | Still none for GDScript (no GUT/GdUnit4 — out of scope, unchanged from Phase 1). Python stdlib `unittest` for `tests/test_quality_gate.py`, unchanged. The de facto GDScript test framework remains the headless check chain: `run_headless_check.sh` (import → main scene → `verify_3d_project.gd` → every `scripts/tools/probe_*.gd`) plus `test_headless_check.sh` (self-test of the check itself). |
+| **Config file** | none — same as Phase 1 |
+| **Quick run command** | `python3 scripts/tools/quality_gate.py --root .` (no Godot needed, catches forbidden phrases / broken `res://` paths / missing `.import` siblings in seconds) |
+| **Full suite command** | `bash scripts/tools/run_headless_check.sh` — **unchanged invocation**, but its content grows: `verify_3d_project.gd` now asserts `intro_level.tscn`'s root is `Node3D` instead of the main scene's (D-27, Q6), and the probe glob now picks up **two** probes instead of one — `probe_camiel_movement.gd` (Phase 1, unchanged) and the new `probe_screen_flow.gd` (D-29). `bash scripts/tools/test_headless_check.sh` (self-test of the check) also grows by the cases proposed in Q6 (probe-glob partial-removal case, inert-audio-bus-config regression case). |
+| **Estimated runtime** | Full suite: ~90-150 seconds observed-ceiling (watchdog caps are `IMPORT_LIMIT=180s` + `RUN_LIMIT=60s` + `VERIFY_LIMIT=60s` + `PROBE_LIMIT=120s` **per probe**, so nominally up to ~420s worst-case with 2 probes if every step maxed out its watchdog — in practice every step observed this session completed in low single-digit seconds once assets import cleanly, matching Phase 1's F2/F7 facts of sub-5s real execution against multi-minute ceilings). The one variable that changes the *real* number materially versus Phase 1 is the audio import pass: three real (non-silent-Opus) `.ogg` files reimporting is still a sub-second operation per VF4's ffmpeg-generated file, so no meaningful runtime growth is expected from Pitfall 1's fix itself. |
+
+### Audio assertions under the actual CI driver (precision point #1)
+
+**All four of D-26's assertions are provable under `--headless`, on any platform — but two of
+them need a bounded retry loop, not an immediate same-frame assertion, and one candidate
+fallback must NOT be used.** This section was revised after the coordinator independently
+reproduced a `playing`-lag/negative-`get_playback_position()` transient this research did not
+initially account for; see VF23 and A6 for the full reproduction attempt and honest gap.
+Concretely, per assertion:
+
+| D-26 assertion | Holds under `--headless`/Dummy? | How to assert it safely | Evidence |
+|---|---|---|---|
+| Correct bus indices resolve (`AudioServer.get_bus_index("Music"/"SFX") != -1`) | Yes, immediately, no timing sensitivity | Assert directly, same frame | VF7 |
+| BGM player reports `playing == true` "after N seconds" (D-26's own wording already anticipates a delay — take it literally) | Yes, but **not necessarily in the same frame as `.play()`** — see the retry-loop pattern below | **Do not** assert `playing` in the same frame `.play()` was called. Poll in a bounded real-time retry loop (below) and assert only after it returns `true` or the timeout is hit | VF9, VF22 confirm `true` eventually; VF23 + the coordinator's independent report show the transition can lag past the first few polls on at least some machine/load combinations |
+| Stream reports `loop == true` | Yes — a property on the `AudioStream` resource, no driver/timing involvement at all | Assert directly, same frame, right after `load()` | VF5 |
+| `set_sfx_volume()` changes only the SFX bus's `volume_db` | Yes — `AudioServer.set_bus_volume_db`/`get_bus_volume_db` operate on the bus graph, not on the driver or playback state | Assert directly, same frame | VF8 |
+
+**`get_playback_position()` must NOT be used as a liveness/fallback proxy — retracting the
+prior version of this section.** VF23 shows it is frozen across dozens of consecutive polls at
+a stretch under fast/no-delay polling (both `AudioStreamWAV` and genuine `AudioStreamOggVorbis`)
+and only advances via discrete jumps tied to *real wall-clock* elapsed time, not simulated
+frame count — so `> 0.0` can read `false` while the stream is genuinely playing, simply because
+no mix-buffer boundary has been crossed yet. Separately, the coordinator's independently
+reproduced reading of `-0.00099773239344` while `playing == true` shows the value can also be
+*negative* near the start (a plausible latency-compensation artifact in Godot's position
+calculation, not a real out-of-range playback position) — this research could not reproduce
+the negative reading directly (VF23), but has no basis to rule it out, and the frozen/jumpy
+behavior it did reproduce is sufficient on its own to disqualify `get_playback_position()` as a
+same-frame or near-frame liveness check. **There is no safe fallback proxy based on playback
+position; use the retry loop on `.playing` instead.**
+
+**Recommended assertion pattern (bounded real-time retry, not a fixed frame count):**
+`--fixed-fps 60` decouples simulated frame time from real wall-clock time (VF11) — the
+Dummy driver's position/state updates are tied to real elapsed time (VF23), so a fixed
+"wait N physics_frames" is not a portable margin across machines of different speed/load. Poll
+against a real-time deadline instead:
+
+```gdscript
+# In probe_screen_flow.gd or a dedicated probe_audio_buses.gd
+func _wait_until_playing(player: AudioStreamPlayer, timeout_ms: int = 2000) -> bool:
+	var deadline := Time.get_ticks_msec() + timeout_ms
+	while Time.get_ticks_msec() < deadline:
+		if player.playing:
+			return true
+		await physics_frame
+	return false
+
+# usage:
+AudioManager.play_music(BGM_PATH)
+if not await _wait_until_playing(AudioManager._bgm_player):
+	push_error("BGM did not report playing == true within 2000ms of play()")
+	quit(1)
+	return
+```
+
+2000ms real time is a deliberately generous margin — VF23's observed jump cadence was ~93ms
+per step under artificial 5ms-per-poll pacing, so 2000ms is over 20x that with headroom for a
+loaded CI runner. This costs nothing when `playing` is already `true` on the first check (the
+common case, per VF9/VF22) and only spends real time when the race from A6 actually manifests.
+
+### Probe-presence guard gap (precision point #2)
+
+**Concrete, unresolved gap, recorded here as a validation requirement rather than fixed in this
+research (fix is larger than this phase's scope):** `run_headless_check.sh`'s non-vacuity guard
+(self-test case 12, `test_headless_check.sh`) only fails when the `probe_*.gd` glob is
+**completely empty**. Once Phase 2 adds `probe_screen_flow.gd` alongside Phase 1's
+`probe_camiel_movement.gd`, deleting *either one* while the other remains leaves the glob
+non-empty — the check stays green while an entire probe's worth of assertions (e.g. every
+MENU-01/02/INTRO-03/04/05 assertion, if `probe_screen_flow.gd` is the one lost) silently stops
+running. This is the same class of failure this project has already hit twice (the empty-glob
+vacuous pass Phase 1's code review caught, and the dormant Opus/Vorbis import mismatch this
+research found) — a check that reports green with fewer assertions running than it appears to.
+
+- **Recommended fix (not this phase's scope to implement, but flag for the planner/backlog):**
+  replace the bare non-empty-glob check in `run_headless_check.sh` with a fixed allow-list of
+  required probe basenames (e.g. a `REQUIRED_PROBES=("probe_camiel_movement.gd" "probe_screen_flow.gd")`
+  array checked by name, failing loudly if any listed name is missing from the glob results,
+  independently of how many *other* probes exist).
+- **Minimum viable Phase 2 action (in scope):** add the `test_headless_check.sh` case from Q6
+  (removing only `probe_screen_flow.gd`, leaving `probe_camiel_movement.gd` in place, and
+  asserting the check **currently still reports "Headless check passed."** — i.e. document the
+  gap as a known-red self-test expectation) so the gap is visible in the test suite itself
+  rather than only in this document. Do **not** silently "fix" this by making that assertion
+  pass without implementing the allow-list — that would misrepresent the guard's actual
+  strength.
+- **Wave 0 placement:** this is not a blocking Wave 0 item (nothing else depends on the guard
+  being stronger to be verified), but the documentation case above should land in the same
+  wave as `probe_screen_flow.gd` itself, so the gap is recorded the moment it becomes possible.
+
+### Sampling Rate
+
+- **After every task commit:** `python3 scripts/tools/quality_gate.py --root .` (seconds,
+  no Godot needed)
+- **After every plan wave:** `bash scripts/tools/run_headless_check.sh` (full import + main
+  scene + verifier + both probes)
+- **Before `/gsd-verify-work`:** `bash scripts/tools/run_headless_check.sh && bash scripts/tools/test_headless_check.sh`
+  green, plus the D-30 manual playtest (title → menu → play → collect → finish → replay → menu)
+- **Max feedback latency:** ~150 seconds (full-suite observed ceiling; see Estimated runtime
+  above for the watchdog-cap vs. observed-runtime distinction)
+
+### Per-Task Verification Map (seed — task IDs not yet assigned)
+
+Task IDs will be `02-0X-TY` once PLAN.md files exist; rows below map each in-scope requirement
+to a test type and a concrete, already-runnable command so the planner can attach IDs directly.
+
+| Requirement | Test Type | Automated Command | File Exists? | Notes |
+|-------------|-----------|--------------------|---------------|-------|
+| MENU-01 | automated (headless probe) | `bash scripts/tools/run_headless_check.sh` (asserts `probe_screen_flow.gd`'s title-screen case: `transition_requested` fires exactly once, guard blocks a second press) | ❌ W0 — `probe_screen_flow.gd` does not exist yet | Needs the `transition_requested` signal seam from Q1 |
+| MENU-02 | automated (headless probe) | same file, main-menu case | ❌ W0 | Same pattern as MENU-01; also needs `main_menu.tscn`'s Start button wired (Plan A) |
+| INTRO-01 | automated (existing probe, needs retargeting) | `bash scripts/tools/run_headless_check.sh` (`probe_camiel_movement.gd`) | ✅ exists, but currently targets `test_space.tscn` not `intro_level.tscn` | Gap: no existing assertion proves movement/camera-follow specifically *inside* `intro_level.tscn`. Recommend either parametrizing `probe_camiel_movement.gd` to also load `intro_level.tscn`, or accepting the Phase 1 coverage as sufficient since `intro_level.tscn` reuses the same `camiel.tscn` instance and structure (`02-CONTEXT.md`'s own framing) — planner's call, flag explicitly either way |
+| INTRO-02 | automated (existing probe, same gap as INTRO-01) | same | ✅ exists, same retargeting gap | Jump case (`_case_jump`) already proven against `test_space.tscn`'s floor; same recommendation as INTRO-01 |
+| INTRO-03 | automated (new probe) | `bash scripts/tools/run_headless_check.sh` (new case in `probe_screen_flow.gd` or a dedicated `probe_intro_level.gd`: drive Camiel into `%Collectible`, assert `collected` fires exactly once, `AudioManager`'s SFX player transitions to `playing == true` exactly once, `%Collectible.monitoring == false` after) | ❌ W0 | Depends on Pitfall 1 (audio asset fix) landing first — an SFX-playing assertion is meaningless while `load()` on `sfx_collect.ogg` returns `null` |
+| INTRO-04 | automated (new probe) | same probe file, finish-marker case: drive Camiel into `%FinishMarker`, assert `finished` fires exactly once, `%WinLayer.visible == true` after | ❌ W0 | Independent of INTRO-03 per D-21 (not gated on collectible) — can be a separate assertion case run either order |
+| INTRO-05 | automated (headless probe) | same probe file, win-screen case: `%WinLayer` focus order `[%ReplayButton, %GoToMenuButton]`, synthesize `ui_accept` on each, assert the correct one-shot behavior (`replay_requested`/`transition_requested` fires once each, per Q1/Q3) | ❌ W0 | Reuses the exact `_press_focused_button()` helper from the MENU-01/02 cases (VF10) |
+| INTRO-06 | automated (headless probe, **must use the bounded real-time retry loop, not a same-frame assertion**) + manual (D-30) | `bash scripts/tools/run_headless_check.sh` for the 4 D-26 proxy assertions (table above) — the `playing == true` assertion specifically must call `_wait_until_playing()` (Validation Architecture's retry-loop pattern) with a real-time timeout, e.g. 2000ms, **not** `assert(player.playing)` on the frame right after `play()`; D-30 playtest for genuine audibility | ❌ W0 for the probe half | **Hard Wave 0 dependency**: blocked on both Pitfall 1 (regenerate `.ogg` files as genuine Vorbis) and Pitfall 2 (commit `default_bus_layout.tres`) landing first — no D-26 assertion can pass while `AudioManager.play_music("res://assets/audio/bgm_ambient.ogg")` returns `null` from `load()` or while `AudioServer.get_bus_index("Music") == -1`. **Additionally**: do not use `get_playback_position()` anywhere in this assertion (VF23/A6) — it is frozen for many polls at a stretch and can read non-monotonically near start; the retry loop must poll `.playing` only. |
+
+### Wave 0 Requirements
+
+- [ ] **Regenerate the three placeholder `.ogg` files as genuine Ogg Vorbis** (Pitfall 1) —
+      blocks every INTRO-06 assertion and any probe that calls `AudioManager.play_music`/
+      `play_sfx`. Verified working recipe: `ffmpeg -f lavfi -i "sine=frequency=440:duration=N" -ac 2 -threads 1 -c:a vorbis -strict -2 -qscale:a 4 out.ogg` (native `vorbis` encoder requires stereo, VF4).
+- [ ] **Commit `res://default_bus_layout.tres`** defining Music/SFX buses sending to Master
+      (Pitfall 2) — blocks every D-26 bus-index/volume-isolation assertion. Generate via the
+      engine's own `AudioServer.add_bus()`/`generate_bus_layout()`/`ResourceSaver.save()` calls
+      (Q2), not hand-typed, to avoid a repeat of `CONCERNS.md`'s hand-typed-constant mistake
+      class. Remove the now-documented-inert `[audio_bus_layout]` block from `project.godot`.
+- [ ] **`scripts/tools/probe_screen_flow.gd`** (D-29) — new file, blocks MENU-01, MENU-02,
+      INTRO-05, and (if folded into the same file) INTRO-03/04's automated verification.
+- [ ] **`verify_3d_project.gd`'s D-27 retarget** — new `_check_gameplay_scene_is_3d()` function
+      pointed at `res://scenes/intro_level.tscn` (Q6) — blocks the full suite from passing at
+      all once `run/main_scene` becomes `title_screen.tscn` (a `Control`), since the current
+      `_check_main_scene()` would otherwise fail every run.
+- [ ] **`test_headless_check.sh` additions from Q6** — the probe-glob partial-removal
+      documentation case (see Probe-presence guard gap above) should land in the same wave as
+      `probe_screen_flow.gd`.
+- [ ] Godot 4.7.2 local install — unchanged carry-over from Phase 1 (D-08), still a hard
+      prerequisite for every command in this section.
+
+*Everything else (the `menu_button` component, `intro_level.tscn`'s geometry, the
+`AudioManager` rebuild's non-bus-layout code) is ordinary plan/task work, not a Wave 0
+blocker — it can be verified incrementally as each plan lands, per the Recommended Task
+Decomposition above.*
+
+### Manual-Only Verifications
+
+| Behavior | Requirement | Why Manual | Test Instructions |
+|----------|-------------|------------|--------------------|
+| Full title → menu → play → collect → finish → replay → menu flow feels right on a real pointer/touch device, and audio is genuinely audible with a perceptible volume-slider effect | MENU-01, MENU-02, INTRO-03, INTRO-04, INTRO-05, INTRO-06 | D-30 mandates one short human playtest, for the same reason as Phase 1's D-11: tap/click on a real device and genuine audibility cannot be verified headlessly (a Dummy audio driver, however faithfully it tracks playback *state*, produces no sound to judge slider feel against) | Run the built game (not headless), play through title → menu → intro level → collect the object → reach the finish → click "Nog een keer" → click "Naar menu", using both mouse/touch and keyboard at least once each; drag the SFX slider and confirm an audible volume change |
+
+
 
