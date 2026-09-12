@@ -4,16 +4,16 @@ milestone: v0.0.4
 current_phase: 03
 current_phase_name: 3D Lesson Parity & Progress Persistence
 status: executing
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-09-12T23:19:54.109Z"
+stopped_at: Completed 03-05-PLAN.md
+last_updated: "2026-09-12T23:55:23.911Z"
 last_activity: 2026-09-12
 last_activity_desc: Phase 03 execution started
-state_head: 57168f2cf8de124cd2a0edea7ed44470e461b857
+state_head: 70a6a78dcc69e00d24c9d436909175843ed64a71
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 18
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 ## Current Position
 
 Phase: 03 (3D Lesson Parity & Progress Persistence) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-09-12 — Phase 03 execution started
 
@@ -75,6 +75,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P02 | 65min | 3 tasks | 9 files |
 | Phase 03 P03 | 75min | 3 tasks | 11 files |
 | Phase 03 P04 | ~50min | 2 tasks | 8 files |
+| Phase 03 P05 | ~25min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,11 @@ Recent decisions affecting current work:
 - [Phase 03]: Lessons 2 and 3 enforce order structurally: an array of the target nodes is read to activate the next one, and neither orchestrator compares an arriving identifier at all (D-37)
 - [Phase 03]: Each ordered lesson's probe case drives three distinct orders -- two different wrong-first touches proved to refuse and complete nothing, then the correct order -- because a correct-order-only case would pass on the archived defect
 - [Phase 03]: The lesson table holds exactly three appended rows, one per scene that exists; no row, disabled button or not-yet-available caption for lessons 4 and 5
+- [Phase 03]: D-46 resolved in practice: the progress-label total is a parameter end to end, so lesson 5 reads Stap: 4 / 4 from the one shared format string with no second form and no reshaping of its four-step rule
+- [Phase 03]: Lesson 4 is proved order-independent by being driven from two genuinely different orders, the second interleaving a colour target into the middle of the counting task -- one order proves nothing about order-independence
+- [Phase 03]: The cue assertion is two-sided: a colour lesson holds shape and label uniform, an ordered lesson holds colour uniform and its non-cue property uniform too -- in both directions the property being taught is the only discriminator
+- [Phase 03]: Lesson 4's counting objects are purple, not lesson 1's orange, because orange sits only 0.239 from this lesson's yellow and a third object in almost-yellow is the trap a yellow-or-green lesson must not set
+- [Phase 03]: The closing persistence case builds its expected identifier set from the lesson table rather than a literal list, so a sixth lesson is covered the day its row lands and a lesson filing progress under an unknown identifier fails too
 
 ### Pending Todos
 
@@ -142,6 +148,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-12T23:19:46.318Z
-Stopped at: Completed 03-04-PLAN.md
+Last session: 2026-09-12T23:55:15.221Z
+Stopped at: Completed 03-05-PLAN.md
 Resume file: None

@@ -30,6 +30,15 @@ then `lesson.free()` — instead of relying on `queue_free()` plus two process f
 no two rooms are ever alive in the same physics space. Do not loosen the log scan, and
 do not raise the probe watchdog limit.
 
+**Re-checked in plan 03-05 under heavier load: 0 occurrences in 6 consecutive runs.**
+The probe now stands up 13 full 3D rooms per process rather than 8 — lessons 4 and 5 add
+five more instances between them — which is the pressure that should have made an
+instance-count-driven warning more frequent, not less. It did not appear once. The item
+stays logged rather than closed, because six clean runs do not disprove an intermittent
+warning that already went five runs without appearing in 03-04; but it is now recorded as
+not scaling with the number of rooms, which argues against room count being the cause. No
+probe, log scan or watchdog limit was changed to accommodate it.
+
 ## Probe-presence guard gap
 
 **Carried forward unchanged** from `02-05-SUMMARY.md`, `03-01-SUMMARY.md` and
