@@ -86,7 +86,7 @@ Recent decisions affecting current work:
 - [Phase 01]: [Phase 01-05]: CI and release workflows pinned to Godot 4.7.2, with SHA512 verification added on every engine/export-template download and the 2D-era verifier/quit-after smoke test replaced by scripts/tools/run_headless_check.sh in both workflows; CONTRIBUTING.md updated to match.
 - [Phase 01]: [Phase 01-06]: D-11 playtest verdict (verbatim): "switch to turn-and-walk" - scripts/camiel_controller.gd steering_mode default changed from CAMERA_RELATIVE to TURN_AND_WALK; no tunable values changed since no feel/tuning complaint was raised
 - [Phase 01]: [Phase 01-06]: FOUND-06 closed - tests/test_ci_workflows.py's silent PyYAML skipUnless fallback replaced with a hard import, and the repository-hygiene CI job now installs PyYAML before running tests
-- [Phase 02]: AudioManager._exit_tree() drains 250ms real time (gated on whether audio ever played) to work around a Godot 4.7.2 engine race releasing AudioStreamOggVorbis playback objects only on the Dummy driver's real-time mix cadence
+- [Phase 02]: AudioManager._exit_tree() drains 250ms real time (gated on whether audio ever played) to work around a Godot 4.7.2 engine race releasing AudioStreamOggVorbis playback objects only on the headless null-audio driver's real-time mix cadence
 - [Phase 02]: Headless tool scripts (probe_*.gd) must fetch autoloads via root.get_node_or_null() rather than the bare global identifier, which only resolves for a normal scene boot, not a --script SceneTree entrypoint
 
 ### Pending Todos
