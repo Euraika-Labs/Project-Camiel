@@ -1,0 +1,62 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="1_vnpbn"]
+[ext_resource type="Script" path="res://scripts/lesson_select.gd" id="2_tjccm"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="3_3p0yd"]
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="4_o5sed"]
+
+[node name="LessonSelect" type="Control" unique_id=420370801]
+layout_mode = 3
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_vnpbn")
+script = ExtResource("2_tjccm")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1528150443]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.62, 0.82, 0.95, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1391962352]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer" unique_id=1872387652]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="Content" type="VBoxContainer" parent="CenterContainer/MarginContainer" unique_id=1295849688]
+layout_mode = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="HeadingLabel" type="Label" parent="CenterContainer/MarginContainer/Content" unique_id=206019674]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "Kies een les"
+horizontal_alignment = 1
+
+[node name="LessonGrid" type="GridContainer" parent="CenterContainer/MarginContainer/Content" unique_id=2021608013]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 32
+theme_override_constants/v_separation = 32
+columns = 3
+
+[node name="BackButton" type="Button" parent="CenterContainer/MarginContainer/Content" unique_id=1313707963 instance=ExtResource("3_3p0yd")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 112)
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("1_vnpbn")
+script = ExtResource("4_o5sed")
+label_text = "Naar menu"
+icon_kind = "home"

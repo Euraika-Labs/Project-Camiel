@@ -427,10 +427,11 @@ func _case_menu_focus_order() -> void:
 	await process_frame
 
 	var start_button: Control = menu.get_node_or_null("%StartButton")
+	var lessons_button: Control = menu.get_node_or_null("%LessonsButton")
 	var sfx_slider: Control = menu.get_node_or_null("%SfxSlider")
 	var bgm_slider: Control = menu.get_node_or_null("%BgmSlider")
-	if start_button == null or sfx_slider == null or bgm_slider == null:
-		push_error("menu_focus_order: one of %StartButton/%SfxSlider/%BgmSlider is missing.")
+	if start_button == null or lessons_button == null or sfx_slider == null or bgm_slider == null:
+		push_error("menu_focus_order: one of %StartButton/%LessonsButton/%SfxSlider/%BgmSlider is missing.")
 		menu.queue_free()
 		quit(1)
 		return
@@ -441,9 +442,16 @@ func _case_menu_focus_order() -> void:
 		quit(1)
 		return
 
+	# Plan 03-03 inserted %LessonsButton between the Start control and the two
+	# sliders (D-31, LESSON-06). The chain still runs from Start all the way to
+	# the music slider and back, with the new control stitched into it in both
+	# directions -- leaving this table pointing Start straight at the sound
+	# slider would let a keyboard user skip the lesson screen entirely, which is
+	# half of what LESSON-06 asks for.
 	var expectations := {
-		start_button: {"down": sfx_slider, "up": null},
-		sfx_slider: {"down": bgm_slider, "up": start_button},
+		start_button: {"down": lessons_button, "up": null},
+		lessons_button: {"down": sfx_slider, "up": start_button},
+		sfx_slider: {"down": bgm_slider, "up": lessons_button},
 		bgm_slider: {"down": null, "up": sfx_slider},
 	}
 	for control: Control in expectations.keys():

@@ -1,0 +1,67 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/lesson_1.gd" id="1_nptbh"]
+[ext_resource type="PackedScene" path="res://scenes/lesson_room.tscn" id="2_7b4e1"]
+[ext_resource type="PackedScene" path="res://scenes/camiel.tscn" id="3_s706f"]
+[ext_resource type="Script" path="res://scripts/camiel_controller.gd" id="4_2mwm7"]
+[ext_resource type="PackedScene" path="res://scenes/ui/lesson_hud.tscn" id="5_g1tg1"]
+[ext_resource type="Script" path="res://scripts/ui/lesson_hud.gd" id="6_740ep"]
+[ext_resource type="PackedScene" path="res://scenes/lesson_target.tscn" id="7_et10w"]
+[ext_resource type="Script" path="res://scripts/lesson_target.gd" id="8_2stxa"]
+
+[node name="Lesson1" type="Node3D" unique_id=1013624667]
+script = ExtResource("1_nptbh")
+
+[node name="LessonRoom" type="Node3D" parent="." unique_id=1248342695 instance=ExtResource("2_7b4e1")]
+
+[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=1271368917]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 4.5)
+
+[node name="Camiel" type="CharacterBody3D" parent="." unique_id=1761816634 instance=ExtResource("3_s706f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 4.5)
+script = ExtResource("4_2mwm7")
+
+[node name="Hud" type="CanvasLayer" parent="." unique_id=851995517 instance=ExtResource("5_g1tg1")]
+unique_name_in_owner = true
+process_mode = 3
+script = ExtResource("6_740ep")
+
+[node name="RedTarget" type="Area3D" parent="." unique_id=429791032 instance=ExtResource("7_et10w")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, -3.5)
+script = ExtResource("8_2stxa")
+task_id = "red"
+target_color = Color(0.86, 0.16, 0.16, 1)
+shape_kind = "box"
+
+[node name="BlueTarget" type="Area3D" parent="." unique_id=501464666 instance=ExtResource("7_et10w")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.5, -3.5)
+script = ExtResource("8_2stxa")
+task_id = "blue"
+target_color = Color(0.13, 0.35, 0.82, 1)
+shape_kind = "box"
+
+[node name="CountGroup" type="Node3D" parent="." unique_id=973363779]
+unique_name_in_owner = true
+
+[node name="Count1" type="Area3D" parent="CountGroup" unique_id=952904297 instance=ExtResource("7_et10w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 0.5, 0)
+script = ExtResource("8_2stxa")
+task_id = "count_1"
+target_color = Color(0.92941177, 0.61960787, 0.3019608, 1)
+shape_kind = "sphere"
+
+[node name="Count2" type="Area3D" parent="CountGroup" unique_id=44241771 instance=ExtResource("7_et10w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+script = ExtResource("8_2stxa")
+task_id = "count_2"
+target_color = Color(0.92941177, 0.61960787, 0.3019608, 1)
+shape_kind = "sphere"
+
+[node name="Count3" type="Area3D" parent="CountGroup" unique_id=1835820597 instance=ExtResource("7_et10w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 0.5, 0)
+script = ExtResource("8_2stxa")
+task_id = "count_3"
+target_color = Color(0.92941177, 0.61960787, 0.3019608, 1)
+shape_kind = "sphere"

@@ -4,7 +4,6 @@
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="2_8ln24"]
 [ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="3_rtw2f"]
 [ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="4_oa1go"]
-[ext_resource type="Script" path="res://scripts/ui/vector_icon.gd" id="5_8ln24"]
 [ext_resource type="Script" path="res://scripts/ui/vector_icon.gd" id="6_bgm01"]
 
 [node name="MainMenu" type="Control" unique_id=363801507]
@@ -44,11 +43,24 @@ alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 112)
 layout_mode = 2
-focus_neighbor_bottom = NodePath("../AudioPanel/AudioRows/SfxRow/SfxSlider")
-focus_next = NodePath("../AudioPanel/AudioRows/SfxRow/SfxSlider")
+focus_neighbor_bottom = NodePath("../LessonsButton")
+focus_next = NodePath("../LessonsButton")
 theme = ExtResource("1_wu84c")
 script = ExtResource("4_oa1go")
 label_text = "Start"
+icon_kind = "walk"
+
+[node name="LessonsButton" type="Button" parent="CenterContainer/MarginContainer/Content" unique_id=1170553464 instance=ExtResource("3_rtw2f")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 112)
+layout_mode = 2
+focus_neighbor_top = NodePath("../StartButton")
+focus_neighbor_bottom = NodePath("../AudioPanel/AudioRows/SfxRow/SfxSlider")
+focus_next = NodePath("../AudioPanel/AudioRows/SfxRow/SfxSlider")
+focus_previous = NodePath("../StartButton")
+theme = ExtResource("1_wu84c")
+script = ExtResource("4_oa1go")
+label_text = "Lessen"
 icon_kind = "walk"
 
 [node name="AudioPanel" type="PanelContainer" parent="CenterContainer/MarginContainer/Content" unique_id=2087255942]
@@ -65,7 +77,7 @@ theme_override_constants/separation = 16
 [node name="SfxIcon" type="Control" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows/SfxRow" unique_id=474425996]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
-script = ExtResource("5_8ln24")
+script = ExtResource("6_bgm01")
 icon_kind = "speaker"
 
 [node name="SfxLabel" type="Label" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows/SfxRow" unique_id=1139773057]
@@ -77,10 +89,10 @@ text = "Geluid"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(320, 56)
 layout_mode = 2
-focus_neighbor_top = NodePath("../../../../StartButton")
+focus_neighbor_top = NodePath("../../../../LessonsButton")
 focus_neighbor_bottom = NodePath("../../BgmRow/BgmSlider")
 focus_next = NodePath("../../BgmRow/BgmSlider")
-focus_previous = NodePath("../../../../StartButton")
+focus_previous = NodePath("../../../../LessonsButton")
 step = 5.0
 value = 80.0
 tick_count = 6
