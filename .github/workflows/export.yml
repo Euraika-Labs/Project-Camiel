@@ -199,7 +199,13 @@ jobs:
           mv camiel-macos-*/Camiel.zip release/ 2>/dev/null || true
           ls -la release/
 
-      - uses: softprops/action-gh-release@v2
+      # Third-party action in the release-publishing path: pinned to an immutable
+      # commit SHA, not a mutable tag. CodeQL rule "Unpinned tag for a non-immutable
+      # Action" flags tag pins here because a tag can be repointed at new code after
+      # review. SHA is softprops/action-gh-release v3.0.3.
+      # Renovate/Dependabot can still bump this; keep the trailing version comment in
+      # sync with the SHA whenever it moves.
+      - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: release/*
         env:
