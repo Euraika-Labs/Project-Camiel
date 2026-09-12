@@ -481,6 +481,42 @@ func _case_lesson_1_count_first() -> void:
 		_fail(case_name, "the win panel is already visible before the lesson was played")
 		return
 
+	# `jump` and the engine's `ui_accept` are both bound to the space key in this
+	# project's input map, so any focusable control alive during 3D play would
+	# fire on every single jump attempt and end the lesson under the child's
+	# feet. The in-play return control clears its own focus mode in the shared
+	# display's ready callback, and the win panel's control is inside a hidden
+	# subtree; this asserts the consequence rather than trusting either.
+	var in_play_back_button: Button = hud.get_node_or_null("%BackButton")
+	if in_play_back_button == null:
+		_fail(case_name, "the shared display has no %BackButton")
+		return
+	if in_play_back_button.focus_mode != Control.FOCUS_NONE:
+		_fail(case_name, "the in-play return control's focus mode is %d, expected FOCUS_NONE" % in_play_back_button.focus_mode)
+		return
+	var focus_owner := lesson.get_viewport().gui_get_focus_owner()
+	if focus_owner != null:
+		_fail(case_name, "%s already holds keyboard focus during play; the space key would reach it on every jump" % focus_owner.name)
+		return
+
+	_transition_count = 0
+	_transition_target = ""
+	lesson.transition_requested.connect(_on_transition_requested_counted)
+	for _i in 3:
+		_press_focused()
+		await process_frame
+	await process_frame
+	if _transition_count != 0:
+		_fail(case_name, "pressing the accept action during play requested %d transitions, expected 0 -- jump and ui_accept share the space key" % _transition_count)
+		return
+	if step_label.text != "Stap: 0 / 3":
+		_fail(case_name, "the progress label moved to %s when the accept action was pressed during play" % step_label.text)
+		return
+	if hud.is_win_visible():
+		_fail(case_name, "the win panel appeared when the accept action was pressed during play")
+		return
+	lesson.transition_requested.disconnect(_on_transition_requested_counted)
+
 	_target_completed_count = 0
 	_target_completed_ids.clear()
 	_lesson_completed_count = 0
