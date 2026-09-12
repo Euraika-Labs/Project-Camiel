@@ -1,11 +1,19 @@
 # probe_camiel_movement.gd
-# Headless behaviour probe for FOUND-05: drives Camiel through the real
-# physical InputMap keys and asserts movement, jump, and camera-follow
-# behaviour. Run by scripts/tools/run_headless_check.sh.
+# Headless behaviour probe for FOUND-05 and INTRO-01/INTRO-02: drives Camiel
+# through the real physical InputMap keys and asserts movement, jump, and
+# camera-follow behaviour. Runs the full case set against test_space.tscn
+# first, exactly as Phase 1 did, then a portable subset (idle, forward, jump,
+# camera_behind) plus a new enclosure case against intro_level.tscn — closing
+# the coverage gap 02-VALIDATION.md named: INTRO-01/INTRO-02 previously
+# asserted only against the Phase 1 test space, never the intro level the
+# requirements actually name. Run by scripts/tools/run_headless_check.sh.
 extends SceneTree
 
-const MAX_TOTAL_FRAMES := 3000
-const SPAWN_POSITION := Vector3(0, 0, 2)
+const MAX_TOTAL_FRAMES := 4200
+const TEST_SPACE_PATH := "res://scenes/test_space.tscn"
+const INTRO_LEVEL_PATH := "res://scenes/intro_level.tscn"
+const PORTABLE_SCENES := [TEST_SPACE_PATH, INTRO_LEVEL_PATH]
+const TEST_SPACE_SPAWN := Vector3(0, 0, 2)
 const ALL_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE]
 
 # Mirrors camiel_controller.gd's SteeringMode enum order (CAMERA_RELATIVE = 0,
@@ -16,8 +24,12 @@ const STEERING_TURN_AND_WALK := 1
 var _camiel: CharacterBody3D
 var _spring_arm: SpringArm3D
 var _camera: Camera3D
+var _current_scene_root: Node
+var _spawn_position := TEST_SPACE_SPAWN
 var _total_frames := 0
 var _failed := false
+var _scene_suffix := ""
+var _portable_pass_count := 0
 
 # State for _case_fall_at_edge(). GDScript lambdas capture outer locals by
 # value, not by reference, so a `func(x): fire_count += 1` closure never
@@ -26,39 +38,94 @@ var _failed := false
 var _fall_fire_count := 0
 var _fall_returned_position := Vector3.ZERO
 
+# State for _case_enclosure(), same reasoning as above.
+var _enclosure_fall_count := 0
+
 
 func _initialize() -> void:
-	var packed: PackedScene = load("res://scenes/test_space.tscn")
-	if packed == null:
-		push_error("Could not load res://scenes/test_space.tscn")
+	if PORTABLE_SCENES.is_empty():
+		push_error("PORTABLE_SCENES is empty; the probe would verify nothing")
 		quit(1)
 		return
 
-	var test_space: Node = packed.instantiate()
-	root.add_child(test_space)
+	if not await _load_scene(TEST_SPACE_PATH, TEST_SPACE_SPAWN):
+		return
+
+	await _run_test_space_cases()
+	if _failed:
+		return
+
+	_unload_current_scene()
+	await process_frame
+	await process_frame
+
+	if not await _load_scene(INTRO_LEVEL_PATH, TEST_SPACE_SPAWN):
+		return
+
+	_scene_suffix = " [intro_level]"
+	_portable_pass_count = 0
+	await _run_portable_cases()
+	_scene_suffix = ""
+	if _failed:
+		return
+
+	if _portable_pass_count == 0:
+		push_error("portable group ran zero cases for %s" % INTRO_LEVEL_PATH)
+		quit(1)
+		return
+
+	await _case_enclosure()
+	if _failed:
+		return
+
+	print("Camiel movement probe passed.")
+	quit(0)
+
+
+func _load_scene(path: String, default_spawn: Vector3) -> bool:
+	var packed: PackedScene = load(path)
+	if packed == null:
+		push_error("Could not load %s" % path)
+		quit(1)
+		return false
+
+	var scene_root: Node = packed.instantiate()
+	root.add_child(scene_root)
+	_current_scene_root = scene_root
 
 	# Wait for Camiel's _ready() (which assigns its @onready camera nodes) to
 	# run before touching it — add_child() enters the tree synchronously, but
 	# _ready() notifications are deferred to the end of the frame.
 	await process_frame
 
-	_camiel = test_space.get_node_or_null("Camiel") as CharacterBody3D
+	_camiel = scene_root.get_node_or_null("Camiel") as CharacterBody3D
 	if _camiel == null:
-		push_error("Camiel node not found in test_space.tscn")
+		push_error("Camiel node not found in %s" % path)
 		quit(1)
-		return
+		return false
 
 	_spring_arm = _camiel.get_node_or_null("CameraPivot/SpringArm3D") as SpringArm3D
 	_camera = _camiel.get_node_or_null("CameraPivot/SpringArm3D/Camera3D") as Camera3D
 	if _spring_arm == null or _camera == null:
-		push_error("Camiel is missing CameraPivot/SpringArm3D/Camera3D")
+		push_error("Camiel is missing CameraPivot/SpringArm3D/Camera3D in %s" % path)
 		quit(1)
-		return
+		return false
 
-	_run_cases()
+	var player_spawn := scene_root.get_node_or_null("PlayerSpawn") as Node3D
+	_spawn_position = player_spawn.global_position if player_spawn != null else default_spawn
+
+	return true
 
 
-func _run_cases() -> void:
+func _unload_current_scene() -> void:
+	if _current_scene_root != null:
+		_current_scene_root.queue_free()
+		_current_scene_root = null
+
+
+# The full case set — runs only against test_space.tscn, which has the open
+# edge and single back wall these cases depend on.
+func _run_test_space_cases() -> void:
 	await _case_early_fall()
 	if _failed:
 		return
@@ -96,14 +163,36 @@ func _run_cases() -> void:
 	if _failed:
 		return
 
-	print("Camiel movement probe passed.")
-	quit(0)
+
+# The portable subset — depends only on a floor, a camera and a spawn point,
+# so it also runs against intro_level.tscn.
+func _run_portable_cases() -> void:
+	await _case_idle()
+	if _failed:
+		return
+	_portable_pass_count += 1
+	await _case_forward()
+	if _failed:
+		return
+	_portable_pass_count += 1
+	await _case_jump()
+	if _failed:
+		return
+	_portable_pass_count += 1
+	await _case_camera_behind()
+	if _failed:
+		return
+	_portable_pass_count += 1
 
 
 func _fail(case_name: String, detail: String) -> void:
 	_failed = true
 	push_error("%s: %s" % [case_name, detail])
 	quit(1)
+
+
+func _pass(case_name: String) -> void:
+	print("PASS %s%s" % [case_name, _scene_suffix])
 
 
 func _send_key(keycode: int, pressed: bool) -> void:
@@ -118,7 +207,7 @@ func _release_all_keys() -> void:
 		_send_key(keycode, false)
 
 
-func _reset(position: Vector3 = SPAWN_POSITION, steering_mode: int = STEERING_CAMERA_RELATIVE) -> void:
+func _reset(position: Vector3 = _spawn_position, steering_mode: int = STEERING_CAMERA_RELATIVE) -> void:
 	_release_all_keys()
 	_camiel.steering_mode = steering_mode
 	_camiel.teleport_to(position)
@@ -152,7 +241,7 @@ func _case_idle() -> void:
 	if not _camiel.is_on_floor():
 		_fail("idle", "is_on_floor() is false with no input")
 		return
-	print("PASS idle")
+	_pass("idle")
 
 
 func _case_forward() -> void:
@@ -173,7 +262,7 @@ func _case_forward() -> void:
 	if forward_delta <= 0.5:
 		_fail("forward", "forward displacement %.4f m <= 0.5 m" % forward_delta)
 		return
-	print("PASS forward")
+	_pass("forward")
 
 
 func _case_same_direction_keys() -> void:
@@ -190,7 +279,7 @@ func _case_same_direction_keys() -> void:
 	if horizontal_speed > walk_speed + 0.05:
 		_fail("same_direction_keys", "horizontal speed %.4f m/s > walk_speed + 0.05 (%.4f)" % [horizontal_speed, walk_speed + 0.05])
 		return
-	print("PASS same_direction_keys")
+	_pass("same_direction_keys")
 
 
 func _case_opposite_keys() -> void:
@@ -207,7 +296,7 @@ func _case_opposite_keys() -> void:
 	if horizontal.length() >= 0.05:
 		_fail("opposite_keys", "horizontal movement %.4f m >= 0.05 m" % horizontal.length())
 		return
-	print("PASS opposite_keys")
+	_pass("opposite_keys")
 
 
 func _case_jump() -> void:
@@ -242,7 +331,7 @@ func _case_jump() -> void:
 	if not landed:
 		_fail("jump", "did not return to floor within 120 frames")
 		return
-	print("PASS jump")
+	_pass("jump")
 
 
 func _case_camera_behind() -> void:
@@ -265,7 +354,7 @@ func _case_camera_behind() -> void:
 	if distance < 1.0 or distance > spring_length + 1.5:
 		_fail("camera_behind", "camera distance %.4f m not within [1.0, %.4f]" % [distance, spring_length + 1.5])
 		return
-	print("PASS camera_behind")
+	_pass("camera_behind")
 
 
 func _case_early_fall() -> void:
@@ -274,11 +363,11 @@ func _case_early_fall() -> void:
 	# _sample_safe_spot a chance to record a spot away from spawn.
 	_camiel.steering_mode = STEERING_CAMERA_RELATIVE
 	_camiel.return_to_safe_spot()
-	var horizontal := _horizontal(SPAWN_POSITION, _camiel.global_position)
-	if horizontal.length() >= 0.01 or absf(_camiel.global_position.y - SPAWN_POSITION.y) >= 0.5:
+	var horizontal := _horizontal(_spawn_position, _camiel.global_position)
+	if horizontal.length() >= 0.01 or absf(_camiel.global_position.y - _spawn_position.y) >= 0.5:
 		_fail("early_fall", "return_to_safe_spot() before any spot was sampled did not return to spawn (%s)" % _camiel.global_position)
 		return
-	print("PASS early_fall")
+	_pass("early_fall")
 
 
 func _on_return_for_fall_edge(position: Vector3) -> void:
@@ -342,7 +431,7 @@ func _case_fall_at_edge() -> void:
 		return
 
 	_camiel.returned_to_safe_spot.disconnect(_on_return_for_fall_edge)
-	print("PASS fall_at_edge")
+	_pass("fall_at_edge")
 
 
 func _case_soft_return() -> void:
@@ -375,7 +464,7 @@ func _case_soft_return() -> void:
 		_fail("soft_return", "CameraPivot is not within 0.01 m of its resting offset after the return")
 		return
 
-	print("PASS soft_return")
+	_pass("soft_return")
 
 
 func _case_wall() -> void:
@@ -391,11 +480,11 @@ func _case_wall() -> void:
 	if hit_length >= threshold:
 		_fail("wall", "spring arm hit length %.4f m not below spring_length - 0.5 (%.4f m)" % [hit_length, threshold])
 		return
-	print("PASS wall")
+	_pass("wall")
 
 
 func _case_turn_and_walk() -> void:
-	_reset(SPAWN_POSITION, STEERING_TURN_AND_WALK)
+	_reset(_spawn_position, STEERING_TURN_AND_WALK)
 	await _wait_frames(2)
 	if _failed:
 		return
@@ -441,7 +530,7 @@ func _case_turn_and_walk() -> void:
 		_fail("turn_and_walk", "camera pivot yaw diverges from rotation.y by %.4f rad after walking" % pivot_yaw_diff)
 		return
 
-	print("PASS turn_and_walk")
+	_pass("turn_and_walk")
 
 
 func _case_arguments() -> void:
@@ -455,4 +544,46 @@ func _case_arguments() -> void:
 		_fail("arguments", "an unknown --steering value changed the mode")
 		return
 	_camiel.steering_mode = STEERING_CAMERA_RELATIVE
-	print("PASS arguments")
+	_pass("arguments")
+
+
+func _on_enclosure_fall(_position: Vector3) -> void:
+	_enclosure_fall_count += 1
+
+
+# Intro-level-only: proves D-17's enclosure claim rather than assuming it.
+# PlayerSpawn sits closer to one wall than the room's half-extent, so holding
+# "move_back" (camera-relative direction toward that near wall) for 120
+# frames both contacts the wall and keeps pressing into it — this must leave
+# Camiel inside the room, still on the floor, with the fall-return signal
+# never firing.
+func _case_enclosure() -> void:
+	_reset()
+	await _wait_frames(2)
+	if _failed:
+		return
+
+	_enclosure_fall_count = 0
+	_camiel.returned_to_safe_spot.connect(_on_enclosure_fall)
+
+	_send_key(KEY_S, true)
+	await _wait_frames(120)
+	_send_key(KEY_S, false)
+	_camiel.returned_to_safe_spot.disconnect(_on_enclosure_fall)
+	if _failed:
+		return
+
+	if not _camiel.is_on_floor():
+		_fail("enclosure", "Camiel is not on the floor after 120 frames pressed into a wall")
+		return
+
+	var distance_from_centre := Vector2(_camiel.global_position.x, _camiel.global_position.z).length()
+	if distance_from_centre >= 8.0:
+		_fail("enclosure", "horizontal distance from room centre %.4f m >= 8.0 m" % distance_from_centre)
+		return
+
+	if _enclosure_fall_count != 0:
+		_fail("enclosure", "fall-return signal fired %d times, expected 0" % _enclosure_fall_count)
+		return
+
+	print("PASS enclosure")

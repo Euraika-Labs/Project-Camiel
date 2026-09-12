@@ -1,7 +1,14 @@
 # verify_3d_project.gd
-# Headless --script verifier: confirms the main scene loads as a Node3D and
-# every tracked .gd/.tscn resource under res:// loads and instantiates cleanly.
+# Headless --script verifier: confirms the main scene loads and instantiates,
+# confirms the gameplay scene (D-27) loads as a Node3D, and every tracked
+# .gd/.tscn resource under res:// loads and instantiates cleanly.
 extends SceneTree
+
+# D-27: the main scene became the Control-rooted title screen in Phase 2, so
+# the Node3D-root assertion retargets here rather than being satisfied by
+# wrapping the title UI in a throwaway Node3D shell (explicitly rejected —
+# that would make this check pass without checking anything real).
+const GAMEPLAY_SCENE_PATH := "res://scenes/intro_level.tscn"
 
 var _script_count := 0
 var _scene_count := 0
@@ -24,11 +31,15 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	if not _check_gameplay_scene_is_3d():
+		quit(1)
+		return
+
 	if not _check_resources():
 		quit(1)
 		return
 
-	print("3D project verified: %d scripts, %d scenes." % [_script_count, _scene_count])
+	print("3D project verified: %d scripts, %d scenes, gameplay scene %s." % [_script_count, _scene_count, GAMEPLAY_SCENE_PATH])
 	quit(0)
 
 
@@ -120,8 +131,32 @@ func _check_main_scene() -> bool:
 		push_error("Main scene failed to instantiate: %s" % main_scene_path)
 		return false
 
+	# No Node3D-root assertion here (D-27): the main scene is now the
+	# Control-rooted title screen. Whether the project is genuinely 3D is
+	# proved by _check_gameplay_scene_is_3d() against a named gameplay scene
+	# instead — this function still proves the main scene loads and
+	# instantiates cleanly.
+	instance.free()
+	return true
+
+
+func _check_gameplay_scene_is_3d() -> bool:
+	if not ResourceLoader.exists(GAMEPLAY_SCENE_PATH):
+		push_error("Gameplay scene does not exist: %s" % GAMEPLAY_SCENE_PATH)
+		return false
+
+	var packed: PackedScene = load(GAMEPLAY_SCENE_PATH)
+	if packed == null:
+		push_error("Gameplay scene did not load as a PackedScene: %s" % GAMEPLAY_SCENE_PATH)
+		return false
+
+	var instance := packed.instantiate()
+	if instance == null:
+		push_error("Gameplay scene failed to instantiate: %s" % GAMEPLAY_SCENE_PATH)
+		return false
+
 	if not instance is Node3D:
-		push_error("Main scene root is not a Node3D: %s" % main_scene_path)
+		push_error("Gameplay scene root is not a Node3D: %s" % GAMEPLAY_SCENE_PATH)
 		instance.free()
 		return false
 
