@@ -683,6 +683,7 @@ func _case_lesson_1_guards() -> void:
 		return
 	var lesson: Node = opened["lesson"]
 	var camiel: CharacterBody3D = opened["camiel"]
+	var hud: CanvasLayer = opened["hud"]
 	var step_label: Label = opened["step_label"]
 
 	var targets := _lesson_1_targets(case_name, lesson)
@@ -767,6 +768,41 @@ func _case_lesson_1_guards() -> void:
 		_fail(case_name, "the progress file grew from %d to %d entries without any lesson finishing" % [entries_before, _disk_entry_count()])
 		return
 
+	# D-34's other half. The tracer proves the win panel's return control goes to
+	# lesson-select; this proves the in-play one does too, on an unfinished
+	# lesson, through the same one guarded transition. It is deliberately
+	# unreachable by the space key, so drive its own signal rather than
+	# synthesising a keyboard press -- the same way the lesson-kit probe proves
+	# the control still works while proving the keyboard cannot reach it.
+	var in_play_back_button: Button = hud.get_node_or_null("%BackButton")
+	if in_play_back_button == null:
+		_fail(case_name, "the shared display has no %BackButton")
+		return
+
+	_transition_count = 0
+	_transition_target = ""
+	lesson.transition_requested.connect(_on_transition_requested_counted)
+
+	in_play_back_button.pressed.emit()
+	await process_frame
+	await process_frame
+	if _transition_count != 1:
+		_fail(case_name, "the in-play return control requested %d transitions, expected 1" % _transition_count)
+		return
+	if _transition_target != LESSON_SELECT_PATH:
+		_fail(case_name, "the in-play return control carried %s, expected %s -- neither of a lesson's return controls goes to the main menu (D-34)" % [_transition_target, LESSON_SELECT_PATH])
+		return
+
+	await _drain_scene_change()
+
+	in_play_back_button.pressed.emit()
+	await process_frame
+	await process_frame
+	if _transition_count != 1:
+		_fail(case_name, "the in-play return control's one-shot guard did not block a second activation; count is %d" % _transition_count)
+		return
+
+	lesson.transition_requested.disconnect(_on_transition_requested_counted)
 	lesson.lesson_completed.disconnect(_on_lesson_completed_counted)
 	lesson.queue_free()
 	await _drain_scene_change()
