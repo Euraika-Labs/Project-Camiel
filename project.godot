@@ -21,6 +21,7 @@ audio/enable_audio_on_mobile=true
 [autoload]
 
 AudioManager="*res://scripts/audio_manager.gd"
+ProgressTracker="*res://scripts/progress_tracker.gd"
 
 [display]
 
