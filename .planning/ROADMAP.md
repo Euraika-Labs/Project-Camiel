@@ -76,8 +76,27 @@ Plans:
   4. Reaching the 3D finish marker shows the win screen with two buttons, "Nog een keer" (replay) and "Naar menu", each with an icon, activated by tap, click, or Enter on the focused button, through one code path.
   5. Background music loops continuously and the SFX volume control has an audible effect.
 
-**Plans**: Not yet planned
+**Plans**: 6 plans
 **UI hint**: yes
+
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Genuine Vorbis audio, a real three-bus layout, and the rebuilt AudioManager autoload
+- [ ] 02-02-PLAN.md — The shared icon-and-label menu button, its six drawn icons, and the UI theme
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 02-03-PLAN.md — Tracer: title screen to main menu to an enclosed, walkable 3D intro level, with the 3D assertion retargeted
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 02-04-PLAN.md — The collectible, the finish marker's signal, and the in-place win-and-replay overlay
+- [ ] 02-05-PLAN.md — The main menu's audio panel and sliders, plus two new headless self-test cases
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 02-06-PLAN.md — Final gate and the D-30 playtest of the whole loop
 
 ### Phase 3: 3D Lesson Parity & Progress Persistence
 
@@ -192,7 +211,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 3D Foundation & Archive | 6/6 | Complete    | 2026-09-11 |
-| 2. Playable 3D Intro Experience | 0/0 | Not started | - |
+| 2. Playable 3D Intro Experience | 0/6 | Planned     | - |
 | 3. 3D Lesson Parity & Progress Persistence | 0/0 | Not started | - |
 | 4. Accessibility & Release Pipeline Hardening | 0/0 | Not started | - |
 | 5. Dutch Voice-Over | 0/0 | Not started | - |
