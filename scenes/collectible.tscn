@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/collectible.gd" id="1_bkg8t"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_1pg6c"]
+radius = 0.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_61c27"]
+albedo_color = Color(0.92941177, 0.61960787, 0.3019608, 1)
+emission_enabled = true
+emission = Color(0.92941177, 0.61960787, 0.3019608, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="SphereMesh" id="SphereMesh_ga2k0"]
+material = SubResource("StandardMaterial3D_61c27")
+radius = 0.3
+height = 0.6
+
+[node name="Collectible" type="Area3D" unique_id=1327767782]
+script = ExtResource("1_bkg8t")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=208529938]
+shape = SubResource("SphereShape3D_1pg6c")
+
+[node name="Mesh" type="MeshInstance3D" parent="." unique_id=1937447756]
+mesh = SubResource("SphereMesh_ga2k0")

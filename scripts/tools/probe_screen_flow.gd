@@ -17,6 +17,8 @@ var _cases_run := 0
 var _finish_signal_count := 0
 var _level_transition_count := 0
 var _level_transition_target := ""
+var _collected_signal_count := 0
+var _drain_audio_manager: Node = null
 
 
 func _initialize() -> void:
@@ -30,6 +32,9 @@ func _initialize() -> void:
 	if _failed:
 		return
 	await _case_finish_marker()
+	if _failed:
+		return
+	await _case_collectible()
 	if _failed:
 		return
 
@@ -257,6 +262,128 @@ func _case_finish_marker() -> void:
 
 	level.transition_requested.disconnect(_on_level_transition_requested)
 	finish_marker.finished.disconnect(_on_finish_marker_finished_counted)
+	level.queue_free()
+	await process_frame
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+func _on_collected_counted() -> void:
+	_collected_signal_count += 1
+
+
+func _drain_sfx_idle() -> bool:
+	return not _drain_audio_manager.is_sfx_playing()
+
+
+# Polls `predicate` once per physics frame against a real wall-clock
+# deadline (VF11, VF23 — the audio mix thread runs on real time, decoupled
+# from --fixed-fps's simulated frames, so a fixed frame count is not a
+# portable margin). Mirrors probe_audio_buses.gd's _wait_until helper.
+func _wait_until(predicate: Callable, timeout_ms: int = 2000) -> bool:
+	var deadline := Time.get_ticks_msec() + timeout_ms
+	while Time.get_ticks_msec() < deadline:
+		if predicate.call():
+			return true
+		await physics_frame
+	return predicate.call()
+
+
+func _count_collectible_instances(node: Node, count: Array) -> void:
+	if node.scene_file_path == "res://scenes/collectible.tscn":
+		count[0] += 1
+	for child in node.get_children():
+		_count_collectible_instances(child, count)
+
+
+# Plan 02-04 Task 2: the collectible's exactly-once contract (INTRO-03), the
+# single-instance count D-19 fixes, and the structural guarantee that
+# intro_level.gd is the only thing that plays the pickup effect.
+func _case_collectible() -> void:
+	var case_name := "collectible"
+	var packed: PackedScene = load("res://scenes/intro_level.tscn")
+	if packed == null:
+		_fail(case_name, "could not load res://scenes/intro_level.tscn")
+		return
+
+	var level: Node3D = packed.instantiate()
+	root.add_child(level)
+	await process_frame
+	await process_frame
+
+	var collectible: Area3D = level.get_node("%Collectible")
+	var camiel: CharacterBody3D = level.get_node("Camiel")
+	var audio_manager: Node = root.get_node_or_null("AudioManager")
+	if audio_manager == null:
+		_fail(case_name, "AudioManager autoload not found at /root/AudioManager")
+		return
+
+	var instance_count := [0]
+	_count_collectible_instances(level, instance_count)
+	if instance_count[0] != 1:
+		_fail(case_name, "intro_level.tscn contains %d collectible instances, expected exactly 1 (D-19)" % instance_count[0])
+		return
+
+	_collected_signal_count = 0
+	collectible.collected.connect(_on_collected_counted)
+
+	var connections := collectible.get_signal_connection_list("collected")
+	if connections.size() != 2:
+		_fail(case_name, "%%Collectible.collected has %d connections, expected 2 (the level's handler and the probe's counter)" % connections.size())
+		return
+
+	# The finish_marker case (run immediately before this one) also plays an
+	# SFX event through this same singleton AudioManager, off its own short
+	# placeholder stream. Drain it here rather than asserting a strict
+	# same-instant baseline, so this case proves the collectible's own
+	# effect rather than racing a prior case's cleanup.
+	_drain_audio_manager = audio_manager
+	await _wait_until(_drain_sfx_idle, 2000)
+	if audio_manager.is_sfx_playing():
+		_fail(case_name, "AudioManager still reports an SFX playing 2000ms after the finish_marker case; cannot prove a fresh pickup")
+		return
+
+	camiel.teleport_to(collectible.global_position)
+	var frames_waited := 0
+	while _collected_signal_count == 0 and frames_waited < 120:
+		await physics_frame
+		frames_waited += 1
+
+	if _collected_signal_count != 1:
+		_fail(case_name, "collected fired %d times within 120 physics frames, expected 1" % _collected_signal_count)
+		return
+	if collectible.monitoring:
+		_fail(case_name, "%Collectible.monitoring is still true after pickup")
+		return
+
+	var became_playing := await _wait_until(audio_manager.is_sfx_playing, 2000)
+	if not became_playing:
+		_fail(case_name, "AudioManager did not report an SFX playing within 2000ms of pickup")
+		return
+
+	for _i in range(60):
+		await physics_frame
+	if _collected_signal_count != 1:
+		_fail(case_name, "collected fired again (count=%d) while Camiel kept overlapping for 60 further frames" % _collected_signal_count)
+		return
+
+	var intruder := StaticBody3D.new()
+	var intruder_shape := CollisionShape3D.new()
+	var intruder_box := BoxShape3D.new()
+	intruder_box.size = Vector3(0.2, 0.2, 0.2)
+	intruder_shape.shape = intruder_box
+	intruder.add_child(intruder_shape)
+	level.add_child(intruder)
+	intruder.global_position = collectible.global_position
+	for _i in range(10):
+		await physics_frame
+	if _collected_signal_count != 1:
+		_fail(case_name, "a non-player StaticBody3D placed inside the collectible triggered it (count=%d)" % _collected_signal_count)
+		return
+	intruder.queue_free()
+
+	collectible.collected.disconnect(_on_collected_counted)
 	level.queue_free()
 	await process_frame
 

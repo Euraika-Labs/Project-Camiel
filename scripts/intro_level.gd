@@ -36,11 +36,19 @@ var _transitioning := false
 
 func _ready() -> void:
 	%FinishMarker.finished.connect(_on_finish_marker_finished)
+	%Collectible.collected.connect(_on_collectible_collected)
 	%ReplayButton.pressed.connect(_on_replay_button_pressed)
 	%GoToMenuButton.pressed.connect(_on_go_to_menu_button_pressed)
 
 
 # ── Signal handlers ──────────────────────────────────────────────
+
+## The single place in the runtime tree that plays the pickup effect
+## (INTRO-03) — %Collectible only emits, it never plays a sound itself, so
+## the archived two-listener defect (CONCERNS.md) cannot recur here.
+func _on_collectible_collected() -> void:
+	AudioManager.play_sfx("collect")
+
 
 ## Reached whether or not %Collectible was ever picked up (D-21: the finish
 ## is not gated on the collectible). Fades the win overlay in and freezes
@@ -54,6 +62,7 @@ func _on_finish_marker_finished() -> void:
 	tween.tween_property(%Scrim, "modulate:a", 1.0, 0.3)
 	%ReplayButton.grab_focus()
 	_camiel.set_physics_process(false)
+	AudioManager.play_sfx("finish")
 
 
 ## Same one-shot guard and deferred scene change title_screen.gd and

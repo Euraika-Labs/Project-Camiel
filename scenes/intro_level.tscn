@@ -9,6 +9,8 @@
 [ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="7_jcxbg"]
 [ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="8_n8fro"]
 [ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="9_2oxm2"]
+[ext_resource type="PackedScene" path="res://scenes/collectible.tscn" id="10_4ioru"]
+[ext_resource type="Script" path="res://scripts/collectible.gd" id="11_jcxbg"]
 
 [sub_resource type="Environment" id="Environment_aimfc"]
 background_mode = 1
@@ -168,6 +170,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("7_jcxbg")
 
@@ -219,3 +223,8 @@ theme = ExtResource("7_jcxbg")
 script = ExtResource("9_2oxm2")
 label_text = "Naar menu"
 icon_kind = "home"
+
+[node name="Collectible" type="Area3D" parent="." unique_id=1327767782 instance=ExtResource("10_4ioru")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0.8, -1)
+script = ExtResource("11_jcxbg")
