@@ -25,6 +25,11 @@ const BACKUP_PATH := "user://progress.json.probe_backup"
 const LESSON_1_PATH := "res://scenes/lesson_1.tscn"
 const LESSON_SELECT_PATH := "res://scenes/lesson_select.tscn"
 
+## A corner of the shared room that is far from every one of lesson 1's five
+## targets, used to take the character off a target so a later teleport onto it
+## is a genuine fresh entry rather than a body that never left.
+const PARKING_SPOT := Vector3(5, 0.1, 5)
+
 # ── Internal state ───────────────────────────────────────────────
 
 var _failed := false
@@ -46,6 +51,12 @@ func _initialize() -> void:
 	_take_progress_backup()
 
 	await _case_lesson_1_count_first()
+	if _failed:
+		return
+	await _case_lesson_1_other_orders()
+	if _failed:
+		return
+	await _case_lesson_1_guards()
 	if _failed:
 		return
 
@@ -335,6 +346,72 @@ func _assert_last_entry(case_name: String, lesson_id: String) -> bool:
 	return true
 
 
+## Drives one lesson-1 instance through an explicit sequence of touches, each
+## paired with the exact progress label a child must see after it, and asserts
+## the lesson finishes exactly once and only on the final touch. Pairing every
+## touch with its own expected label is what turns "the lesson eventually
+## finished" into "the lesson counted correctly at every step" -- an early
+## completion, or a counting object that wrongly counts on its own, fails on the
+## step it happened rather than being absorbed by a passing end state.
+func _drive_touch_sequence(case_name: String, opened: Dictionary, targets: Dictionary, sequence: Array) -> bool:
+	var lesson: Node = opened["lesson"]
+	var camiel: CharacterBody3D = opened["camiel"]
+	var hud: CanvasLayer = opened["hud"]
+	var step_label: Label = opened["step_label"]
+
+	if step_label.text != "Stap: 0 / 3":
+		_fail(case_name, "the progress label reads %s at the start of the lesson, expected Stap: 0 / 3" % step_label.text)
+		return false
+	if hud.is_win_visible():
+		_fail(case_name, "the win panel is already visible before the lesson was played")
+		return false
+
+	_target_completed_count = 0
+	_target_completed_ids.clear()
+	_lesson_completed_count = 0
+	_lesson_completed_ids.clear()
+	_lesson_completed_times.clear()
+	_watch_targets(targets["red"], targets["blue"], targets["counts"])
+	lesson.lesson_completed.connect(_on_lesson_completed_counted)
+
+	for i in sequence.size():
+		var target: Area3D = sequence[i][0]
+		var expected_label: String = sequence[i][1]
+		if await _touch_target(camiel, target) < 0:
+			_fail(case_name, "step %d (%s) never registered a touch within 120 physics frames" % [i + 1, target.name])
+			return false
+		if step_label.text != expected_label:
+			_fail(case_name, "after step %d (%s) the label reads %s, expected %s" % [i + 1, target.name, step_label.text, expected_label])
+			return false
+		if i < sequence.size() - 1 and _lesson_completed_count != 0:
+			_fail(case_name, "the lesson finished at step %d of %d, before all three tasks were done" % [i + 1, sequence.size()])
+			return false
+
+	await process_frame
+	await process_frame
+
+	if _lesson_completed_count != 1:
+		_fail(case_name, "lesson_completed fired %d times, expected exactly 1" % _lesson_completed_count)
+		return false
+	if _lesson_completed_ids[0] != "lesson_1":
+		_fail(case_name, "lesson_completed carried %s, expected lesson_1" % _lesson_completed_ids[0])
+		return false
+	if _lesson_completed_times[0] <= 0.0:
+		_fail(case_name, "lesson_completed carried an elapsed time of %s, expected greater than zero" % _lesson_completed_times[0])
+		return false
+	if not hud.is_win_visible():
+		_fail(case_name, "the win panel is not visible after the lesson finished")
+		return false
+	if camiel.is_physics_processing():
+		_fail(case_name, "the character's physics processing is still on after the lesson finished")
+		return false
+	if not _assert_last_entry(case_name, "lesson_1"):
+		return false
+
+	lesson.lesson_completed.disconnect(_on_lesson_completed_counted)
+	return true
+
+
 ## Presses the win panel's return control, asserts exactly one transition to
 ## lesson-select, drains the scene change the handler really requested, presses
 ## the same control again, and asserts the one-shot guard blocked the second
@@ -479,6 +556,184 @@ func _case_lesson_1_count_first() -> void:
 	lesson.lesson_completed.disconnect(_on_lesson_completed_counted)
 	lesson.queue_free()
 	await process_frame
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+## Lesson 1 finishes from two further task orders -- counting in the middle and
+## counting last. Together with the tracer's counting-first run, that is three
+## genuinely different orders, which is what "regardless of which of its three
+## tasks is completed first" actually asks for (D-36).
+func _case_lesson_1_other_orders() -> void:
+	var case_name := "lesson_1_other_orders"
+	var entries_before := _disk_entry_count()
+
+	# --- Run 1: red, then the three counting objects, then blue. The counting
+	# task sits in the middle here, and the two objects before the last one must
+	# leave the label exactly where it was. ---
+	var first: Dictionary = await _open_lesson(case_name, LESSON_1_PATH)
+	if _failed:
+		return
+	var first_targets := _lesson_1_targets(case_name, first["lesson"])
+	if _failed:
+		return
+	var first_counts: Array[Area3D] = first_targets["counts"]
+	var first_sequence: Array = [
+		[first_targets["red"], "Stap: 1 / 3"],
+		[first_counts[0], "Stap: 1 / 3"],
+		[first_counts[1], "Stap: 1 / 3"],
+		[first_counts[2], "Stap: 2 / 3"],
+		[first_targets["blue"], "Stap: 3 / 3"],
+	]
+	if not await _drive_touch_sequence(case_name, first, first_targets, first_sequence):
+		return
+	first["lesson"].queue_free()
+	await _drain_scene_change()
+
+	# --- Run 2: blue, then red, then the three counting objects. The counting
+	# task is last here, so the lesson must not finish until the third object. ---
+	var second: Dictionary = await _open_lesson(case_name, LESSON_1_PATH)
+	if _failed:
+		return
+	var second_targets := _lesson_1_targets(case_name, second["lesson"])
+	if _failed:
+		return
+	var second_counts: Array[Area3D] = second_targets["counts"]
+	var second_sequence: Array = [
+		[second_targets["blue"], "Stap: 1 / 3"],
+		[second_targets["red"], "Stap: 2 / 3"],
+		[second_counts[0], "Stap: 2 / 3"],
+		[second_counts[1], "Stap: 2 / 3"],
+		[second_counts[2], "Stap: 3 / 3"],
+	]
+	if not await _drive_touch_sequence(case_name, second, second_targets, second_sequence):
+		return
+	second["lesson"].queue_free()
+	await _drain_scene_change()
+
+	# One entry per completion is what D-40's append log means in practice: two
+	# completions, two new lines in the file, neither overwriting the other.
+	var entries_after := _disk_entry_count()
+	if entries_after != entries_before + 2:
+		_fail(case_name, "the progress file grew from %d to %d entries across two completions, expected %d" % [entries_before, entries_after, entries_before + 2])
+		return
+	var data := _read_progress_file(case_name)
+	if _failed:
+		return
+	var entries: Array = data["entries"]
+	for offset in 2:
+		var entry: Dictionary = entries[entries.size() - 1 - offset]
+		if entry.get("lesson_id", "") != "lesson_1":
+			_fail(case_name, "one of the two new entries carries lesson_id %s, expected lesson_1" % [entry.get("lesson_id")])
+			return
+	print("[probe_lesson_order] progress entries before/after two completions: %d / %d" % [entries_before, entries_after])
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+## Nothing short of all three tasks finishes lesson 1, and nothing other than
+## the child finishes anything: two of three counting objects is not the
+## counting task, a completed target contributes once and only once, and a plain
+## body that is not the player completes nothing even though the room's own
+## floor shares its collision layer with every target.
+func _case_lesson_1_guards() -> void:
+	var case_name := "lesson_1_guards"
+	var entries_before := _disk_entry_count()
+
+	var opened: Dictionary = await _open_lesson(case_name, LESSON_1_PATH)
+	if _failed:
+		return
+	var lesson: Node = opened["lesson"]
+	var camiel: CharacterBody3D = opened["camiel"]
+	var step_label: Label = opened["step_label"]
+
+	var targets := _lesson_1_targets(case_name, lesson)
+	if _failed:
+		return
+	var red: Area3D = targets["red"]
+	var blue: Area3D = targets["blue"]
+	var counts: Array[Area3D] = targets["counts"]
+
+	_target_completed_count = 0
+	_target_completed_ids.clear()
+	_lesson_completed_count = 0
+	_lesson_completed_ids.clear()
+	_lesson_completed_times.clear()
+	_watch_targets(red, blue, counts)
+	lesson.lesson_completed.connect(_on_lesson_completed_counted)
+
+	# Two of the three counting objects, plus the red target. An incomplete
+	# counting task must not count as a task.
+	for i in 2:
+		if await _touch_target(camiel, counts[i]) < 0:
+			_fail(case_name, "counting object %d never registered a touch within 120 physics frames" % (i + 1))
+			return
+	if await _touch_target(camiel, red) < 0:
+		_fail(case_name, "the red target never registered a touch within 120 physics frames")
+		return
+
+	for _i in range(120):
+		await physics_frame
+	if _lesson_completed_count != 0:
+		_fail(case_name, "the lesson completed on two of three counting objects plus one colour; an unfinished counting task must not count (D-36)")
+		return
+	if step_label.text != "Stap: 1 / 3":
+		_fail(case_name, "after two counting objects and the red target the label reads %s, expected Stap: 1 / 3" % step_label.text)
+		return
+
+	# A completed target contributes once. Park the character away first so the
+	# return is a genuine fresh entry into the area, not a body that never left.
+	var label_before_repeat := step_label.text
+	camiel.teleport_to(PARKING_SPOT)
+	for _i in range(10):
+		await physics_frame
+	var completions_before_repeat := _target_completed_count
+	camiel.teleport_to(red.global_position)
+	for _i in range(60):
+		await physics_frame
+	if _target_completed_count != completions_before_repeat:
+		_fail(case_name, "standing on an already-completed target for 60 further physics frames added %d completions, expected 0" % (_target_completed_count - completions_before_repeat))
+		return
+	if step_label.text != label_before_repeat:
+		_fail(case_name, "the label moved to %s while standing on an already-completed target, expected it to stay at %s" % [step_label.text, label_before_repeat])
+		return
+
+	# A plain body that is not the player. The room's floor sits on the same
+	# default collision layer as every target, so the player-group guard is what
+	# keeps the room itself from finishing the lesson.
+	camiel.teleport_to(PARKING_SPOT)
+	for _i in range(10):
+		await physics_frame
+	var intruder := StaticBody3D.new()
+	var intruder_shape := CollisionShape3D.new()
+	var intruder_box := BoxShape3D.new()
+	intruder_box.size = Vector3(0.2, 0.2, 0.2)
+	intruder_shape.shape = intruder_box
+	intruder.add_child(intruder_shape)
+	lesson.add_child(intruder)
+	intruder.global_position = counts[2].global_position
+	for _i in range(10):
+		await physics_frame
+	if _lesson_completed_count != 0:
+		_fail(case_name, "a non-player body placed on a lesson target completed the lesson")
+		return
+	if _target_completed_count != completions_before_repeat:
+		_fail(case_name, "a non-player body placed on a lesson target completed a task (count rose to %d)" % _target_completed_count)
+		return
+	if step_label.text != label_before_repeat:
+		_fail(case_name, "the label moved to %s when a non-player body was placed on a target" % step_label.text)
+		return
+	intruder.queue_free()
+
+	if _disk_entry_count() != entries_before:
+		_fail(case_name, "the progress file grew from %d to %d entries without any lesson finishing" % [entries_before, _disk_entry_count()])
+		return
+
+	lesson.lesson_completed.disconnect(_on_lesson_completed_counted)
+	lesson.queue_free()
+	await _drain_scene_change()
 
 	_cases_run += 1
 	print("PASS %s" % case_name)
