@@ -55,7 +55,7 @@ coverage:
         ref: "scripts/tools/probe_audio_buses.gd#_case_menu_sfx_slider"
         status: pass
     human_judgment: true
-    rationale: "Genuine audibility of the slider's effect cannot be verified headlessly (Dummy audio driver produces no sound); D-30's human playtest at the end of the phase is the backstop for perceived audibility, per 02-VALIDATION.md's Manual-Only Verifications table."
+    rationale: "Genuine audibility of the slider's effect cannot be verified headlessly (the null audio driver produces no sound); D-30's human playtest at the end of the phase is the backstop for perceived audibility, per 02-VALIDATION.md's Manual-Only Verifications table."
   - id: D2
     description: "A music-volume slider beside it moves only the music bus, with the same read-back and isolation guarantees"
     requirement: "INTRO-06"
