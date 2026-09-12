@@ -1,0 +1,124 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/lesson_hud.gd" id="1_21sae"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="2_1fd7q"]
+[ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="3_b0w4e"]
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="4_7vfob"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1w28"]
+content_margin_left = 32.0
+content_margin_top = 32.0
+content_margin_right = 32.0
+content_margin_bottom = 32.0
+bg_color = Color(1, 0.9647059, 0.9098039, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.84705883, 0.79607844, 0.6901961, 1)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
+[node name="LessonHud" type="CanvasLayer" unique_id=851995517]
+process_mode = 3
+script = ExtResource("1_21sae")
+
+[node name="TopBar" type="Control" parent="." unique_id=2026008640]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 96.0
+
+[node name="Margin" type="MarginContainer" parent="TopBar" unique_id=1002750281]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 16
+
+[node name="Row" type="HBoxContainer" parent="TopBar/Margin" unique_id=734307053]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="TopBar/Margin/Row" unique_id=1671875849]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SmallLabel"
+
+[node name="StepLabel" type="Label" parent="TopBar/Margin/Row" unique_id=1725814619]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+text = "Stap: 0 / 3"
+horizontal_alignment = 2
+
+[node name="BackButton" type="Button" parent="." unique_id=1313707963 instance=ExtResource("2_1fd7q")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 112)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -136.0
+offset_right = 24.0
+offset_bottom = -136.0
+theme = ExtResource("3_b0w4e")
+script = ExtResource("4_7vfob")
+label_text = "Naar lessen"
+icon_kind = "home"
+
+[node name="WinRoot" type="Control" parent="." unique_id=1651980744]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Scrim" type="Control" parent="WinRoot" unique_id=2114708555]
+unique_name_in_owner = true
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="ColorRect" type="ColorRect" parent="WinRoot/Scrim" unique_id=1048486677]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.35)
+
+[node name="CenterContainer" type="CenterContainer" parent="WinRoot/Scrim" unique_id=210213504]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="WinPanel" type="PanelContainer" parent="WinRoot/Scrim/CenterContainer" unique_id=1819777699]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_y1w28")
+
+[node name="WinContent" type="VBoxContainer" parent="WinRoot/Scrim/CenterContainer/WinPanel" unique_id=1742530326]
+layout_mode = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="WinTitle" type="Label" parent="WinRoot/Scrim/CenterContainer/WinPanel/WinContent" unique_id=2006867743]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "Goed zo!"
+horizontal_alignment = 1
+
+[node name="WinBackButton" type="Button" parent="WinRoot/Scrim/CenterContainer/WinPanel/WinContent" unique_id=1103579595 instance=ExtResource("2_1fd7q")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 112)
+layout_mode = 2
+theme = ExtResource("3_b0w4e")
+script = ExtResource("4_7vfob")
+label_text = "Nog een les"
+icon_kind = "walk"

@@ -16,6 +16,9 @@ func _initialize() -> void:
 	await _case_target_completes_on_touch()
 	if _failed:
 		return
+	await _case_hud_form_and_win_panel()
+	if _failed:
+		return
 
 	if _cases_run == 0:
 		push_error("no case ran; the probe would verify nothing")
@@ -35,6 +38,30 @@ func _fail(case_name: String, detail: String) -> void:
 func _on_task_completed_counted(task_id: String) -> void:
 	_completed_count += 1
 	_completed_ids.append(task_id)
+
+
+var _back_requested_count := 0
+var _win_back_requested_count := 0
+
+
+func _on_back_requested_counted() -> void:
+	_back_requested_count += 1
+
+
+func _on_win_back_requested_counted() -> void:
+	_win_back_requested_count += 1
+
+
+# Mirrors probe_screen_flow.gd's synthesised accept-action helper.
+func _press_focused() -> void:
+	var press := InputEventAction.new()
+	press.action = "ui_accept"
+	press.pressed = true
+	Input.parse_input_event(press)
+	var release := InputEventAction.new()
+	release.action = "ui_accept"
+	release.pressed = false
+	Input.parse_input_event(release)
 
 
 ## Instantiates the shared room and a player body under it. Building the
@@ -146,6 +173,94 @@ func _case_target_completes_on_touch() -> void:
 	await process_frame
 
 	room.queue_free()
+	await process_frame
+
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+func _case_hud_form_and_win_panel() -> void:
+	var case_name := "hud_form_and_win_panel"
+	var hud_packed: PackedScene = load("res://scenes/ui/lesson_hud.tscn")
+	var hud: CanvasLayer = hud_packed.instantiate()
+	root.add_child(hud)
+	await process_frame
+	await process_frame
+
+	var title_label: Label = hud.get_node("%TitleLabel")
+	var back_button: Button = hud.get_node("%BackButton")
+	var win_back_button: Button = hud.get_node("%WinBackButton")
+
+	hud.set_title("Les 1")
+	if title_label.text != "Les 1":
+		_fail(case_name, "title label reads %s, expected Les 1" % title_label.text)
+		return
+
+	hud.set_step(2, 3)
+	var step_label: Label = hud.get_node("%StepLabel")
+	if step_label.text != "Stap: 2 / 3":
+		_fail(case_name, "step label reads %s, expected Stap: 2 / 3" % step_label.text)
+		return
+	hud.set_step(4, 4)
+	if step_label.text != "Stap: 4 / 4":
+		_fail(case_name, "step label reads %s, expected Stap: 4 / 4 -- the same call shape must stay correct for the four-step lesson" % step_label.text)
+		return
+
+	if hud.is_win_visible():
+		_fail(case_name, "hud.is_win_visible() is true before show_win() was ever called")
+		return
+	if back_button.focus_mode != Control.FOCUS_NONE:
+		_fail(case_name, "%%BackButton.focus_mode is %d, expected FOCUS_NONE" % back_button.focus_mode)
+		return
+
+	_back_requested_count = 0
+	_win_back_requested_count = 0
+	hud.back_requested.connect(_on_back_requested_counted)
+	hud.win_back_requested.connect(_on_win_back_requested_counted)
+
+	var back_connections := back_button.get_signal_connection_list("pressed")
+	if back_connections.size() != 1:
+		_fail(case_name, "%%BackButton.pressed has %d connections, expected 1 (the display's own handler)" % back_connections.size())
+		return
+	var win_back_connections := win_back_button.get_signal_connection_list("pressed")
+	if win_back_connections.size() != 1:
+		_fail(case_name, "%%WinBackButton.pressed has %d connections, expected 1 (the display's own handler)" % win_back_connections.size())
+		return
+
+	hud.show_win()
+	await process_frame
+	await process_frame
+
+	if not hud.is_win_visible():
+		_fail(case_name, "hud.is_win_visible() is false after show_win()")
+		return
+	if not win_back_button.has_focus():
+		_fail(case_name, "%WinBackButton does not hold focus after show_win()")
+		return
+
+	_press_focused()
+	await process_frame
+	await process_frame
+
+	if _win_back_requested_count != 1:
+		_fail(case_name, "win_back_requested fired %d times, expected 1" % _win_back_requested_count)
+		return
+	if _back_requested_count != 0:
+		_fail(case_name, "back_requested fired %d times, expected 0 -- the space key must not reach the in-play control" % _back_requested_count)
+		return
+
+	# Proves the in-play control still works while proving the keyboard
+	# cannot reach it: its own signal, not a synthesised keyboard press.
+	back_button.pressed.emit()
+	await process_frame
+	await process_frame
+	if _back_requested_count != 1:
+		_fail(case_name, "back_requested fired %d times after the button's own pressed signal, expected 1" % _back_requested_count)
+		return
+
+	hud.back_requested.disconnect(_on_back_requested_counted)
+	hud.win_back_requested.disconnect(_on_win_back_requested_counted)
+	hud.queue_free()
 	await process_frame
 
 	_cases_run += 1
