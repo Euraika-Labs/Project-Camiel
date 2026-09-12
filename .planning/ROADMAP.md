@@ -112,12 +112,34 @@ Plans:
   4. Lesson 3 (3D sequence) only completes after its targets are activated in the defined order.
   5. Lessons 4 and 5 are real, completable 3D educational tasks, and completing any lesson (1-5) writes a matching entry (lesson_id, stars, time_seconds, completed_at) to user://progress.json, with no error from the progress-tracking system.
 
-**Plans**: Not yet planned
+**Plans**: 6 plans
 **UI hint**: yes
+
+Plans:
+**Wave 1**
+
+- [ ] 03-01-PLAN.md — Progress persistence: atomic write, fail-soft read, versioned append log, proved by re-reading the file from disk
+- [ ] 03-02-PLAN.md — The shared lesson kit: one parametrized target with its activation gate, the shared room, and the one progress-label form
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 03-03-PLAN.md — Tracer: main menu to lesson-select to Lesson 1, finished counting-task-first, recorded on disk
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 03-04-PLAN.md — Lessons 2 and 3: order enforced structurally, with an out-of-order refusal proved for each
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 03-05-PLAN.md — Lessons 4 and 5, the five-entry lesson table, and five record call sites proved on disk
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 03-06-PLAN.md — Playtest all five lessons, prove the save survives a real relaunch, apply the verdict
 
 **Open Questions** (owned by this phase — do not decide during roadmapping):
 
-- Design of Lessons 4 and 5 (they were empty placeholders in 2D). Their concrete educational concept is undecided and must be settled while this phase is discussed.
+- Design of Lessons 4 and 5 — settled during phase discussion: D-43 makes Lesson 4 a second colour-recognition-and-counting task on a new colour pair, and D-44 makes Lesson 5 a four-step sequence.
 
 ### Phase 03.1: Camiel 3D model and animations replace the primitive-shape placeholder (INSERTED)
 
