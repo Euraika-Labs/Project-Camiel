@@ -47,3 +47,38 @@ sign-off checklist. `run_headless_check.sh` has no `REQUIRED_PROBES` named-probe
 allow-list, so deleting any single `probe_*.gd` still leaves the glob non-empty and the
 check passes green with that probe's whole coverage silently gone. Tracked in
 `STATE.md`'s Pending Todos; not Phase 3 scope.
+
+## probe_screen_flow.gd gives a false failure when run without --fixed-fps 60
+
+Found by the orchestrator while executing plan 03-06 Task 1, which requires *reading* all
+eight probe success lines rather than trusting the glob covered them.
+
+Run the way `run_headless_check.sh` runs it, the probe passes:
+
+```
+$ Godot --headless --fixed-fps 60 --path . --script res://scripts/tools/probe_screen_flow.gd
+Screen flow probe passed.
+```
+
+Run the way a developer would reach for by hand, it fails:
+
+```
+$ Godot --headless --path . -s scripts/tools/probe_screen_flow.gd
+ERROR: win_buttons: %WinLayer did not become visible a second time after a replayed lap
+```
+
+Reproduced in both directions, so the flag is the whole difference — the `win_buttons` case
+waits on a replayed lap in frames, and without a pinned frame rate the wait expires before
+the panel returns. Nothing is wrong with the shipped game, and the committed check always
+passes the flag, so CI and the phase gates are unaffected.
+
+It is logged because it is this project's signature defect class inverted: a check that
+lies, but toward a false **failure** rather than a false pass. The cost is a developer
+concluding the screen flow is broken when it is not, and the other seven probes do not share
+the fragility — they were all run by hand in the same pass and passed without the flag.
+
+**Fix when touched, not now:** make the `win_buttons` wait real-time bounded rather than
+frame-counted, the same way `02-VALIDATION.md`'s D-26 rules already require for audio
+liveness (`_wait_until_playing(player, 2000)`). Do not "fix" it by adding `--fixed-fps` to a
+comment and calling the invocation documented, and do not raise the frame budget — that
+hides the pacing dependency instead of removing it.
