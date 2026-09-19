@@ -35,23 +35,23 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 - [ ] **LESSON-01**: Lesson 1 (3D colour recognition red/blue and counting to 3) finishes regardless of which of its three tasks the child completes first
 - [ ] **LESSON-02**: Lesson 2 (3D shape order) only completes after circle, square, and triangle are touched in that specific order
 - [ ] **LESSON-03**: Lesson 3 (3D sequence) only completes after its targets are activated in the defined order
-- [ ] **LESSON-04**: Lesson 4 is a real, completable 3D educational task (its concept is a pending decision, to be settled when this requirement is discussed)
-- [ ] **LESSON-05**: Lesson 5 is a real, completable 3D educational task (its concept is a pending decision, to be settled when this requirement is discussed)
+- [ ] **LESSON-04**: Lesson 4 is a real, completable 3D educational task (yellow/green recognition and counting to three)
+- [ ] **LESSON-05**: Lesson 5 is a real, completable 3D educational task (ordered sequence from one to four)
 - [ ] **LESSON-06**: A lesson-select screen, reachable from the main menu, offers a way to start any of Lessons 1 through 5 by tap, click, or keyboard
-- [ ] **PROGRESS-01**: The progress-tracking system initializes without a script error
-- [ ] **PROGRESS-02**: Completing any lesson (1 through 5) writes a matching entry (`lesson_id`, `stars`, `time_seconds`, `completed_at`) to `user://progress.json`
+- [x] **PROGRESS-01**: The progress-tracking system initializes without a script error
+- [x] **PROGRESS-02**: Completing any lesson (1 through 5) writes a matching entry (`lesson_id`, `stars`, `time_seconds`, `completed_at`) to `user://progress.json`
 
 ### Accessibility & Release Pipeline Hardening
 
 - [x] **ACCESS-01**: Every text/background color combination in the shipped 3D UI meets WCAG 2.1 AA contrast (4.5:1 normal text, 3:1 for text that qualifies as large), verified by computed ratios
-- [ ] **ACCESS-02**: A reachable UI control toggles high-contrast mode, and the visual change applies immediately to on-screen UI
-- [ ] **CI-01**: A single Godot engine version (4.7.2) is pinned and used consistently by the CI workflow, the release workflow, the export workflow, and the Godot setup doc
-- [ ] **CI-02**: The version string shown in-game and used in build artifact names comes from one source of truth instead of being hand-edited in multiple files
-- [ ] **CI-03**: The CI pipeline fails the build when a GDScript parse error or runtime script error occurs during startup or scene load, across the new 3D scenes
-- [ ] **CI-04**: The Linux export job successfully packages the built binary into a `.tar.gz` artifact
+- [x] **ACCESS-02**: A reachable UI control toggles high-contrast mode, and the visual change applies immediately to on-screen UI
+- [x] **CI-01**: A single Godot engine version (4.7.2) is pinned and used consistently by the CI workflow, the release workflow, the export workflow, and the Godot setup doc
+- [x] **CI-02**: The version string shown in-game and used in build artifact names comes from one source of truth instead of being hand-edited in multiple files
+- [x] **CI-03**: The CI pipeline fails the build when a GDScript parse error or runtime script error occurs during startup or scene load, across the new 3D scenes
+- [x] **CI-04**: The Linux export job successfully packages the built binary into a `.tar.gz` artifact
 - [ ] **CI-05**: Pushing a version tag creates exactly one GitHub release with the correct Windows, Linux, and macOS files attached as files, not directories
-- [ ] **DOCS-01**: `README.md` and `docs/roadmap.md` describe only 3D capabilities that are actually reachable and working in the current build
-- [ ] **DOCS-02**: `README.md`'s stated license matches the repository's actual `LICENSE` file
+- [x] **DOCS-01**: `README.md` and `docs/roadmap.md` describe only 3D capabilities that are actually reachable and working in the current build
+- [x] **DOCS-02**: `README.md`'s stated license matches the repository's actual `LICENSE` file
 
 ### Dutch Voice-Over
 
@@ -62,32 +62,32 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 
 - [ ] **MOBILE-01**: The on-screen joystick maps to 3D movement proportionally (analog) rather than snapping to full speed
 - [ ] **MOBILE-02**: A child can hold the movement joystick and press the jump control at the same time without either input being dropped
-- [ ] **MOBILE-03**: The touch controller is instanced in every level and lesson scene, not only the intro level
+- [x] **MOBILE-03**: The touch controller is instanced in every level and lesson scene, not only the intro level
 
 ### Web Export
 
-- [ ] **WEB-01**: The Web export preset uses the correct Godot 4 platform identifier and the Compatibility renderer, and produces a build via the Godot 4.7.2 editor or CLI
+- [x] **WEB-01**: The Web export preset uses the correct Godot 4 platform identifier and the Compatibility renderer, and produces a build via the Godot 4.7.2 editor or CLI
 - [ ] **WEB-02**: A CI job builds the Web export, and the resulting build is verified to load
-- [ ] **WEB-03**: `docs/web-export.md`, `docs/quick-start.md`, and `docs/roadmap.md` agree with each other, and with the shipped state, on the Web export's actual availability
+- [x] **WEB-03**: `docs/web-export.md`, `docs/quick-start.md`, and `docs/roadmap.md` agree with each other, and with the shipped state, on the Web export's actual availability
 
 ### Parent Dashboard
 
-- [ ] **DASH-01**: A parent or teacher can view aggregated progress stats (total lessons completed, total stars, total time, star-rating breakdown, last session) for a child's `progress.json` in a local, read-only web dashboard
-- [ ] **DASH-02**: The dashboard serves `GET /api/progress` and `GET /api/summary`, and accepts a `progress.json` upload via `POST /api/progress/import`, matching the documented contract
-- [ ] **DASH-03**: No child progress data leaves the local device — the dashboard makes no external network calls
+- [x] **DASH-01**: A parent or teacher can view aggregated progress stats (total lessons completed, total stars, total time, star-rating breakdown, last session) for a child's `progress.json` in a local, read-only web dashboard
+- [x] **DASH-02**: The dashboard serves `GET /api/progress` and `GET /api/summary`, and accepts a `progress.json` upload via `POST /api/progress/import`, matching the documented contract
+- [x] **DASH-03**: No child progress data leaves the local device — the dashboard makes no external network calls
 
 ### Additional Lesson Levels
 
-- [ ] **MORE-01**: At least one new lesson beyond the original five is reachable from the lesson-select screen, fully completable, and records progress the same way Lessons 1-5 do
-- [ ] **MORE-02**: New lessons are built on a shared 3D lesson-base pattern rather than a one-off copy of an existing orchestrator script
+- [x] **MORE-01**: At least one new lesson beyond the original five is reachable from the lesson-select screen, fully completable, and records progress the same way Lessons 1-5 do
+- [x] **MORE-02**: New lessons are built on a shared 3D lesson-base pattern rather than a one-off copy of an existing orchestrator script
+
+### Character Art — Phase 03.1
+
+- **MODEL-01**: Camiel uses the authored 3D GLB with idle, walk and jump animations. This requirement was pulled forward from v2 into this milestone. Technical model/movement probes pass; human recognition and animation-feel acceptance remain open.
 
 ## v2 Requirements
 
 Deferred to a future milestone. Tracked but not in this roadmap.
-
-### Character Art
-
-- **MODEL-01**: Camiel's real 3D model and animations replace the primitive-shape placeholder; the model's source (AI-generated from the existing 2D art vs. made/commissioned) is an open decision not yet settled. **Pulled forward from v2 into this milestone as Phase 03.1** after the Phase 2 playtest, placed before the accessibility phase so contrast is judged on real art and before later phases so proportions are tuned once. The archived 2D drawings remain retrievable from tag `archive/2d-alpha-v0.0.3` as source material.
 
 ### Platform Expansion
 
@@ -117,6 +117,12 @@ Explicitly excluded from this milestone. Documented to prevent scope creep.
 | Git LFS / asset repository restructuring | Tech debt tracked in `.planning/codebase/CONCERNS.md`; does not block the milestone success metric |
 | Parent dashboard extensions beyond the documented read-only single-child viewer | v2 (`DASH-EXT-01`, `DASH-EXT-02`) |
 
+## Evidence status — 2026-09-19
+
+The table below is the current status register. Checked requirements have bounded technical verification; this does not certify child friendliness or close phase 03-06. Unchecked requirements with technical evidence identify remaining human or artifact-specific acceptance. Historical phase plans and reports remain dated records, not the current status register.
+
+Implementation merged in [PR #10](https://github.com/Euraika-Labs/Project-Camiel/pull/10), merge `c00504d`. [CI run 35468153825](https://github.com/Euraika-Labs/Project-Camiel/actions/runs/35468153825) succeeded on `2e84a3a`: 16 headless fault-injection cases, normal Godot gate and four exports; all 11 PR checks passed. Local integration evidence includes 13 Godot probes, macOS/browser flows and two-process persistence. Logs under `builds/verification/acceptance/` are local evidence, not committed attachments. See [build evidence](../docs/build-and-release.md).
+
 ## Traceability
 
 Which phases cover which requirements.
@@ -137,44 +143,44 @@ Which phases cover which requirements.
 | INTRO-04 | Phase 2 | Complete |
 | INTRO-05 | Phase 2 | Complete |
 | INTRO-06 | Phase 2 | Complete |
-| MODEL-01 | Phase 03.1 | Pending |
-| LESSON-01 | Phase 3 | Pending |
-| LESSON-02 | Phase 3 | Pending |
-| LESSON-03 | Phase 3 | Pending |
-| LESSON-04 | Phase 3 | Pending |
-| LESSON-05 | Phase 3 | Pending |
-| LESSON-06 | Phase 3 | Pending |
-| PROGRESS-01 | Phase 3 | Pending |
-| PROGRESS-02 | Phase 3 | Pending |
+| MODEL-01 | Phase 03.1 | Technical pass: model/movement probes; human recognition and animation feel open |
+| LESSON-01 | Phase 3 | Technical pass: lesson-order/select probes; required human five-lesson playtest open |
+| LESSON-02 | Phase 3 | Technical pass: lesson-order/select probes; required human five-lesson playtest open |
+| LESSON-03 | Phase 3 | Technical pass: lesson-order/select probes; required human five-lesson playtest open |
+| LESSON-04 | Phase 3 | Technical pass: lesson-order/select probes; required human five-lesson playtest open |
+| LESSON-05 | Phase 3 | Technical pass: lesson-order/select probes; required human five-lesson playtest open |
+| LESSON-06 | Phase 3 | Technical pass: lesson-order/select probes; required human five-lesson playtest open |
+| PROGRESS-01 | Phase 3 | Verified: startup and progress probe |
+| PROGRESS-02 | Phase 3 | Verified: all six lesson IDs reloaded by fresh process; unchanged save hash |
 | ACCESS-01 | Phase 4 | Verified: 195 computed pairs, minimum 5.339:1; see docs/accessibility-report.md |
-| ACCESS-02 | Phase 4 | Pending |
-| CI-01 | Phase 4 | Pending |
-| CI-02 | Phase 4 | Pending |
-| CI-03 | Phase 4 | Pending |
-| CI-04 | Phase 4 | Pending |
-| CI-05 | Phase 4 | Pending |
-| DOCS-01 | Phase 4 | Pending |
-| DOCS-02 | Phase 4 | Pending |
-| VOICE-01 | Phase 5 | Pending |
-| VOICE-02 | Phase 5 | Pending |
-| MOBILE-01 | Phase 6 | Pending |
-| MOBILE-02 | Phase 6 | Pending |
-| MOBILE-03 | Phase 6 | Pending |
-| WEB-01 | Phase 7 | Pending |
-| WEB-02 | Phase 7 | Pending |
-| WEB-03 | Phase 7 | Pending |
-| DASH-01 | Phase 8 | Pending |
-| DASH-02 | Phase 8 | Pending |
-| DASH-03 | Phase 8 | Pending |
-| MORE-01 | Phase 9 | Pending |
-| MORE-02 | Phase 9 | Pending |
+| ACCESS-02 | Phase 4 | Verified: accessibility probe and native settings flow |
+| CI-01 | Phase 4 | Verified: pinned engine and successful remote CI/exports |
+| CI-02 | Phase 4 | Verified: config/version, release_version.py and artifact names |
+| CI-03 | Phase 4 | Verified: remote headless gate and 16 fault-injection cases |
+| CI-04 | Phase 4 | Verified: Linux export/package; native Linux play untested |
+| CI-05 | Phase 4 | Open: no tagged release publication executed; workflow tests only |
+| DOCS-01 | Phase 4 | Verified against merged 3D implementation; explicit acceptance limits |
+| DOCS-02 | Phase 4 | Verified: README agrees with proprietary LICENSE |
+| VOICE-01 | Phase 5 | Technical pass: voice/assets probes; human intelligibility open |
+| VOICE-02 | Phase 5 | Technical pass: independent Voice bus; device listening open |
+| MOBILE-01 | Phase 6 | Technical pass: proportional input probe; physical touch open |
+| MOBILE-02 | Phase 6 | Technical pass: simultaneous input probe; physical touch open |
+| MOBILE-03 | Phase 6 | Verified: shared controller attaches touch UI in intro and all six lessons |
+| WEB-01 | Phase 7 | Verified: local export and Chromium WebGL gameplay |
+| WEB-02 | Phase 7 | Partial: remote CI export passes; local build played, CI artifact not separately played |
+| WEB-03 | Phase 7 | Verified: availability and evidence boundaries aligned |
+| DASH-01 | Phase 8 | Verified: actual Godot save imported; browser statistics checked |
+| DASH-02 | Phase 8 | Verified: HTTP tests and browser import match version-1 contract |
+| DASH-03 | Phase 8 | Verified within observed flows: loopback requests, bind/CSP reviewed |
+| MORE-01 | Phase 9 | Verified: lesson 6 menu roundtrip, completion and fresh-process reload |
+| MORE-02 | Phase 9 | Verified: ordered_lesson.gd shared by lessons 2, 3, 5 and 6 |
 
 **Coverage:**
 
-- v1 requirements: 44 total
-- Mapped to phases: 44
+- v1 requirements: 45 total (including MODEL-01)
+- Mapped to phases: 45
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-09-11*
-*Last updated: 2026-09-11 — regenerated for the 2D-to-3D pivot, replacing the 2D-era requirement set*
+*Last updated: 2026-09-19 — merged implementation, remote CI and bounded acceptance reconciled*

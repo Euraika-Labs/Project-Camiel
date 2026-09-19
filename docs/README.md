@@ -1,23 +1,26 @@
-# Project Camiel Documentation
+# Project Camiel-documentatie
 
-This folder documents what is known and what has been done so far for Project Camiel.
+Deze handleidingen beschrijven de geïntegreerde **3D-versie alpha-v0.0.4**. De technische implementatie is gemergd; menselijke acceptatie en releasepublicatie blijven afzonderlijke stappen.
 
-## Documents
+## Spelen en begeleiden
 
-- [Project Overview](project-overview.md)
-- [Development Log](development-log.md)
-- [Godot Setup](godot-setup.md)
-- [Assets And Animations](assets-and-animations.md)
-- [Build And Release](build-and-release.md)
-- [CI And Community Standards](ci-and-community-standards.md)
-- [Roadmap](roadmap.md)
+- [Snel starten en bediening](quick-start.md)
+- [Projectoverzicht](project-overview.md)
+- [Ouders en leerkrachten](parent-teacher-notes.md)
+- [Lokaal ouderdashboard](parent-dashboard.md)
+- [Toegankelijkheid en bewijsgrenzen](accessibility-report.md)
+- [Roadmap en acceptatie](roadmap.md)
 
-## Current Status
+## Ontwikkelen en bouwen
 
-Project Camiel is currently at `alpha-v0.0.1`.
+- [Godot instellen](godot-setup.md)
+- [Engine- en formaatnotities](godot-update-notes.md)
+- [Assets en animaties](assets-and-animations.md)
+- [Bouwen en releasen](build-and-release.md)
+- [Webexport](web-export.md)
+- [CI en communityafspraken](ci-and-community-standards.md)
+- [Ondertekening: huidige status](code-signing.md)
 
-The alpha is a small Godot 4 intro experience for children from around 3 years old. It focuses on a friendly character, simple movement, clear colors, and a gentle first interaction.
+## Geschiedenis
 
-For the broader product vision, safety model, character bible, and long-term architecture notes, see the GitHub Wiki:
-
-https://github.com/Euraika-Labs/Project-Camiel/wiki
+De [ontwikkellog](development-log.md) en oudere changelogsecties beschrijven de voormalige 2D-versie. Zij zijn geen handleiding voor de huidige runtime. De actuele repositorydocumentatie heeft voorrang op oudere wiki- of fasebeschrijvingen.

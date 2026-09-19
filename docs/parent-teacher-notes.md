@@ -1,58 +1,32 @@
-# Parent & Teacher Notes — Camiel alpha-v0.0.3
+# Ouders en leerkrachten — Camiel alpha-v0.0.4
 
-## About Camiel
+Camiel is een Nederlandstalig 3D-leerspel voor kinderen vanaf ongeveer drie jaar. Het ontwerp biedt rustige opdrachten zonder tijdslimiet. Of kinderen de instructies zelfstandig begrijpen en de beweging prettig vinden, moet nog met een menselijke speeltest worden beoordeeld. Speel aanvankelijk samen.
 
-Camiel is a child-friendly educational game for children aged 3+. The game features Camiel, a friendly dog character who guides children through gentle learning challenges. The experience is calm, colourful, and free of time pressure — designed to support early learning in a stress-free environment.
+## Start en lessen
 
-## Learning Objectives
+Kies **Spelen**, daarna **Start** voor de introductie of **Lessen** voor de lesselectie. Alle zes lessen zijn direct kiesbaar.
 
-### Touch the Red Block
+| Les | Opdracht |
+|---|---|
+| 1 | Rood en blauw aanraken en drie telvoorwerpen verzamelen, in vrije taakvolgorde |
+| 2 | Cirkel, vierkant en driehoek in die volgorde aanraken |
+| 3 | De cijfers 1, 2 en 3 in volgorde aanraken |
+| 4 | Geel en groen aanraken en drie telvoorwerpen verzamelen, in vrije taakvolgorde |
+| 5 | De cijfers 1 tot en met 4 in volgorde aanraken |
+| 6 | De cijfers 1 tot en met 5 in volgorde aanraken |
 
-- **Colour recognition (red):** Children identify the red block among other elements in the scene.
-- **Cause and effect:** Touching the block triggers an immediate visual change (it turns green) and a chime sound — teaching children that their actions have consequences.
-- **Physical coordination:** Moving Camiel to the target requires directional movement, building early spatial awareness.
+Beweeg met WASD of de pijltjestoetsen en spring met Spatie. Op een gedetecteerd aanraakscherm verschijnen een joystick en springknop. Dit is technisch getest met gesimuleerde invoer; fysieke touchscreenbediening staat nog open. Gebruik de zichtbare terugknoppen om van lessen naar de selectie en het menu te gaan.
 
-### Find the Hidden Blue Target
+Nederlandse instructies en feedback zijn als audio meegeleverd. Muziek, effecten en stemvolume zijn afzonderlijk instelbaar. Hoog contrast is bereikbaar via **Instellingen**. Zie [toegankelijkheid](accessibility-report.md) voor de gemeten tekstcontrasten en beperkingen; dit is geen volledige WCAG-certificering.
 
-- **Visual discrimination and observation:** The blue target is deliberately camouflaged against the scene background, encouraging careful looking rather than quick scanning.
-- **Persisting to find:** The task resists quick success, teaching children that effort is rewarded even when something is not immediately obvious.
-- **Colour recognition (blue):** Children confirm the colour once the target is found.
+## Voortgang en privacy
 
-### Count 1–2–3
+Elke afgeronde les voegt lokaal een record toe met sterren, duur en datum. De gemeten duur is geen aftellende tijdslimiet. Na afsluiten blijft voortgang bewaard. Browsergegevens wissen kan webvoortgang verwijderen.
 
-- **Number sense (1, 2, 3):** Children see three stars and hear them counted aloud as each is collected.
-- **One-to-one correspondence:** Each star collected maps to exactly one count — a foundational mathematical concept.
-- **Sequential thinking:** The challenge requires collecting in any order, reinforcing that the count updates after each action.
+Het [ouderdashboard](parent-dashboard.md) toont een handmatig gekozen `progress.json`. Het draait alleen lokaal en bevat geen accounts, telemetrie of cloudopslag. Het leest browseropslag niet automatisch uit.
 
-## How to Play
+## Samen uitproberen
 
-1. Start from the main menu.
-2. Press **Start** to begin the intro scene.
-3. Press **Les** (Lesson) from the main menu to access the three educational micro-tasks.
-4. Children complete each challenge at their own pace — there is **no timer and no failure state**.
-5. On completion a "Goed zo!" (Well done!) message appears and the child returns to the menu.
+Laat het kind kleuren benoemen, samen tellen en uitleggen welk doel het volgende is. Noteer per les waar hulp nodig is, of gesproken aanwijzingen verstaanbaar zijn en of camera en bediening comfortabel blijven. Sluit het spel volledig af en controleer na herstart de voortgang. Automatische tests vervangen deze observaties niet.
 
-## Classroom Suggestions
-
-- **1:1 adult-child pairing** is recommended for the best learning dialogue.
-- **Project on a large screen** for whole-group introduction to the game mechanics before individual play.
-- **Use as a reward or calm-down activity** — the game is deliberately low-arousal.
-- **Pause and discuss:** After each micro-task, ask the child to name the colour or count the collected items out loud.
-- **Encourage verbal narration:** Ask the child to "tell Camiel where to go" rather than controlling the character for them.
-
-## Accessibility
-
-- Large UI elements (minimum 48×48 px touch targets) — suitable for developing fine motor control.
-- High-contrast colours throughout all UI text and game elements.
-- Audio + visual feedback for every event — no audio-only cues.
-- No fast animations, flashing, or strobing effects.
-- No time pressure, score penalties, or negative feedback.
-- **High-contrast toggle** available via the Accessibility autoload (`Accessibility.toggle_high_contrast()`).
-
-## Technical
-
-- **Engine:** Godot 4 (open source, MIT/GPL)
-- **Platform:** Windows (alpha build), macOS and HTML5 exports planned
-- **Project page:** [github.com/Euraika-Labs/Project-Camiel](https://github.com/Euraika-Labs/Project-Camiel)
-- **Autoload services:** `AudioManager` (music + SFX), `Accessibility` (contrast settings)
-- **Language:** Dutch throughout; English equivalents can be added per locale
+Zie [startinstructies](quick-start.md) voor installatie. Windows, Linux, macOS en Web worden geëxporteerd; alleen macOS en de lokale browserbuild zijn hier daadwerkelijk doorlopen. Het project valt onder de [repositorylicentie](../LICENSE).

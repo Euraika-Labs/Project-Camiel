@@ -3,15 +3,15 @@ gsd_state_version: "1.0"
 milestone: v0.0.4
 current_phase: 03
 current_phase_name: 3D Lesson Parity & Progress Persistence
-status: executing
+status: verifying
 stopped_at: Integrated alpha-v0.0.4 acceptance in progress
-last_updated: "2026-09-19T18:39:00Z"
+last_updated: "2026-09-19T21:22:41Z"
 last_activity: 2026-09-19
 last_activity_desc: Integrated headless gate and six-lesson process restart verified; final acceptance open
-state_head: 70a6a78dcc69e00d24c9d436909175843ed64a71
+state_head: c00504dc2d4f28a050ac3f31db5f9c84b3190836
 progress:
   total_phases: 10
-  completed_phases: 0
+  completed_phases: 2
   total_plans: 18
   completed_plans: 17
 ---
@@ -20,31 +20,28 @@ progress:
 
 ## Current integration evidence — 2026-09-19
 
-Alpha-v0.0.4 implementation is integrated for independent verification. The isolated integration run passed the complete Godot headless gate and a real write-process exit followed by a fresh reader process: nine completion entries cover all six lessons, with identical save hashes. Evidence is in the workspace acceptance task `aa38adeb-5b83-4b69-8110-59add2e0c7d5`; local logs and source manifests are under `/private/tmp/camiel-final-aa38adeb/`. A durable workspace copy of the evidence is in `builds/verification/acceptance/`; playable packages are in `builds/release/`.
+Alpha-v0.0.4 implementation is merged via PR #10; final acceptance remains open. The isolated integration run passed the complete Godot headless gate and a real write-process exit followed by a fresh reader process: nine completion entries cover all six lessons, with identical save hashes. Evidence is in the workspace acceptance task `aa38adeb-5b83-4b69-8110-59add2e0c7d5`; local logs and source manifests are under `/private/tmp/camiel-final-aa38adeb/`. A durable workspace copy of the evidence is in `builds/verification/acceptance/`; playable packages are in `builds/release/`.
 
-Technical delivery checks passed: the dashboard transport-test race is fixed, all 41 Python tests and 13 Godot probes pass, and current web/native macOS flows have been checked. Final milestone acceptance remains open for the human/platform boundaries below. Human assessment of child friendliness, character recognition and movement feel is not replaced by automation. Physical touchscreen and Windows/Linux native execution require separate evidence. Earlier phase counters below describe historical plan execution, not completion of the current integrated milestone.
+Technical delivery checks passed: the dashboard transport-test race is fixed, the earlier integration run passed 41 Python tests and 13 Godot probes, and current web/native macOS flows have been checked. Final milestone acceptance remains open for the human/platform boundaries below. Human assessment of child friendliness, character recognition and movement feel is not replaced by automation. Physical touchscreen and Windows/Linux native execution require separate evidence. Earlier phase counters below describe historical plan execution, not completion of the current integrated milestone.
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-09-11)
+See: .planning/PROJECT.md (updated 2026-09-19)
 
 **Core value:** A young child can go from the title screen through every lesson, entirely on their own, without hitting a bug or needing adult help — and their progress is remembered afterward.
-**Current focus:** Phase 03 — 3D Lesson Parity & Progress Persistence
+**Current focus:** Human milestone acceptance and platform verification
 
 ## Current Position
 
-Phase: 03 (3D Lesson Parity & Progress Persistence) — EXECUTING
-Plan: 6 of 6
-Status: Ready to execute
-Last activity: 2026-09-12 — Phase 03 execution started
+Phase 03 plan 6 remains a human playtest gate. Phases 03.1 and 4–9 have integrated implementations; their evidence and remaining limits are recorded in REQUIREMENTS.md and docs/roadmap.md. PR #10 merged; no alpha-v0.0.4 release tag has been published by this workflow.
 
-Progress: [░░░░░░░░░░] 0%
+The 18-plan counter covers the original phase 1–3 plans (17 executed); later integration work is not represented as invented phase-plan completions.
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 12
+- Total original plans completed: 17
 - Average duration: - min
 - Total execution time: - hours
 
@@ -57,7 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 
 **Recent Trend:**
 
-- Last 5 plans: none yet
+- Last 5 original plans: 03-01 through 03-05
 - Trend: Not enough data
 
 *Updated after each plan completion*
@@ -88,10 +85,10 @@ Progress: [░░░░░░░░░░] 0%
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+Historical decision log; later entries and the current requirement table supersede earlier scope choices:
 
 - Pivot: Project Camiel switches from 2D to a full 3D game, built from scratch in this repository; the 2D code is archived under a git tag and then removed from the runtime project (removal execution confirmed with the user beforehand) — decided during the paused Phase 1 (2D) discussion, 2026-09-11
-- Camiel and lesson props start as primitive 3D shapes (capsule, boxes, spheres); the real Camiel 3D model is deferred to v2, with its source (AI-generated vs. made/commissioned) left as an open decision
+- Initial primitive-character decision was superseded by Phase 03.1. Camiel now uses an authored GLB with idle/walk/jump; lesson props remain primitive.
 - Roadmap rebuilt immediately, without a feasibility spike
 - Milestone scoping: the 3D-foundation and lesson-parity phases (1-4) run before the alpha-v0.0.4 feature phases (5-9)
 - Parent Dashboard (Phase 8) is sequenced after Progress Persistence (Phase 3)
@@ -113,7 +110,7 @@ Recent decisions affecting current work:
 - [Phase 02]: [Phase 02-04]: Area3D forbids toggling monitoring synchronously inside its own body_entered callback; collectible.gd defers monitoring off, the pickup tween, and the collected signal together as one call_deferred step
 - [Phase 02]: [Phase 02-05]: Godot's GDScript loader enforces singleton resource identity per path regardless of ResourceLoader.CACHE_MODE_IGNORE, so packing two icon nodes that both load vector_icon.gd always dedupes to one ext_resource; the scene generator's post-processing step splits it into two declarations pointing at the same file so each icon row owns its own
 - [Phase 02]: [Phase 02-05]: Per 02-VALIDATION.md's "Probe-presence guard gap", the REQUIRED_PROBES named-probe allow-list for run_headless_check.sh is deliberately left unimplemented this phase; test_headless_check.sh Case 13 records the current weakness (removing one named probe while others remain still passes) as a known, honestly-named gap rather than a guarantee
-- [Phase 02]: [Phase 02]: [Phase 02-06]: D-30 playtest verdict (verbatim): "it works but graphics are very basic" - no functional or tuning changes applied since no defect or adjustment was named; the graphics remark is out-of-scope feedback mapped to the already-deferred v2 MODEL-01
+- [Phase 02]: [Phase 02]: [Phase 02-06]: D-30 playtest verdict (verbatim): "it works but graphics are very basic" - no functional or tuning changes applied since no defect or adjustment was named; the graphics remark subsequently led to MODEL-01 being pulled into Phase 03.1
 - [Phase 03]: [Phase 03-01]: RED evidence for the corrupt-file recovery case was produced by temporarily reverting progress_tracker.gd to the archived bug's JSON.parse_string() call, confirming run_headless_check.sh goes CHECK FAILED on the exact ERROR: Parse JSON failed line even though recovery is correct, then reverted (byte-identical to the committed file)
 - [Phase 03]: [Phase 03-01]: Task 3's deliberate-failure exercise forced a false assertion to prove the probe's failure funnel restores a real save file; verified via a SHA-256 checksum of the pre-existing real progress.json matched before and after
 - [Phase 03]: [Phase 03-02]: D-37/D-38's activation gate shipped inside lesson_target.gd's Task 1 commit rather than a separate Task 3 diff, since the gate is one branch inside the same _on_body_entered method Task 1 also writes; RED evidence for Task 3's negative case was produced by temporarily removing the gate branch, confirming the failure, then restoring the file byte-identical
@@ -136,9 +133,9 @@ Recent decisions affecting current work:
 ### Blockers/Concerns
 
 - `.planning/phases/01-playable-intro-path/` holds the superseded 2D-era discussion checkpoint (`01-DISCUSS-CHECKPOINT.json`); it is retired by the orchestrator, not by this file.
-- Renderer choice (Forward Plus vs. Compatibility) is an open question Phase 1 must settle before any 3D visuals are built.
-- Camera and control scheme for free 3D movement is an open question for Phase 1, the phase that first builds movement.
-- Design of Lessons 4 and 5 is an open question for Phase 3, the phase that builds lesson parity.
+- Human playtest 03-06 and character/voice assessment remain open.
+- Physical touch and native Windows/Linux execution remain unverified; Compatibility and turn-and-walk have already been selected.
+- Tagged release publication is untested. Lessons 4 (yellow/green/counting) and 5 (1–4 sequence) are implemented.
 
 ### Roadmap Evolution
 
@@ -154,6 +151,12 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-12T23:55:15.221Z
-Stopped at: Completed 03-05-PLAN.md
+Last session: 2026-09-19
+Stopped at: PR #10 merged; remaining human/platform acceptance recorded
 Resume file: None
+
+## Bewijs na integratie — 19 september 2026
+
+[PR #10](https://github.com/Euraika-Labs/Project-Camiel/pull/10) is gemergd als `c00504dc2d4f28a050ac3f31db5f9c84b3190836`. [CI-run 35468153825](https://github.com/Euraika-Labs/Project-Camiel/actions/runs/35468153825) slaagde op PR-head `2e84a3a97bee5627ef43c05300c1bbecaa6b07d5`: projectcontrole, 16 foutinjectiegevallen en vier exports. Alle 11 PR-checks waren groen, inclusief de exacte verplichte naam `Export Windows build`.
+
+De eerdere lokale integratierun telde 41 Python-tests en 13 Godot-probes. De latere Windows-gate voegde een Python-regressietest toe. Lokale macOS- en browserflows en opslag na een echte procesherstart zijn getest. De CI-webexport is gebouwd, maar het gedownloade CI-webartifact is niet afzonderlijk in een browser gespeeld; het eerdere browserbewijs betreft de lokaal geëxporteerde runtime. Menselijke speelacceptatie, fysiek touchscreengebruik, native Windows/Linux-uitvoering en een getagde releasepublicatie blijven open. Lokale bewijsbestanden onder `builds/verification/` worden niet in git meegeleverd.

@@ -26,7 +26,7 @@ enginebinary; op macOS bijvoorbeeld `/Applications/Godot.app/Contents/MacOS/Godo
 ```bash
 python3 -m venv /tmp/camiel-build-venv
 /tmp/camiel-build-venv/bin/pip install PyYAML
-/tmp/camiel-build-venv/bin/python -m unittest tests.test_quality_gate tests.test_ci_workflows tests.test_release_build tests.test_web_export
+/tmp/camiel-build-venv/bin/python -m unittest tests.test_quality_gate tests.test_ci_workflows tests.test_release_build tests.test_web_export tests.test_parent_dashboard tests.test_voice_assets
 python3 scripts/tools/quality_gate.py --root .
 GODOT=/pad/naar/Godot bash scripts/tools/run_headless_check.sh
 GODOT=/pad/naar/Godot bash scripts/tools/test_headless_check.sh
@@ -91,3 +91,11 @@ resultaten afzonderlijk in de oplevering.
 
 Referenties: [Godot command-line export](https://docs.godotengine.org/en/stable/tutorials/export/exporting_projects.html)
 en [herbruikbare GitHub-workflows](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows).
+
+## Bewijs na integratie — 19 september 2026
+
+[PR #10](https://github.com/Euraika-Labs/Project-Camiel/pull/10) is gemergd als `c00504dc2d4f28a050ac3f31db5f9c84b3190836`. [CI-run 35468153825](https://github.com/Euraika-Labs/Project-Camiel/actions/runs/35468153825) slaagde op PR-head `2e84a3a97bee5627ef43c05300c1bbecaa6b07d5`: projectcontrole, 16 foutinjectiegevallen en vier exports. Alle 11 PR-checks waren groen, inclusief de exacte verplichte naam `Export Windows build`.
+
+De eerdere lokale integratierun telde 41 Python-tests en 13 Godot-probes. De latere Windows-gate voegde een Python-regressietest toe. Lokale macOS- en browserflows en opslag na een echte procesherstart zijn getest. De CI-webexport is gebouwd, maar het gedownloade CI-webartifact is niet afzonderlijk in een browser gespeeld; het eerdere browserbewijs betreft de lokaal geëxporteerde runtime. Menselijke speelacceptatie, fysiek touchscreengebruik, native Windows/Linux-uitvoering en een getagde releasepublicatie blijven open. Lokale bewijsbestanden onder `builds/verification/` worden niet in git meegeleverd.
+
+De verplichte check `Export Windows build` is een compatibiliteitsgate na de herbruikbare exportworkflow. Hij slaagt alleen als alle vier exports slagen en faalt ook bij overgeslagen of geannuleerde exports. De echte Windows-exportjob heet `export-builds / Export windows build`.
