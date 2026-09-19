@@ -12,7 +12,7 @@ Camiel is opgebouwd als Nederlandstalig 3D-spel in Godot 4.7.2 met Compatibility
 | Toegankelijkheid | Leesbare themakleuren en instelling voor hoog contrast | Gemeten kleurparen en live themaprobe; geen volledige WCAG-conformiteitsclaim |
 | Nederlandse spraak | Gebundelde instructies en feedback, eigen volumebus | Audiobus en assetprobes; luisteren op doelapparaten apart |
 | Touch | Proportionele joystick, gelijktijdig springen, vrijgeven en focusverlies | Inputprobes in intro en alle lessen; fysiek touchscreen open |
-| Web | Web-preset, lokale server en CI-exportconfiguratie | Echte browserles en opslag na herladen getest; finale bron/buildmatching en externe CI-run apart |
+| Web | Web-preset, lokale server en CI-exportconfiguratie | Echte browserles en opslag na herladen getest; bron/buildmatching gecontroleerd; externe CI-run apart |
 | Ouderdashboard | Lokale import, voortgang en samenvatting | HTTP- en browsercontroles; geen accounts of cloudopslag |
 | Releases | Versiebron, vier exportdoelen en één releaseworkflow | Lokale gates en pakketchecks; getagde GitHub-release niet uitgevoerd |
 

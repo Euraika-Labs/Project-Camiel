@@ -258,4 +258,4 @@ Integration order: 1 → 2 → 3 → 03.1 → 4 → 5 → 6 → 7 → 8 → 9. I
 | 8. Parent Dashboard | — | Implemented; integrated acceptance open | - |
 | 9. Additional Lesson Levels | — | Implemented; integrated acceptance open | - |
 
-Integration evidence update, 2026-09-19: the isolated integrated headless gate passed, including model, accessibility, touch, voice and six-lesson probes. A fresh process reloaded all six lesson identifiers with an unchanged save hash. Final source/build matching, visual desktop/browser evidence, Python test remediation and human acceptance remain open. No new phase-completion checkboxes are claimed by this update.
+Integration evidence update, 2026-09-19: the isolated integrated headless gate passed, including model, accessibility, touch, voice and six-lesson probes. A fresh process reloaded all six lesson identifiers with an unchanged save hash. Final technical gates, desktop/browser visual checks, source/build matching and Python test remediation are complete; human acceptance, physical touch and Windows/Linux native execution remain open. No new phase-completion checkboxes are claimed by this update.

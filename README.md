@@ -7,11 +7,11 @@ Project Camiel is een Nederlandstalig educatief 3D-spel in Godot, met Camiel de 
 
 ## Ontwikkelstatus
 
-De huidige ontwikkelversie is **alpha-v0.0.4**. Integratie en eindacceptatie zijn nog bezig. Een versienummer of groene CI-badge is geen bevestiging dat alle desktop- en webfuncties zijn geaccepteerd.
+De huidige ontwikkelversie is **alpha-v0.0.4**. De technische integratie is gecontroleerd; menselijke speelacceptatie blijft open. Een versienummer of groene CI-badge is geen bevestiging dat alle desktop- en webfuncties zijn geaccepteerd.
 
 De 3D-codebasis bevat een titelscherm, hoofdmenu, introductiewereld en lesselectie. Lessen oefenen kleuren, vormen, tellen en volgordes. Lesvoortgang gebruikt het lokale bestand `user://progress.json` met les, sterren, speelduur en voltooiingstijd.
 
-Karakteranimaties, toegankelijkheidsinstellingen, Nederlandse spraak, aanraakbediening, webexport, het lokale ouderdashboard en extra lesinhoud worden voor deze versie geïntegreerd en gecontroleerd. De uiteindelijke speelbaarheid en opslag na herstart worden afzonderlijk getest. Beoordeling van kindvriendelijkheid en bewegingsgevoel blijft een menselijke speeltest.
+Karakteranimaties, toegankelijkheidsinstellingen, Nederlandse spraak, aanraakbediening, webexport, het lokale ouderdashboard en zes lessen zijn geïntegreerd. De volledige headless controle, 41 Python-tests, opslag over een echte procesherstart en browserflows zijn uitgevoerd. De macOS-build is native doorlopen; Windows- en Linux-archieven zijn gebouwd maar hier niet native gespeeld. Fysiek multi-touchgebruik en hoorbaarheid op ieder apparaat blijven afzonderlijke controles. Beoordeling van kindvriendelijkheid en bewegingsgevoel blijft een menselijke speeltest.
 
 De eerdere 2D-versie is gearchiveerd onder de tag `archive/2d-alpha-v0.0.3`; de huidige runtime gebruikt `CharacterBody3D` en de Compatibility-renderer. Zie de [roadmap](docs/roadmap.md) voor de voortgang en [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) voor de acceptatiecriteria.
 

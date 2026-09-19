@@ -20,9 +20,9 @@ progress:
 
 ## Current integration evidence — 2026-09-19
 
-Alpha-v0.0.4 implementation is integrated for independent verification. The isolated integration run passed the complete Godot headless gate and a real write-process exit followed by a fresh reader process: nine completion entries cover all six lessons, with identical save hashes. Evidence is in the workspace acceptance task `aa38adeb-5b83-4b69-8110-59add2e0c7d5`; local logs and source manifests are under `/private/tmp/camiel-final-aa38adeb/`. These temporary files are not release artifacts.
+Alpha-v0.0.4 implementation is integrated for independent verification. The isolated integration run passed the complete Godot headless gate and a real write-process exit followed by a fresh reader process: nine completion entries cover all six lessons, with identical save hashes. Evidence is in the workspace acceptance task `aa38adeb-5b83-4b69-8110-59add2e0c7d5`; local logs and source manifests are under `/private/tmp/camiel-final-aa38adeb/`. A durable workspace copy of the evidence is in `builds/verification/acceptance/`; playable packages are in `builds/release/`.
 
-Final acceptance remains open: a dashboard transport-test race is under repair, and desktop/browser evidence must be tied to the final source tree and packaged builds. Human assessment of child friendliness, character recognition and movement feel is not replaced by automation. Physical touchscreen and Windows/Linux native execution require separate evidence. Earlier phase counters below describe historical plan execution, not completion of the current integrated milestone.
+Technical delivery checks passed: the dashboard transport-test race is fixed, all 41 Python tests and 13 Godot probes pass, and current web/native macOS flows have been checked. Final milestone acceptance remains open for the human/platform boundaries below. Human assessment of child friendliness, character recognition and movement feel is not replaced by automation. Physical touchscreen and Windows/Linux native execution require separate evidence. Earlier phase counters below describe historical plan execution, not completion of the current integrated milestone.
 
 ## Project Reference
 
