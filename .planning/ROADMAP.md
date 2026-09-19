@@ -243,16 +243,19 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9
+Integration order: 1 → 2 → 3 → 03.1 → 4 → 5 → 6 → 7 → 8 → 9. Independent module implementation may run in parallel; milestone acceptance still requires integrated evidence.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 3D Foundation & Archive | 6/6 | Complete    | 2026-09-11 |
 | 2. Playable 3D Intro Experience | 6/6 | Complete    | 2026-09-12 |
-| 3. 3D Lesson Parity & Progress Persistence | 5/6 | In Progress|  |
-| 4. Accessibility & Release Pipeline Hardening | 0/0 | Not started | - |
-| 5. Dutch Voice-Over | 0/0 | Not started | - |
-| 6. Mobile Touch Controls | 0/0 | Not started | - |
-| 7. Web Export | 0/0 | Not started | - |
-| 8. Parent Dashboard | 0/0 | Not started | - |
-| 9. Additional Lesson Levels | 0/0 | Not started | - |
+| 3. 3D Lesson Parity & Progress Persistence | 5/6 | Process restart verified; human playtest open | - |
+| 03.1. Camiel model and animations | — | Model probes passed; human visual acceptance open | - |
+| 4. Accessibility & Release Pipeline Hardening | — | Implemented; integrated acceptance open | - |
+| 5. Dutch Voice-Over | — | Implemented; integrated acceptance open | - |
+| 6. Mobile Touch Controls | — | Implemented; integrated acceptance open | - |
+| 7. Web Export | — | Implemented; integrated acceptance open | - |
+| 8. Parent Dashboard | — | Implemented; integrated acceptance open | - |
+| 9. Additional Lesson Levels | — | Implemented; integrated acceptance open | - |
+
+Integration evidence update, 2026-09-19: the isolated integrated headless gate passed, including model, accessibility, touch, voice and six-lesson probes. A fresh process reloaded all six lesson identifiers with an unchanged save hash. Final source/build matching, visual desktop/browser evidence, Python test remediation and human acceptance remain open. No new phase-completion checkboxes are claimed by this update.

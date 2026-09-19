@@ -4,10 +4,10 @@ milestone: v0.0.4
 current_phase: 03
 current_phase_name: 3D Lesson Parity & Progress Persistence
 status: executing
-stopped_at: Completed 03-05-PLAN.md
-last_updated: "2026-09-12T23:55:23.911Z"
-last_activity: 2026-09-12
-last_activity_desc: Phase 03 execution started
+stopped_at: Integrated alpha-v0.0.4 acceptance in progress
+last_updated: "2026-09-19T18:39:00Z"
+last_activity: 2026-09-19
+last_activity_desc: Integrated headless gate and six-lesson process restart verified; final acceptance open
 state_head: 70a6a78dcc69e00d24c9d436909175843ed64a71
 progress:
   total_phases: 10
@@ -17,6 +17,12 @@ progress:
 ---
 
 # Project State
+
+## Current integration evidence — 2026-09-19
+
+Alpha-v0.0.4 implementation is integrated for independent verification. The isolated integration run passed the complete Godot headless gate and a real write-process exit followed by a fresh reader process: nine completion entries cover all six lessons, with identical save hashes. Evidence is in the workspace acceptance task `aa38adeb-5b83-4b69-8110-59add2e0c7d5`; local logs and source manifests are under `/private/tmp/camiel-final-aa38adeb/`. These temporary files are not release artifacts.
+
+Final acceptance remains open: a dashboard transport-test race is under repair, and desktop/browser evidence must be tied to the final source tree and packaged builds. Human assessment of child friendliness, character recognition and movement feel is not replaced by automation. Physical touchscreen and Windows/Linux native execution require separate evidence. Earlier phase counters below describe historical plan execution, not completion of the current integrated milestone.
 
 ## Project Reference
 
