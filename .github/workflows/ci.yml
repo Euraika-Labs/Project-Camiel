@@ -41,7 +41,7 @@ jobs:
       - name: Test quality gate
         shell: bash
         run: |
-          python3 -m unittest tests.test_quality_gate tests.test_ci_workflows tests.test_release_build tests.test_web_export
+          python3 -m unittest tests.test_quality_gate tests.test_ci_workflows tests.test_release_build tests.test_web_export tests.test_parent_dashboard tests.test_voice_assets
 
       - name: Run AI quality gate
         shell: bash
