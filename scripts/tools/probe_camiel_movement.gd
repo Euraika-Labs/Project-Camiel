@@ -10,6 +10,7 @@
 extends SceneTree
 
 const MAX_TOTAL_FRAMES := 4200
+const CAMIEL_SCENE_PATH := "res://scenes/camiel.tscn"
 const TEST_SPACE_PATH := "res://scenes/test_space.tscn"
 const INTRO_LEVEL_PATH := "res://scenes/intro_level.tscn"
 const PORTABLE_SCENES := [TEST_SPACE_PATH, INTRO_LEVEL_PATH]
@@ -78,8 +79,44 @@ func _initialize() -> void:
 	if _failed:
 		return
 
+	await _case_steering_default()
+	if _failed:
+		return
+
 	print("Camiel movement probe passed.")
 	quit(0)
+
+
+## Pins the steering mode the game actually ships with.
+##
+## Every other steering case in this probe assigns `steering_mode` itself before
+## driving Camiel, so all of them pass under either default -- which meant the
+## one value the child plays with was the only one nothing checked, and it had
+## already drifted to turn_and_walk once without anything going red.
+##
+## The instance is deliberately left OUT of the tree. `_ready()` calls
+## `apply_steering_arguments(OS.get_cmdline_user_args())`, so a probe run with
+## `--steering=...` on the command line would otherwise overwrite the very value
+## under test and report a pass for the wrong reason. Reading the property on a
+## detached instance also covers a `.tscn` override, which a check against the
+## script's literal would miss: whatever `camiel.tscn` serialises is what the
+## child gets.
+func _case_steering_default() -> void:
+	var case_name := "steering_default"
+	var packed: PackedScene = load(CAMIEL_SCENE_PATH)
+	if packed == null:
+		_fail(case_name, "could not load %s" % CAMIEL_SCENE_PATH)
+		return
+
+	var detached: Node = packed.instantiate()
+	var shipped: int = detached.steering_mode
+	detached.free()
+
+	if shipped != STEERING_CAMERA_RELATIVE:
+		_fail(case_name, "%s ships steering_mode %d, expected %d (camera-relative)" % [CAMIEL_SCENE_PATH, shipped, STEERING_CAMERA_RELATIVE])
+		return
+
+	_pass(case_name)
 
 
 func _load_scene(path: String, default_spawn: Vector3) -> bool:

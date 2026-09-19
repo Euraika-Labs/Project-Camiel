@@ -252,7 +252,7 @@ rm -f "${WORK_DIR}/scripts/tools/probe_screen_flow.gd" "${WORK_DIR}/scripts/tool
 assert_result "removing one named probe (probe_screen_flow.gd) while others remain still passes -- known gap in the probe-presence guard" 0 "Headless check passed." -- \
 	bash "${CHECK_SCRIPT}"
 
-# --- Case 14: inert inline audio bus configuration fails, naming the audio probe ---
+# --- Case 14: inert inline audio bus configuration fails at startup ---
 # The [audio_bus_layout] block once written directly inside project.godot is
 # inert in Godot 4.7.2 (VF6, 02-RESEARCH.md): AudioServer.get_bus_count()
 # stays at 1 at runtime no matter what buses that section declares. The only
@@ -260,8 +260,8 @@ assert_result "removing one named probe (probe_screen_flow.gd) while others rema
 # res://default_bus_layout.tres resource (VF7). This case removes that
 # working resource and plants the old inline Master/SFX section back into
 # project.godot (the exact shape this file carried before plan 02-01, see
-# git history), and requires the check to go red, attributing the failure
-# to probe_audio_buses.gd specifically -- not to some other unrelated step.
+# git history). VoiceManager now rejects its missing bus during startup,
+# before probes run. Require that precise diagnostic, not an unrelated error.
 # A future contributor who adds a third bus the old (inline) way would
 # otherwise get a silent no-op; this case turns that into a red build.
 reset_copy
@@ -277,7 +277,7 @@ bus/1/name="SFX"
 bus/1/volume_db=0.0
 bus/1/send="Master"
 EOF
-assert_result "inert inline audio bus configuration (no layout resource) fails, naming the audio probe" 1 "CHECK FAILED" "probe probe_audio_buses.gd" -- \
+assert_result "inert inline audio bus configuration fails at Voice startup" 1 "CHECK FAILED: main scene" "[VoiceManager] Voice bus missing" -- \
 	bash "${CHECK_SCRIPT}"
 cp "${REPO_ROOT}/default_bus_layout.tres" "${WORK_DIR}/default_bus_layout.tres"
 
@@ -295,5 +295,19 @@ printf 'not a real png file, just garbage bytes 0123456789' >"${WORK_DIR}/assets
 assert_result "generic ERROR during import fails" 1 "CHECK FAILED" "error pattern found in import log" -- \
 	bash "${CHECK_SCRIPT}"
 rm -f "${WORK_DIR}/assets/zz_broken.png" "${WORK_DIR}/assets/zz_broken.png.import"
+
+# --- Case 16: missing Music/SFX still fails in the audio probe ---
+# Keep Voice valid so its startup guard cannot mask the independent audio
+# probe. Music/SFX absence must be caught even when the main scene starts.
+reset_copy
+cat >"${WORK_DIR}/default_bus_layout.tres" <<'EOF'
+[gd_resource type="AudioBusLayout" format=3]
+
+[resource]
+bus/1/name = &"Voice"
+bus/1/send = &"Master"
+EOF
+assert_result "missing Music/SFX with Voice intact fails in the audio probe" 1 "CHECK FAILED: probe probe_audio_buses.gd" -- \
+	bash "${CHECK_SCRIPT}"
 
 echo "Headless check self-test passed."

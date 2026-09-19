@@ -34,7 +34,8 @@ func _draw() -> void:
 ## and the target size: every coordinate is expressed as a fraction of
 ## target_size, so the same shape reads identically at a 32px slider-row icon
 ## and a 64px button icon. Valid kinds: "play", "walk", "replay", "home",
-## "speaker", "music_note". An unrecognised kind warns and returns no shapes.
+## "speaker", "music_note", "lesson_colors", "lesson_shapes",
+## "lesson_sequence". An unrecognised kind warns and returns no shapes.
 func get_icon_shapes(kind: String, target_size: Vector2) -> Array[Dictionary]:
 	match kind:
 		"play":
@@ -49,6 +50,12 @@ func get_icon_shapes(kind: String, target_size: Vector2) -> Array[Dictionary]:
 			return _speaker_shapes(target_size)
 		"music_note":
 			return _music_note_shapes(target_size)
+		"lesson_colors":
+			return _lesson_colors_shapes(target_size)
+		"lesson_shapes":
+			return _lesson_shapes_shapes(target_size)
+		"lesson_sequence":
+			return _lesson_sequence_shapes(target_size)
 		_:
 			push_warning("[VectorIcon] Unknown icon kind: ", kind)
 			return []
@@ -176,4 +183,49 @@ func _music_note_shapes(target_size: Vector2) -> Array[Dictionary]:
 	return [
 		{"type": "circle", "center": notehead_center, "radius": notehead_radius},
 		{"type": "rect", "rect": stem_rect},
+	]
+
+
+func _lesson_colors_shapes(target_size: Vector2) -> Array[Dictionary]:
+	# Two equal circles side by side with a clear gap: two colours to tell
+	# apart. Horizontal and equal-sized on purpose, so it cannot be mistaken
+	# for the walking icon's diagonally offset, much smaller pair. Both draw in
+	# the component's one icon colour -- the kinds are distinguished by form and
+	# count, never by hue.
+	var w := target_size.x
+	var h := target_size.y
+	var radius: float = minf(w, h) * 0.16
+	return [
+		{"type": "circle", "center": Vector2(w * 0.30, h * 0.5), "radius": radius},
+		{"type": "circle", "center": Vector2(w * 0.70, h * 0.5), "radius": radius},
+	]
+
+
+func _lesson_shapes_shapes(target_size: Vector2) -> Array[Dictionary]:
+	# A circle, a square and a triangle in a row: shapes to put in order.
+	var w := target_size.x
+	var h := target_size.y
+	var circle_radius: float = minf(w, h) * 0.13
+	var triangle := PackedVector2Array([
+		Vector2(w * 0.70, h * 0.63),
+		Vector2(w * 0.92, h * 0.63),
+		Vector2(w * 0.81, h * 0.35),
+	])
+	return [
+		{"type": "circle", "center": Vector2(w * 0.20, h * 0.5), "radius": circle_radius},
+		{"type": "rect", "rect": Rect2(Vector2(w * 0.40, h * 0.37), Vector2(w * 0.22, h * 0.26))},
+		{"type": "polygon", "points": triangle},
+	]
+
+
+func _lesson_sequence_shapes(target_size: Vector2) -> Array[Dictionary]:
+	# Three circles of increasing radius along a rising diagonal: a first, a
+	# second and a third.
+	var w := target_size.x
+	var h := target_size.y
+	var unit: float = minf(w, h)
+	return [
+		{"type": "circle", "center": Vector2(w * 0.22, h * 0.76), "radius": unit * 0.08},
+		{"type": "circle", "center": Vector2(w * 0.50, h * 0.52), "radius": unit * 0.12},
+		{"type": "circle", "center": Vector2(w * 0.78, h * 0.26), "radius": unit * 0.16},
 	]

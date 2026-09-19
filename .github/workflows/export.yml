@@ -1,212 +1,84 @@
 name: Export
 
+# Called only after the caller has passed repository and headless gates.
 on:
-  push:
-    branches: [main]
-    tags: ["v*"]
-  pull_request:
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
 
-# Sanitize GITHUB_REF_NAME for use in paths (branch names can contain /).
-# NOTE: GitHub Actions has NO `replace()` expression function. Its function set is
-# closed: contains, startsWith, endsWith, format, join, toJSON, fromJSON, hashFiles
-# plus the status functions. A previous revision used replace(replace(...)), which is
-# a workflow-validation error — the whole file failed to load and every run completed
-# with ZERO jobs, so "Export Windows build" silently never ran while remaining a
-# required status check. Do not reintroduce replace(); use format() or sanitize in a
-# shell step writing to $GITHUB_ENV.
 env:
   GODOT_VERSION: 4.7.2
   GODOT_STATUS: stable
   GODOT_TEMPLATE_VERSION: 4.7.2.stable
-  REF_SLUG: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || github.ref_name }}
-  REF_CLEAN: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || contains(github.ref, 'refs/tags/') && github.ref_name || format('run-{0}', github.run_number) }}
+  GODOT_BIN: Godot_v4.7.2-stable_linux.x86_64
 
 jobs:
-  # ── Quality gate ────────────────────────────────────────────────
-  quality:
+  export:
+    name: Export ${{ matrix.target }} build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [windows, linux, macos, web]
     steps:
-      - uses: actions/checkout@v7
-
-      - name: Run AI quality gate
-        run: python3 scripts/tools/quality_gate.py --root .
-
-  # ── Windows ──────────────────────────────────────────────────────
-  export-windows:
-    needs: quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
+      - name: Checkout
+        uses: actions/checkout@v7
 
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y unzip zip
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip zip
 
       - name: Download Godot
+        shell: bash
         run: |
           curl --fail --show-error --location --retry 5 --retry-delay 5 \
             -o "$RUNNER_TEMP/godot.zip" \
             "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/SHA512-SUMS.txt" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/SHA512-SUMS.txt"
+          expected="$(awk -v name="Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip" '$2 == name || $2 == "*" name { print $1; exit }' "$RUNNER_TEMP/SHA512-SUMS.txt")"
+          actual="$(sha512sum "$RUNNER_TEMP/godot.zip" | awk '{ print $1 }')"
+          if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+            echo "::error::SHA512 mismatch for Godot engine download"
+            exit 1
+          fi
           unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
-          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64"
+          chmod +x "$RUNNER_TEMP/godot/${GODOT_BIN}"
 
       - name: Install export templates
+        shell: bash
         run: |
           curl --fail --show-error --location --retry 5 --retry-delay 5 \
             -o "$RUNNER_TEMP/export_templates.tpz" \
             "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
+          curl --fail --show-error --location --retry 5 --retry-delay 5 \
+            -o "$RUNNER_TEMP/SHA512-SUMS.txt" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/SHA512-SUMS.txt"
+          expected="$(awk -v name="Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz" '$2 == name || $2 == "*" name { print $1; exit }' "$RUNNER_TEMP/SHA512-SUMS.txt")"
+          actual="$(sha512sum "$RUNNER_TEMP/export_templates.tpz" | awk '{ print $1 }')"
+          if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+            echo "::error::SHA512 mismatch for Godot export templates download"
+            exit 1
+          fi
           unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
           mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}"
-          cp -R "$RUNNER_TEMP/export_templates/templates/." \
-            "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/"
+          cp -R "$RUNNER_TEMP/export_templates/templates/." "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/"
 
-      - name: Import project
-        run: |
-          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
-            --headless --editor --path . --quit
-
-      - name: Export Windows
-        run: |
-          mkdir -p dist/windows
-          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
-            --headless --path . \
-            --export-release "Windows Desktop" \
-            "dist/windows/Camiel.exe"
-          zip -j "dist/windows/Camiel-windows.zip" "dist/windows/Camiel.exe"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: camiel-windows-${{ env.REF_CLEAN }}
-          path: dist/windows/Camiel-windows.zip
-          retention-days: 30
-
-  # ── Linux ────────────────────────────────────────────────────────
-  export-linux:
-    needs: quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y unzip tar
-
-      - name: Download Godot
-        run: |
-          curl --fail --show-error --location --retry 5 --retry-delay 5 \
-            -o "$RUNNER_TEMP/godot.zip" \
-            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
-          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
-          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64"
-
-      - name: Install export templates
-        run: |
-          curl --fail --show-error --location --retry 5 --retry-delay 5 \
-            -o "$RUNNER_TEMP/export_templates.tpz" \
-            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
-          unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
-          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}"
-          cp -R "$RUNNER_TEMP/export_templates/templates/." \
-            "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/"
-
-      - name: Import project
-        run: |
-          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
-            --headless --editor --path . --quit
-
-      - name: Export Linux
-        run: |
-          mkdir -p dist/linux
-          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
-            --headless --path . \
-            --export-release "Linux/X11" \
-            "dist/linux/Camiel.x86_64"
-          tar -czf "dist/linux/Camiel-linux.tar.gz" Camiel.x86_64
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: camiel-linux-${{ env.REF_CLEAN }}
-          path: dist/linux/Camiel-linux.tar.gz
-          retention-days: 30
-
-  # ── macOS ────────────────────────────────────────────────────────
-  export-macos:
-    needs: quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y unzip
-
-      - name: Download Godot
-        run: |
-          curl --fail --show-error --location --retry 5 --retry-delay 5 \
-            -o "$RUNNER_TEMP/godot.zip" \
-            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
-          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
-          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64"
-
-      - name: Install export templates
-        run: |
-          curl --fail --show-error --location --retry 5 --retry-delay 5 \
-            -o "$RUNNER_TEMP/export_templates.tpz" \
-            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
-          unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
-          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}"
-          cp -R "$RUNNER_TEMP/export_templates/templates/." \
-            "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/"
-
-      - name: Import project
-        run: |
-          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
-            --headless --editor --path . --quit
-
-      - name: Export macOS
-        run: |
-          mkdir -p dist/macos
-          "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" \
-            --headless --path . \
-            --export-release "macOS" \
-            "dist/macos/Camiel.zip"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: camiel-macos-${{ env.REF_CLEAN }}
-          path: dist/macos/Camiel.zip
-          retention-days: 30
-
-  # ── Release ─────────────────────────────────────────────────────
-  release:
-    needs: [export-windows, export-linux, export-macos]
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v8
-        with:
-          path: release
-          pattern: camiel-*
-          merge-multiple: false
-
-      - name: Rename artifacts to release-friendly names
-        run: |
-          mv camiel-windows-*/Camiel-windows.zip release/ 2>/dev/null || true
-          mv camiel-linux-*/Camiel-linux.tar.gz release/ 2>/dev/null || true
-          mv camiel-macos-*/Camiel.zip release/ 2>/dev/null || true
-          ls -la release/
-
-      # Third-party action in the release-publishing path: pinned to an immutable
-      # commit SHA, not a mutable tag. CodeQL rule "Unpinned tag for a non-immutable
-      # Action" flags tag pins here because a tag can be repointed at new code after
-      # review. SHA is softprops/action-gh-release v3.0.3.
-      # Renovate/Dependabot can still bump this; keep the trailing version comment in
-      # sync with the SHA whenever it moves.
-      - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
-        with:
-          files: release/*
+      - name: Export and package
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          GODOT="$RUNNER_TEMP/godot/${GODOT_BIN}" python3 scripts/tools/build_release.py "$TARGET"
+
+      - name: Upload packaged artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ matrix.target }}
+          path: builds/release/*
+          if-no-files-found: error
+          retention-days: 14

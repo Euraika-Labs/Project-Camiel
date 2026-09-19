@@ -100,10 +100,18 @@ corner_radius_bottom_right = 24
 corner_radius_bottom_left = 24
 
 [resource]
+default_font_size = 24
+Label/colors/font_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
+CheckButton/colors/font_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
+CheckButton/colors/font_hover_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
+CheckButton/colors/font_pressed_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
+CheckButton/colors/font_focus_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
+CheckButton/colors/font_hover_pressed_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
 Button/colors/font_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
 Button/colors/font_disabled_color = Color(0.12156863, 0.22745098, 0.3372549, 0.5)
 Button/colors/font_focus_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
 Button/colors/font_hover_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
+Button/colors/font_hover_pressed_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
 Button/colors/font_pressed_color = Color(0.12156863, 0.22745098, 0.3372549, 1)
 Button/styles/disabled = SubResource("StyleBoxFlat_0p5d0")
 Button/styles/focus = SubResource("StyleBoxFlat_1exxx")

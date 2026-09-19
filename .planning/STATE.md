@@ -1,36 +1,42 @@
 ---
 gsd_state_version: "1.0"
 milestone: v0.0.4
-current_phase: 3
+current_phase: 03
 current_phase_name: 3D Lesson Parity & Progress Persistence
-status: planning
-stopped_at: Phase 02 complete, ready to plan Phase 3
-last_updated: "2026-09-12T20:15:24.410Z"
-last_activity: 2026-09-12
-last_activity_desc: Phase 02 complete, transitioned to Phase 3
-state_head: 5ec1197edd977a455fa1732d1c6ea4de71684bf2
+status: executing
+stopped_at: Integrated alpha-v0.0.4 acceptance in progress
+last_updated: "2026-09-19T18:39:00Z"
+last_activity: 2026-09-19
+last_activity_desc: Integrated headless gate and six-lesson process restart verified; final acceptance open
+state_head: 70a6a78dcc69e00d24c9d436909175843ed64a71
 progress:
   total_phases: 10
-  completed_phases: 1
-  total_plans: 12
-  completed_plans: 12
+  completed_phases: 0
+  total_plans: 18
+  completed_plans: 17
 ---
 
 # Project State
+
+## Current integration evidence — 2026-09-19
+
+Alpha-v0.0.4 implementation is integrated for independent verification. The isolated integration run passed the complete Godot headless gate and a real write-process exit followed by a fresh reader process: nine completion entries cover all six lessons, with identical save hashes. Evidence is in the workspace acceptance task `aa38adeb-5b83-4b69-8110-59add2e0c7d5`; local logs and source manifests are under `/private/tmp/camiel-final-aa38adeb/`. A durable workspace copy of the evidence is in `builds/verification/acceptance/`; playable packages are in `builds/release/`.
+
+Technical delivery checks passed: the dashboard transport-test race is fixed, all 41 Python tests and 13 Godot probes pass, and current web/native macOS flows have been checked. Final milestone acceptance remains open for the human/platform boundaries below. Human assessment of child friendliness, character recognition and movement feel is not replaced by automation. Physical touchscreen and Windows/Linux native execution require separate evidence. Earlier phase counters below describe historical plan execution, not completion of the current integrated milestone.
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-09-11)
 
 **Core value:** A young child can go from the title screen through every lesson, entirely on their own, without hitting a bug or needing adult help — and their progress is remembered afterward.
-**Current focus:** Phase 02 — Playable 3D Intro Experience
+**Current focus:** Phase 03 — 3D Lesson Parity & Progress Persistence
 
 ## Current Position
 
-Phase: 3 — 3D Lesson Parity & Progress Persistence
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-12 — Phase 02 complete, transitioned to Phase 3
+Phase: 03 (3D Lesson Parity & Progress Persistence) — EXECUTING
+Plan: 6 of 6
+Status: Ready to execute
+Last activity: 2026-09-12 — Phase 03 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -71,6 +77,11 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P04 | 20min | 3 tasks | 10 files |
 | Phase 02 P05 | 30min | 3 tasks | 4 files |
 | Phase 02 P06 | 20 min | 1 tasks | 0 files |
+| Phase 03 P01 | 55min | 2 tasks | 5 files |
+| Phase 03 P02 | 65min | 3 tasks | 9 files |
+| Phase 03 P03 | 75min | 3 tasks | 11 files |
+| Phase 03 P04 | ~50min | 2 tasks | 8 files |
+| Phase 03 P05 | ~25min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -103,6 +114,20 @@ Recent decisions affecting current work:
 - [Phase 02]: [Phase 02-05]: Godot's GDScript loader enforces singleton resource identity per path regardless of ResourceLoader.CACHE_MODE_IGNORE, so packing two icon nodes that both load vector_icon.gd always dedupes to one ext_resource; the scene generator's post-processing step splits it into two declarations pointing at the same file so each icon row owns its own
 - [Phase 02]: [Phase 02-05]: Per 02-VALIDATION.md's "Probe-presence guard gap", the REQUIRED_PROBES named-probe allow-list for run_headless_check.sh is deliberately left unimplemented this phase; test_headless_check.sh Case 13 records the current weakness (removing one named probe while others remain still passes) as a known, honestly-named gap rather than a guarantee
 - [Phase 02]: [Phase 02]: [Phase 02-06]: D-30 playtest verdict (verbatim): "it works but graphics are very basic" - no functional or tuning changes applied since no defect or adjustment was named; the graphics remark is out-of-scope feedback mapped to the already-deferred v2 MODEL-01
+- [Phase 03]: [Phase 03-01]: RED evidence for the corrupt-file recovery case was produced by temporarily reverting progress_tracker.gd to the archived bug's JSON.parse_string() call, confirming run_headless_check.sh goes CHECK FAILED on the exact ERROR: Parse JSON failed line even though recovery is correct, then reverted (byte-identical to the committed file)
+- [Phase 03]: [Phase 03-01]: Task 3's deliberate-failure exercise forced a false assertion to prove the probe's failure funnel restores a real save file; verified via a SHA-256 checksum of the pre-existing real progress.json matched before and after
+- [Phase 03]: [Phase 03-02]: D-37/D-38's activation gate shipped inside lesson_target.gd's Task 1 commit rather than a separate Task 3 diff, since the gate is one branch inside the same _on_body_entered method Task 1 also writes; RED evidence for Task 3's negative case was produced by temporarily removing the gate branch, confirming the failure, then restoring the file byte-identical
+- [Phase 03]: 03-03: const LESSONS holds exactly one row until each lesson's scene exists; the lesson-select probe loads every table entry, so a row added before its scene fails loudly (D-33, Pitfall 7)
+- [Phase 03]: 03-03: lesson 1's counting task is three objects that together mark ONE of three tasks, keeping D-36's check at three and D-46's label at three steps while still making the child count
+- [Phase 03]: 03-03: the bare autoload name ProgressTracker does resolve inside a scene's own script under a --script entry point; the plan's contingency lookup was unnecessary
+- [Phase 03]: Lessons 2 and 3 enforce order structurally: an array of the target nodes is read to activate the next one, and neither orchestrator compares an arriving identifier at all (D-37)
+- [Phase 03]: Each ordered lesson's probe case drives three distinct orders -- two different wrong-first touches proved to refuse and complete nothing, then the correct order -- because a correct-order-only case would pass on the archived defect
+- [Phase 03]: The lesson table holds exactly three appended rows, one per scene that exists; no row, disabled button or not-yet-available caption for lessons 4 and 5
+- [Phase 03]: D-46 resolved in practice: the progress-label total is a parameter end to end, so lesson 5 reads Stap: 4 / 4 from the one shared format string with no second form and no reshaping of its four-step rule
+- [Phase 03]: Lesson 4 is proved order-independent by being driven from two genuinely different orders, the second interleaving a colour target into the middle of the counting task -- one order proves nothing about order-independence
+- [Phase 03]: The cue assertion is two-sided: a colour lesson holds shape and label uniform, an ordered lesson holds colour uniform and its non-cue property uniform too -- in both directions the property being taught is the only discriminator
+- [Phase 03]: Lesson 4's counting objects are purple, not lesson 1's orange, because orange sits only 0.239 from this lesson's yellow and a third object in almost-yellow is the trap a yellow-or-green lesson must not set
+- [Phase 03]: The closing persistence case builds its expected identifier set from the lesson table rather than a literal list, so a sixth lesson is covered the day its row lands and a lesson filing progress under an unknown identifier fails too
 
 ### Pending Todos
 
@@ -129,6 +154,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-12T19:47:53.065Z
-Stopped at: Phase 02 complete, ready to plan Phase 3
+Last session: 2026-09-12T23:55:15.221Z
+Stopped at: Completed 03-05-PLAN.md
 Resume file: None

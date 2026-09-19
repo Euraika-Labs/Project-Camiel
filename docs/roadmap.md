@@ -1,60 +1,34 @@
 # Roadmap
 
-## Alpha v0.0.1 — Done (2025)
-- Godot project created.
-- Camiel character assets generated and imported.
-- Camiel animation resource created.
-- Camiel converted to CharacterBody2D.
-- Playable intro scene created.
-- Windows export templates installed.
-- Windows alpha build exported.
-- GitHub repository created.
-- GitHub release created with build assets.
+## Alpha-v0.0.4 — geïntegreerd, acceptatie open
 
-## Alpha v0.0.2 — Done (2026-06-05)
-- Simple main menu with one big Start button added.
-- Gentle background music and soft sound effects implemented (AudioManager Autoload).
-- One collectible object (star) with pickup feedback added.
-- HUD showing star count added.
-- Finish marker added so the child can complete the intro.
+Camiel is opgebouwd als Nederlandstalig 3D-spel in Godot 4.7.2 met Compatibility-rendering. De oude 2D-runtime is gearchiveerd onder `archive/2d-alpha-v0.0.3`; historische 2D-functies zijn geen claims over de huidige build.
 
-## Alpha v0.0.3 — Done (2026-06-05)
-- First educational micro-tasks implemented:
-  - Touch the red block (color recognition, cause-effect)
-  - Find blue (visual discrimination, observation)
-  - Count 1, 2, 3 objects (number sense, one-to-one correspondence)
-- Lesson scene (lesson_1.tscn) with progress tracking added.
-- Parent/teacher notes created (docs/parent-teacher-notes.md).
-- Accessibility checks completed, WCAG 2.1 AA compliant (docs/accessibility-report.md).
-- GitHub Actions CI/CD pipeline implemented (.github/workflows/export.yml).
-- Code signing documentation created (docs/code-signing.md).
-- Branded title screen added (scenes/title_screen.tscn).
-- Version label component added (scenes/ui/version_label.tscn).
-- Accessibility Autoload singleton added (scripts/accessibility.gd).
+| Onderdeel | Geïmplementeerd | Bewijs en grens |
+|---|---|---|
+| Intro en lessen | Titelscherm, hoofdmenu, lesselectie, introductie en zes lessen | Headless flows en lesregels getest; menselijke speelbeoordeling open |
+| Voortgang | Lokale lesafrondingen met sterren, tijd en datum | Alle zes lessen na echte procesexit teruggelezen |
+| Camiel | GLB-karakter met idle-, loop- en springanimatie | Model- en bewegingsprobes; menselijke herkenbaarheid en animatiegevoel open |
+| Toegankelijkheid | Leesbare themakleuren en instelling voor hoog contrast | Gemeten kleurparen en live themaprobe; geen volledige WCAG-conformiteitsclaim |
+| Nederlandse spraak | Gebundelde instructies en feedback, eigen volumebus | Audiobus en assetprobes; luisteren op doelapparaten apart |
+| Touch | Proportionele joystick, gelijktijdig springen, vrijgeven en focusverlies | Inputprobes in intro en alle lessen; fysiek touchscreen open |
+| Web | Web-preset, lokale server en CI-exportconfiguratie | Echte browserles en opslag na herladen getest; bron/buildmatching gecontroleerd; externe CI-run apart |
+| Ouderdashboard | Lokale import, voortgang en samenvatting | HTTP- en browsercontroles; geen accounts of cloudopslag |
+| Releases | Versiebron, vier exportdoelen en één releaseworkflow | Lokale gates en pakketchecks; getagde GitHub-release niet uitgevoerd |
 
-## Design Principles (unchanged)
-- One idea at a time.
-- Clear colors.
-- Large UI.
-- No time pressure.
-- No punishment-heavy failure state.
-- Keep controls minimal.
+De volledige geïntegreerde Godot-gate is geslaagd. Een eerder aangetroffen importcrash en testfouten worden in het acceptatiebewijs bewaard; een latere geslaagde run maakt die waarnemingen niet ongedaan. Builds moeten aan de daadwerkelijk geteste broninhoud worden gekoppeld. Het technische bewijs staat in de workspace-taak **Onafhankelijke controle en speelbare oplevering**; de projectplanning houdt open acceptatiecriteria zichtbaar.
 
-## Known Technical Improvements
-- Add code signing for Windows (certificate acquisition required).
-- Reduce duplicate legacy assets if repository size becomes an issue.
-- Add a proper title screen (DONE: alpha-v0.0.3).
-- Add a version label inside the game (DONE: alpha-v0.0.3).
-- Add voice-over audio for non-readers.
-- Parental dashboard (web-based progress tracking).
-- Mobile touch support.
-- Web export (HTML5 via Godot).
+## Starten en bouwen
 
-## Next: Alpha v0.0.4 Ideas
-- Voice-over audio (Dutch) for non-readers.
-- Parental dashboard (simple web app).
-- Mobile touch controls.
-- Web export (HTML5 Godot export).
-- More lesson levels.
+- [Snel starten](quick-start.md)
+- [Desktopbuilds en releases](build-and-release.md)
+- [Webexport en browseropslag](web-export.md)
+- [Lokaal ouderdashboard](parent-dashboard.md)
 
----
+## Ontwerpprincipes
+
+Eén opdracht tegelijk, duidelijke kleuren, grote bedieningsvlakken, weinig toetsen en geen tijdsdruk. Menselijke tests bepalen of kinderen het spel werkelijk zelfstandig begrijpen en prettig kunnen bedienen.
+
+## Buiten deze mijlpaal
+
+Accounts, telemetrie, cloudopslag, multiplayer, Android APK en betaalde codesigning zijn geen onderdeel van deze oplevering. Windows- en Linux-uitvoering, fysiek touchscreengebruik en menselijke acceptatie worden niet uit macOS- of headless resultaten afgeleid.

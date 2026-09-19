@@ -9,7 +9,13 @@ signal returned_to_safe_spot(position: Vector3)
 
 enum SteeringMode { CAMERA_RELATIVE, TURN_AND_WALK }
 
-@export var steering_mode: SteeringMode = SteeringMode.TURN_AND_WALK
+# Camera-relative is the shipped steering mode: the stick direction is the
+# direction Camiel goes, which is what a five-year-old expects from a pad.
+# Turn-and-walk stays available behind --steering=turn_and_walk because it is
+# easier for a child who steers with two hands on a keyboard, but it is not the
+# default. probe_camiel_movement.gd's steering_default case pins this value, so
+# it cannot drift back silently -- it already did once.
+@export var steering_mode: SteeringMode = SteeringMode.CAMERA_RELATIVE
 @export var walk_speed := 2.5
 @export var acceleration := 12.0
 @export var deceleration := 16.0
@@ -30,6 +36,7 @@ var _spawn_position: Vector3
 var _last_safe_position: Vector3
 var _safe_spot_timer := 0.0
 var _is_returning := false
+var _touch_controls: Control
 
 
 func _ready() -> void:
@@ -40,10 +47,25 @@ func _ready() -> void:
 	apply_steering_arguments(OS.get_cmdline_user_args())
 	_return_sound.stream = _build_return_tone()
 	_snap_camera_behind()
+	var touch_layer := CanvasLayer.new()
+	touch_layer.name = "TouchLayer"
+	touch_layer.layer = 5
+	add_child(touch_layer)
+	_touch_controls = preload("res://scripts/ui/touch_controller.gd").new()
+	_touch_controls.name = "TouchControls"
+	touch_layer.add_child(_touch_controls)
+
+
+func _process(_delta: float) -> void:
+	# Win panels disable player physics without pausing the scene tree.
+	_touch_controls.visible = _touch_controls.available and is_physics_processing()
 
 
 func _physics_process(delta: float) -> void:
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	input_dir = (input_dir + _touch_controls.movement).limit_length(1.0)
+	# Consume every tick, including in the air, so a tap never queues a stale jump.
+	var touch_jump: bool = _touch_controls.consume_jump()
 
 	if steering_mode == SteeringMode.TURN_AND_WALK:
 		_process_turn_and_walk(input_dir, delta)
@@ -52,7 +74,7 @@ func _physics_process(delta: float) -> void:
 
 	if not is_on_floor():
 		velocity.y = max(velocity.y - _gravity * delta, -max_fall_speed)
-	elif Input.is_action_just_pressed("jump"):
+	elif Input.is_action_just_pressed("jump") or touch_jump:
 		velocity.y = jump_velocity
 
 	move_and_slide()

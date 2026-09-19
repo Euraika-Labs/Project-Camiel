@@ -237,7 +237,17 @@ func _case_defaults() -> void:
 	print("PASS defaults")
 
 
-const ALL_ICON_KINDS := ["play", "walk", "replay", "home", "speaker", "music_note"]
+const ALL_ICON_KINDS := [
+	"play",
+	"walk",
+	"replay",
+	"home",
+	"speaker",
+	"music_note",
+	"lesson_colors",
+	"lesson_shapes",
+	"lesson_sequence",
+]
 
 
 func _case_all_icon_kinds() -> void:
