@@ -1,105 +1,54 @@
-# Quick-Start Guide — Project Camiel
+# Camiel starten
 
-**5 minutes from download to playing.**
+Camiel is een Nederlandstalig 3D-leerspel. Alpha-v0.0.4 wordt technisch geverifieerd; beoordeling door kinderen en begeleiders blijft afzonderlijk nodig.
 
----
+## Vanuit de broncode
 
-## What is Project Camiel?
+1. Installeer de standaardeditie van **Godot 4.7.2**, volgens [Godot instellen](godot-setup.md).
+2. Kies **Importeren** in de Godot-projectbeheerder en selecteer `project.godot`.
+3. Open het project en druk op **F5**. Wacht bij de eerste start op het importeren van assets.
+4. Kies **Spelen** op het titelscherm. Kies daarna **Start** voor de introductie of **Lessen** voor de zes lessen.
 
-Camiel is a child-friendly educational game for children aged 3+. Camiel is a friendly dog who guides children through gentle learning challenges. No reading required — Camiel speaks through pictures and sounds.
+## Vanuit een desktopbuild
 
----
+Pak het complete platformarchief uit; houd het uitvoerbestand en eventuele bijbestanden samen. Open op macOS de `.app`, op Windows het `.exe`-bestand, of op Linux het uitvoerbare bestand. Builds zijn niet ondertekend of genotariseerd. Gebruik alleen een build waarvan je de bron vertrouwt; houd eventuele beveiligingsmeldingen van het besturingssysteem aan. Bouwinstructies en exacte pakketnamen staan in [bouwen en releasen](build-and-release.md).
 
-## Step 1: Install Godot 4.6.4
+## In de browser
 
-### Option A: Windows
-1. Download Godot 4.6.4 from [godotengine.org](https://godotengine.org) (select Windows 64-bit)
-2. Run the `.exe` installer, or download the portable `.zip` and extract anywhere
-3. That is it — no installation needed for portable version
+Een echte Web-export en browserproef zijn uitgevoerd. Een nieuw broncommit vereist een nieuwe buildcontrole; een lokale proef bewijst geen uitgevoerde GitHub CI-run.
 
-### Option B: macOS
-1. Download Godot 4.6.4 from [godotengine.org](https://godotengine.org) (select macOS)
-2. Drag Godot.app to your Applications folder
-3. On first run: System Preferences > Security & Privacy > allow "App Store and identified developers"
+Pak de webbuild uit in `builds/web` en voer vanuit de repository uit:
 
-### Option C: Linux
-1. Download Godot 4.6.4 from [godotengine.org](https://godotengine.org) (select Linux)
-2. Make executable: `chmod +x Godot_v4.6.4_x11.64`
-3. Run: `./Godot_v4.6.4_x11.64`
+```bash
+python3 scripts/tools/serve_web.py builds/web
+```
 
----
+Open **http://127.0.0.1:8060/index.html**. Klik in het spel om toetsenbord en audio te activeren. Houd voor voortgang hetzelfde browserprofiel en dezelfde URL/poort aan. Zie [webexport](web-export.md) voor export, browseropslag en probleemoplossing. Dubbelklikken op het HTML-bestand werkt niet als startmethode.
 
-## Step 2: Open the Project
+## Bediening en geluid
 
-1. Launch Godot 4.6.4
-2. Click **"Import"** (the folder icon)
-3. Navigate to where you extracted Project Camiel
-4. Select `project.godot` and click **"Import & Run"**
-5. The project opens — click the **Play** button (triangle icon, top-right) or press **F5**
+| Actie | Bediening |
+|---|---|
+| Bewegen | WASD of pijltjestoetsen |
+| Springen | Spatie |
+| Schermbediening bij touch | Joystick en springknop, waar touch gedetecteerd wordt |
+| Muziek en effecten | Schuifregelaars in het hoofdmenu |
+| Hoog contrast en stemvolume | Instellingen in het hoofdmenu |
 
----
+De camera volgt Camiel. Voor teruggaan gebruik je de zichtbare menuknoppen. Tijdens lessen geeft tekst samen met Nederlandse spraak de opdracht. De spraakassets zijn meegeleverd; er is geen spraakdienst nodig tijdens het spelen.
 
-## Step 3: Play!
+## Voortgang en ouderdashboard
 
-### Main Menu
-- **Play** — Start the intro level
-- **Les** (Lesson) — Start the educational micro-tasks
+Lesafrondingen worden lokaal opgeslagen. Desktop gebruikt Godots gebruikersmap (`user://progress.json`); web gebruikt IndexedDB in de browser. Het wissen van browsergegevens of gebruik van een andere origin kan webvoortgang verwijderen.
 
-### Controls for the child
-| Action | Keys |
-|--------|------|
-| Walk | Left / Right arrows or A / D |
-| Jump | Space, W, or Up |
-| Sit | S or Down |
-| Run | Hold Shift while walking |
+Het ouderdashboard leest een handmatig gekozen `progress.json` en vervangt de spelopslag niet:
 
-### During the game
-- **Collect stars** — Walk into them
-- **Touch the red block** — Find it in the lesson
-- **Find blue** — Look carefully, it is camouflaged
-- **Count 1, 2, 3** — Touch the objects in order
+```bash
+python3 -m dashboard
+```
 
----
+Open **http://127.0.0.1:8765/**. Zie [ouderdashboard](parent-dashboard.md) voor het exportformaat en de privacygrenzen.
 
-## Troubleshooting
+## Verificatiegrenzen
 
-### The game does not start
-- Make sure you have Godot 4.6.4 (not 3.x or 4.6.2)
-- Press F5 to start, not just open the project
-
-### No sound
-- Check your computer volume
-- Check the in-game volume in the AudioManager (future feature)
-
-### The screen is too big / too small
-- Press F11 to toggle fullscreen
-- In Godot: Project > Settings > Display > Window > Size > Override
-
-### The child cannot control Camiel
-- Make sure the keyboard is connected
-- For very young children: an adult can hold the child is hand and guide the keys together
-
-### Game is too fast or too slow
-- Restart the game (press F5)
-- Check if other apps are running slowly on the computer
-
----
-
-## For Parents & Teachers
-
-- See `docs/parent-teacher-notes.md` for learning objectives per activity
-- See `docs/accessibility-report.md` for accessibility features
-- The game has no ads, no in-app purchases, no internet required after download
-- Works offline once downloaded
-
----
-
-## Supported Platforms
-
-| Platform | Status |
-|----------|--------|
-| Windows 10/11 | Fully tested |
-| macOS | Tested |
-| Linux | Tested |
-| Web (HTML5) | Planned |
-| Android/iOS | Planned |
+Headless spelprobes en browseropslagcontroles zijn uitgevoerd. Native uitvoer op Windows en Linux, fysiek multi-touchgebruik, hoorbaarheid op ieder apparaat en menselijke kindvriendelijkheidsbeoordeling zijn hiermee niet bewezen. Een volledig conformiteitslabel voor toegankelijkheid volgt niet uit enkele gemeten contrastverhoudingen. De [roadmap](roadmap.md) onderscheidt implementatie van acceptatie.
