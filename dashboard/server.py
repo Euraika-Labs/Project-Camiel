@@ -197,4 +197,5 @@ def main():
         try:
             server.serve_forever()
         except KeyboardInterrupt:
+            # Ctrl+C is normal shutdown; the context manager closes the server.
             pass
