@@ -127,3 +127,20 @@ jobs:
   export-builds:
     needs: [verify-godot]
     uses: ./.github/workflows/export.yml
+
+  export-windows:
+    # Preserve the required branch-protection context across reusable workflows.
+    name: Export Windows build
+    needs: [export-builds]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require successful exports
+        env:
+          EXPORT_RESULT: ${{ needs.export-builds.result }}
+        run: |
+          if [ "$EXPORT_RESULT" != "success" ]; then
+            echo "::error::Required exports did not succeed: $EXPORT_RESULT"
+            exit 1
+          fi

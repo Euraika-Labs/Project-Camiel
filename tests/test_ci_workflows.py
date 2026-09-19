@@ -216,6 +216,22 @@ class CiWorkflowTests(unittest.TestCase):
         self.assertNotIn("|| true", self.release_text)
         self.assertIn("merge-multiple: true", self.release_text)
 
+    def test_required_windows_context_fails_closed(self) -> None:
+        ci = yaml.safe_load(self.ci_text)
+        job = ci["jobs"]["export-windows"]
+        self.assertEqual("Export Windows build", job["name"])
+        self.assertEqual(["export-builds"], job["needs"])
+        self.assertEqual("${{ always() }}", job["if"])
+        step = job["steps"][0]
+        self.assertEqual("${{ needs.export-builds.result }}", step["env"]["EXPORT_RESULT"])
+        for result in ("success", "failure", "cancelled", "skipped", ""):
+            with self.subTest(result=result):
+                completed = subprocess.run(
+                    ["bash", "-e", "-o", "pipefail", "-c", step["run"]],
+                    env={**os.environ, "EXPORT_RESULT": result}, capture_output=True,
+                )
+                self.assertEqual(result == "success", completed.returncode == 0)
+
     def test_trigger_and_permission_boundaries(self) -> None:
         # BaseLoader preserves YAML's 'on' key instead of coercing it to True.
         release = yaml.load(self.release_text, Loader=yaml.BaseLoader)
