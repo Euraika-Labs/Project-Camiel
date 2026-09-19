@@ -12,7 +12,9 @@ Bijgewerkt op 19 september 2026. Dit rapport beschrijft de geïntegreerde 3D-ver
 | Crèmekleurig paneel/knop | `(1, 0.9647059, 0.9098039)` | 10,90:1 |
 | Ingedrukte knop | `(0.92, 0.88752943, 0.8370196)` | 9,12:1 |
 
-De probe controleert alle expliciet ingestelde, niet-uitgeschakelde tekstkleuren in het thema tegen deze drie achtergronden met een grens van 4,5:1. De definitieve geïntegreerde run slaagt. Dit is geen volledige inventaris van elke gerenderde pixel, transparantiecombinatie, systeemwidget of 3D-achtergrond. Uitgeschakelde tekststates zijn niet in deze berekening opgenomen.
+De definitieve geïntegreerde probe slaagt. De aanvullende broninventaris `builds/verification/text-contrast-inventory.json` kruist alle 15 expliciete, actieve tekstkleurinstellingen met alle 13 ondoorzichtige UI-achtergronden uit thema en scènes: 195 conservatieve combinaties, waaronder combinaties die niet samen worden getoond. Het minimum is **5,339:1**, boven de strengere grens van 4,5:1 voor normale tekst. Een onafhankelijke herberekening bevestigt alle verhoudingen en de themabronhash tegen de geteste eindboom.
+
+Broncontrole bevestigt de thema-overerving voor titel, menu, lesselectie, instellingen, HUD en winpanelen, inclusief de Label-kinderen van menuknoppen; er zijn geen aanvullende runtime-tekstkleuroverrides. Hoog contrast gebruikt zwarte tekst en haalt ook over de conservatieve achtergrondset minimaal 9,598:1. De 3D-lescijfers gebruiken witte tekst met een zwarte contour van 24 eenheden: tekst tegenover contour is 21:1. **ACCESS-01 is hiermee voldaan voor tekstcontrast in de opgeleverde 3D-UI.** Uitgeschakelde bedieningselementen en tijdelijke in-/uitfades zijn uitgezonderd; dit is geen algemene WCAG-certificering.
 
 ## Hoog contrast en bediening
 
@@ -32,11 +34,11 @@ De touchprobe controleert proportionele joystickinvoer, gelijktijdig springen, l
 
 ## Bewijs en open punten
 
-De volledige geïntegreerde Godot-gate bevat de toegankelijkheidsprobe en slaagt. Bewijs is lokaal gebundeld onder `builds/acceptance/` en in de workspace-acceptatietaak. Webschermafbeeldingen staan onder `builds/web-verification-final/`. Deze lokale bestanden worden niet automatisch als gepubliceerde releasebijlage aangeboden.
+De volledige geïntegreerde Godot-gate bevat de toegankelijkheidsprobe en slaagt. Bewijs is lokaal gebundeld onder `builds/verification/acceptance/` en in de workspace-acceptatietaak. Webschermafbeeldingen staan onder `builds/web-verification-final/`. Deze lokale bestanden worden niet automatisch als gepubliceerde releasebijlage aangeboden.
 
 Open blijven:
 
-- Volledige audit van alle tekst-, focus-, icoon- en achtergrondcombinaties in alle schermtoestanden.
+- Aanvullende audit van focusindicatie, iconen en overige niet-tekstuele toegankelijkheid in alle schermtoestanden.
 - Schaling en bruikbaarheid op uiteenlopende schermen en fysieke touchapparaten.
 - Beoordeling met kinderen en begeleiders, inclusief kleuronderscheid, begrijpend luisteren en motorische belasting.
 - Ondersteunende technologie, schermlezers, bewegingsgevoeligheid en een volledige toegankelijkheidsaudit.

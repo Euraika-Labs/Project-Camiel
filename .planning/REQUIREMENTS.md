@@ -43,7 +43,7 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 
 ### Accessibility & Release Pipeline Hardening
 
-- [ ] **ACCESS-01**: Every text/background color combination in the shipped 3D UI meets WCAG 2.1 AA contrast (4.5:1 normal text, 3:1 for text that qualifies as large), verified by computed ratios
+- [x] **ACCESS-01**: Every text/background color combination in the shipped 3D UI meets WCAG 2.1 AA contrast (4.5:1 normal text, 3:1 for text that qualifies as large), verified by computed ratios
 - [ ] **ACCESS-02**: A reachable UI control toggles high-contrast mode, and the visual change applies immediately to on-screen UI
 - [ ] **CI-01**: A single Godot engine version (4.7.2) is pinned and used consistently by the CI workflow, the release workflow, the export workflow, and the Godot setup doc
 - [ ] **CI-02**: The version string shown in-game and used in build artifact names comes from one source of truth instead of being hand-edited in multiple files
@@ -146,7 +146,7 @@ Which phases cover which requirements.
 | LESSON-06 | Phase 3 | Pending |
 | PROGRESS-01 | Phase 3 | Pending |
 | PROGRESS-02 | Phase 3 | Pending |
-| ACCESS-01 | Phase 4 | Pending |
+| ACCESS-01 | Phase 4 | Verified: 195 computed pairs, minimum 5.339:1; see docs/accessibility-report.md |
 | ACCESS-02 | Phase 4 | Pending |
 | CI-01 | Phase 4 | Pending |
 | CI-02 | Phase 4 | Pending |
