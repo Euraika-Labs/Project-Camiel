@@ -1,85 +1,44 @@
-# Accessibility Report — Camiel alpha-v0.0.3
+# Toegankelijkheidsrapport — Camiel alpha-v0.0.4
 
-**Standard:** WCAG 2.1 AA
+Bijgewerkt op 19 september 2026. Dit rapport beschrijft de geïntegreerde 3D-versie op Godot 4.7.2. Het vervangt de historische 2D-claims. **Volledige WCAG-conformiteit is niet vastgesteld.** De onderstaande technische controles zijn geen menselijke beoordeling van begrijpelijkheid, comfort of zelfstandig spelen.
 
-This report covers all user-facing UI and game elements in the alpha-v0.0.3 build.
+## Gemeten tekstcontrast
 
----
+`scripts/tools/probe_accessibility.gd` berekent contrast met gelineariseerde RGB-waarden en relatieve luminantie. Het gedeelde thema gebruikt donkere tekst `Color(0.12156863, 0.22745098, 0.3372549, 1)`.
 
-## Colour Contrast
+| Achtergrond | Kleur | Gemeten verhouding |
+|---|---|---|
+| Blauwe menuachtergrond | `(0.62, 0.82, 0.95)` | 7,16:1 |
+| Crèmekleurig paneel/knop | `(1, 0.9647059, 0.9098039)` | 10,90:1 |
+| Ingedrukte knop | `(0.92, 0.88752943, 0.8370196)` | 9,12:1 |
 
-| Element | Foreground | Background | Ratio | Pass? |
-|---|---|---|---|---|
-| Main menu title "Camiel" | White | Blue `(0.2, 0.4, 0.6)` | ~8.5:1 | ✅ YES |
-| Start button text | White | Green `(0.43, 0.74, 0.31)` | ~7.2:1 | ✅ YES |
-| Lesson button text | White | Blue `(0.2, 0.4, 0.6)` | ~8.5:1 | ✅ YES |
-| HUD "Stars: 0" label | White | Semi-transparent overlay | ~7:1 | ✅ YES |
-| Win overlay "Goed zo!" | White | Green `(0.15, 0.85, 0.15)` | ~7.2:1 | ✅ YES |
-| Lesson 1 title label | Dark brown `(0.09, 0.08, 0.06)` | Sky `(0.6, 0.84, 1.0)` | ~4.8:1 | ✅ YES |
+De probe controleert alle expliciet ingestelde, niet-uitgeschakelde tekstkleuren in het thema tegen deze drie achtergronden met een grens van 4,5:1. De definitieve geïntegreerde run slaagt. Dit is geen volledige inventaris van elke gerenderde pixel, transparantiecombinatie, systeemwidget of 3D-achtergrond. Uitgeschakelde tekststates zijn niet in deze berekening opgenomen.
 
-All text/background combinations meet WCAG AA minimum of 4.5:1 (normal text) and 3:1 (large/UI).
+## Hoog contrast en bediening
 
----
+Het hoofdmenu biedt **Instellingen → Hoog contrast**. De gedeelde thematekst wordt zwart; themapanelen en knoppen krijgen een witte achtergrond en zwarte randen. De volumebalkvulling blijft zwart, zodat deze zichtbaar is op wit. De voorkeur wordt lokaal bewaard in `user://settings.cfg`.
 
-## Font Sizes
+De technische probe bevestigt bereikbaarheid van de instellingenknop, omschakelen via de UI, onmiddellijke wijziging van het geladen thema, opslaan van de voorkeur, sluiten met Escape en herstel van focus naar Start. De coördinator heeft de macOS-instellingenflow visueel doorlopen. De oorspronkelijke witte volumebalk op een wit paneel is daarbij gevonden en hersteld.
 
-| Element | Size | WCAG AA Target | Pass? |
-|---|---|---|---|
-| Button text (Start, Les) | 32 px equivalent (24 pt+) | ≥ 18 pt (AA) / ≥ 14 pt (AAA) | ✅ PASS |
-| HUD labels ("Stars: 0") | 24 px | ≥ 18 pt | ✅ PASS |
-| Lesson title | 44 px | Large text | ✅ PASS |
-| Version labels | 16 px | Not critical / decorative | ✅ PASS |
+De vaste crèmekleurige HUD-achtergrond en lokale winpaneelstijl schakelen niet integraal naar wit; hun tekst schakelt wel mee. Daaruit wordt geen volledige schermbrede hoogcontrastgarantie afgeleid. Titelscherm, hoofdmenu en lesselectie gebruiken dezelfde gedeelde themabron, maar de lesdoelkleuren blijven inhoudelijk behouden.
 
----
+## Tekst, geluid en aanraakbediening
 
-## Touch / Click Targets
+Het thema definieert 20 px voor kleine labels, 28 px voor knoplabels, 40 px voor koppen en 64 px voor de grote titel. Dit zijn Godot-layoutwaarden; de effectieve fysieke grootte hangt van scherm en schaling af. Er wordt geen universele leesbaarheids- of aanraakdoelconformiteit uit afgeleid.
 
-| Element | Size | WCAG AA Target | Pass? |
-|---|---|---|---|
-| Start button | ~400 × 80 px | ≥ 44 × 44 px (AAA) / ≥ 24 × 24 px (AA) | ✅ PASS |
-| Lesson button | ~400 × 80 px | ≥ 44 × 44 px | ✅ PASS |
-| All collectible hit areas | ≥ 40 × 40 px | ≥ 44 × 44 px | ✅ PASS |
+Nederlandse instructies en feedback zijn als offline audio meegeleverd op een afzonderlijke Voice-bus. Hoofdmenu en instellingen bieden afzonderlijke regelaars voor muziek, effecten en stem. Audioprobes bewijzen routing en niet-stille samples; zij beoordelen geen verstaanbaarheid. Browsers kunnen audio blokkeren tot een gebruikersgebaar.
 
-All interactive elements are well above minimum touch-target sizes.
+De touchprobe controleert proportionele joystickinvoer, gelijktijdig springen, loslaten en focusverlies in intro en alle zes lessen. Dit is gesimuleerde invoer. Een werkelijk touchscreen en menselijke bediening zijn nog apart te beoordelen.
 
----
+## Bewijs en open punten
 
-## Motion
+De volledige geïntegreerde Godot-gate bevat de toegankelijkheidsprobe en slaagt. Bewijs is lokaal gebundeld onder `builds/acceptance/` en in de workspace-acceptatietaak. Webschermafbeeldingen staan onder `builds/web-verification-final/`. Deze lokale bestanden worden niet automatisch als gepubliceerde releasebijlage aangeboden.
 
-- Star bobbing animation: gentle sine-wave, ~0.4 Hz — **below** the 1 Hz threshold for concern.
-- Win celebration: static overlay, no animated elements — **PASS**.
-- No flashing or strobing effects present in any scene — **PASS**.
+Open blijven:
 
----
+- Volledige audit van alle tekst-, focus-, icoon- en achtergrondcombinaties in alle schermtoestanden.
+- Schaling en bruikbaarheid op uiteenlopende schermen en fysieke touchapparaten.
+- Beoordeling met kinderen en begeleiders, inclusief kleuronderscheid, begrijpend luisteren en motorische belasting.
+- Ondersteunende technologie, schermlezers, bewegingsgevoeligheid en een volledige toegankelijkheidsaudit.
 
-## Audio + Visual Redundancy
-
-| Event | Audio | Visual | Pass? |
-|---|---|---|---|
-| Collectible pickup | `sfx_collect.ogg` chime | Star disappears + HUD count increments | ✅ |
-| Red block success | `sfx_finish.ogg` | Block turns green, label updates | ✅ |
-| Blue target found | `sfx_collect.ogg` | Block brightens, label updates | ✅ |
-| Count challenge complete | `sfx_finish.ogg` | "3! Goed zo!" message shown | ✅ |
-| Win screen | `sfx_finish.ogg` | "Goed zo!" overlay | ✅ |
-
-Every audio event has a corresponding visual signal. No information is conveyed by sound alone.
-
----
-
-## Applied Fixes from Prior Audit
-
-1. **ColourRect background behind all text labels** — ensures readability regardless of scene background brightness.
-2. **High-contrast mode** via `Accessibility` autoload (`toggle_high_contrast()`) — darkens UI backgrounds and boosts label contrast when enabled.
-3. **Button pressed-state colour** corrected from default grey to a darker green matching the active brand palette, preventing invisible-button-state confusion.
-
----
-
-## Outstanding Considerations
-
-- No reduced-motion toggle is implemented yet (planned for alpha-v0.0.4).
-- No visible mute button is implemented yet (planned for alpha-v0.0.4).
-- All colour-blindness considerations are qualitative; a deuteranopia/protanopia simulation pass is recommended before beta.
-
----
-
-*Report generated: 2026-06-05 | Engine: Godot 4 | Build: alpha-v0.0.3*
+De geautomatiseerde resultaten rechtvaardigen uitsluitend de hierboven beschreven controles; er is geen algemene toegankelijkheidscertificering of volledige mijlpaalacceptatie afgegeven.
