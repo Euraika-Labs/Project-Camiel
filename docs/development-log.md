@@ -1,5 +1,9 @@
 # Development Log
 
+## Status van dit document
+
+Historisch verslag van de 2D-alphas tot alpha-v0.0.3. Alle verwijzingen hieronder naar “current” assets, bediening en paden gelden voor die oude versie onder tag `archive/2d-alpha-v0.0.3`. Voor de gemergde 3D-versie alpha-v0.0.4 gelden het [projectoverzicht](project-overview.md), [assets](assets-and-animations.md) en [bouwinstructies](build-and-release.md). PR #10 is op 19 september 2026 gemergd; menselijke mijlpaalacceptatie blijft open.
+
 ## Initial Character Asset Work
 
 The project started from a reference image of Camiel, a cute Bernese Mountain Dog style character with:

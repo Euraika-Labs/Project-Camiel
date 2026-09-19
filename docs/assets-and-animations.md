@@ -1,82 +1,23 @@
-# Assets And Animations
+# Assets en animaties — 3D
 
-## Canonical Asset Location
+## Camiel
 
-The main Godot-ready character assets live under:
+Het huidige model staat in `assets/characters/camiel/camiel.glb`, met importinstellingen in de bijbehorende `.glb.import`. Het is een voor dit project opgebouwd, textuurvrij glTF-model met materiaalvlakken en transformanimaties. De generator is `scripts/tools/build_camiel_model.py`; de referentie is Camiels gearchiveerde 2D-tekening. Het model is meegeleverd, dus Python of modelleersoftware is tijdens het spelen niet nodig.
 
-`assets/camiel/`
+```bash
+python3 scripts/tools/build_camiel_model.py
+```
 
-Important subfolders:
+Dit commando overschrijft het model. Importeer het resultaat met de vastgepinde Godot-versie en voer de model- en bewegingsprobes uit voordat je een gewijzigde asset oplevert.
 
-- `assets/camiel/animations/`
-- `assets/camiel/poses/`
-- `assets/camiel/poses/side/`
+`scripts/characters/camiel_visual.gd` bestuurt `idle`, `walk` en `jump`. Loopanimatie volgt werkelijke verplaatsing; de gedeelde `scripts/camiel_controller.gd` behoudt beweging, botsingen en camera. Lesobjecten blijven eenvoudige 3D-vormen.
 
-## Animation Structure
+Model- en bewegingsprobes zijn geslaagd. Herkenbaarheid als Camiel en prettig animatiegevoel moeten nog door mensen beoordeeld worden.
 
-Each animation has its own folder.
+## Geluid en UI
 
-Current animation frame counts:
+Muziek en effecten staan in `assets/audio/`; Nederlandse PCM WAV-spraak en tekstcatalogus in `assets/audio/speech_nl/`. Zie de [audioassetnotities](../assets/audio/README.md). Het gedeelde UI-thema staat in `assets/theme/ui_theme.tres`; iconen worden door `scripts/ui/vector_icon.gd` getekend.
 
-| Animation | Frames |
-| --- | ---: |
-| `idle_left` | 4 |
-| `idle_right` | 4 |
-| `walk_left` | 6 |
-| `walk_right` | 6 |
-| `run_left` | 6 |
-| `run_right` | 6 |
-| `jump_left` | 4 |
-| `jump_right` | 4 |
-| `sit_left` | 4 |
-| `sit_right` | 4 |
-| `sleep_left` | 3 |
-| `sleep_right` | 3 |
+## Historische 2D-assets
 
-## SpriteFrames Resource
-
-Godot animation data is stored in:
-
-`assets/camiel/camiel_sprite_frames.tres`
-
-This resource is assigned to Camiel's `AnimatedSprite2D`.
-
-## Original/Legacy Asset Folders
-
-The project still contains earlier generated sets:
-
-- `assets/dogs/`
-- `assets/dogs_side/`
-
-These are useful as reference/backup pose sets. The current game scene uses the canonical `assets/camiel/` assets.
-
-## Transparent PNG Workflow
-
-The generated dog images were created on chroma-key backgrounds, then converted to transparent PNGs.
-
-Temporary chroma/intermediate files are under:
-
-`tmp/`
-
-The `tmp/` folder is ignored by git.
-
-## Jump Color Fix
-
-Some initial jump frames had too many semi-transparent pixels, making Camiel look green or dark when jumping.
-
-The fix:
-
-- Rebuilt `jump_right` frames from original magenta chroma sources.
-- Rebuilt alpha with a cleaner matte.
-- Recreated `jump_left` by mirroring the fixed right-facing frames.
-- Reimported the updated PNGs into Godot.
-
-Backup of old jump frames:
-
-`tmp/jump_frames_before_color_fix/`
-
-This backup is local-only and ignored by git.
-
-## Godot Import Files
-
-The `.png.import` files are committed. They help Godot reproduce the same import settings when the project is opened elsewhere.
+De voormalige `assets/camiel/`, `assets/dogs/` en `assets/dogs_side/` horen bij tag `archive/2d-alpha-v0.0.3`. De huidige runtime gebruikt geen `AnimatedSprite2D` of SpriteFrames voor Camiel. De [ontwikkellog](development-log.md) bewaart de oude assetwerkwijze.

@@ -10,7 +10,7 @@ This directory holds all audio files used by the game.
 | `sfx_collect.ogg` | Collectible pickup sound | OGG Vorbis, stereo, ~0.4 s | Bright 880 Hz chime, short attack, exponential decay. Does not loop |
 | `sfx_finish.ogg` | Level complete / flag reached fanfare | OGG Vorbis, stereo, ~1.2 s | Three warm rising tones (523 Hz, 659 Hz, 784 Hz) in sequence, fading out at the end. Does not loop |
 
-## Every file here must be genuine Ogg Vorbis, not Opus
+## OGG-bestanden moeten echte Vorbis bevatten, geen Opus
 
 An Ogg container carrying Opus data (`OggS` then `OpusHead` in the first bytes)
 fails Godot's Vorbis importer. The failure is silent after the first attempt:
@@ -58,6 +58,10 @@ set on the imported stream resource itself, in the `.ogg.import` sidecar's
 resulting `AudioStreamOggVorbis`. Only `bgm_ambient.ogg.import` sets
 `loop=true` — a one-shot sound effect that looped would never stop.
 
+## Nederlandse spraak
+
+`speech_nl/catalog.json` bevat de Nederlandse teksten en generatiegegevens (Ellen, nl-BE). De meegeleverde clips zijn PCM WAV, mono, 22050 Hz, 16-bit. `scripts/tools/generate_voice_assets.py` genereert ze op macOS; tijdens het spelen is geen spraakdienst nodig. `scripts/voice_manager.gd` routeert de clips naar de onafhankelijke Voice-bus. Verstaanbaarheid op doelapparaten vereist menselijke beoordeling.
+
 ## Implementation
 
 Files are loaded via `AudioManager` (autoload singleton). See `scripts/audio_manager.gd`
@@ -65,6 +69,4 @@ for the loading logic and bus routing.
 
 ## Licensing
 
-All audio files must be royalty-free or produced for this project. If using
-third-party assets, ensure the licence is compatible with the project's MIT
- licence.
+Het project is proprietary volgens [LICENSE](../../LICENSE), niet MIT. Controleer bij toekomstige externe audio afzonderlijk de distributierechten; een engine- of toollicentie verleent geen rechten op willekeurige assets.

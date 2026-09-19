@@ -7,11 +7,11 @@ Project Camiel is een Nederlandstalig educatief 3D-spel in Godot, met Camiel de 
 
 ## Ontwikkelstatus
 
-De huidige ontwikkelversie is **alpha-v0.0.4**. De technische integratie is gecontroleerd; menselijke speelacceptatie blijft open. Een versienummer of groene CI-badge is geen bevestiging dat alle desktop- en webfuncties zijn geaccepteerd.
+De huidige ontwikkelversie is **alpha-v0.0.4**, gemergd via [PR #10](https://github.com/Euraika-Labs/Project-Camiel/pull/10). De technische integratie is gecontroleerd; menselijke speelacceptatie blijft open. Een versienummer of groene CI-badge is geen bevestiging dat alle desktop- en webfuncties zijn geaccepteerd.
 
 De 3D-codebasis bevat een titelscherm, hoofdmenu, introductiewereld en lesselectie. Lessen oefenen kleuren, vormen, tellen en volgordes. Lesvoortgang gebruikt het lokale bestand `user://progress.json` met les, sterren, speelduur en voltooiingstijd.
 
-Karakteranimaties, toegankelijkheidsinstellingen, Nederlandse spraak, aanraakbediening, webexport, het lokale ouderdashboard en zes lessen zijn geïntegreerd. De volledige headless controle, 41 Python-tests, opslag over een echte procesherstart en browserflows zijn uitgevoerd. De macOS-build is native doorlopen; Windows- en Linux-archieven zijn gebouwd maar hier niet native gespeeld. Fysiek multi-touchgebruik en hoorbaarheid op ieder apparaat blijven afzonderlijke controles. Beoordeling van kindvriendelijkheid en bewegingsgevoel blijft een menselijke speeltest.
+Karakteranimaties, toegankelijkheidsinstellingen, Nederlandse spraak, aanraakbediening, webexport, het lokale ouderdashboard en zes lessen zijn geïntegreerd. De eerdere integratierun omvatte de volledige headless controle, 41 Python-tests, opslag over een echte procesherstart en browserflows; de Windows-check kreeg daarna een extra regressietest. De macOS-build is native doorlopen; Windows- en Linux-archieven zijn gebouwd maar hier niet native gespeeld. Fysiek multi-touchgebruik en hoorbaarheid op ieder apparaat blijven afzonderlijke controles. Beoordeling van kindvriendelijkheid en bewegingsgevoel blijft een menselijke speeltest.
 
 De eerdere 2D-versie is gearchiveerd onder de tag `archive/2d-alpha-v0.0.3`; de huidige runtime gebruikt `CharacterBody3D` en de Compatibility-renderer. Zie de [roadmap](docs/roadmap.md) voor de voortgang en [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) voor de acceptatiecriteria.
 
@@ -53,3 +53,5 @@ De Godot-controles staan in `scripts/tools/run_headless_check.sh`. Deze voeren o
 ## Licentie
 
 Copyright © 2026 Euraika Labs. **Alle rechten voorbehouden.** Broncode, assets, documentatie en builds zijn eigendom van Euraika Labs, tenzij afzonderlijk schriftelijk anders gelicentieerd. Zie [LICENSE](LICENSE) voor de voorwaarden.
+
+De vier remote CI-exports en de verplichte Windows-check zijn geslaagd; [bouwbewijs en releasegrenzen](docs/build-and-release.md) vermelden de geteste commit. Dit is nog geen gepubliceerde alpha-v0.0.4-release.

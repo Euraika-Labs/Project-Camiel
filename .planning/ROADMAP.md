@@ -4,6 +4,10 @@
 
 This roadmap replaces the 2D-stabilization plan after the project pivoted to a full 3D game. The first four phases build the 3D foundation and reach lesson parity with the original 2D design — the 2D game archived and retired, a working 3D project baseline, a fully playable title-screen-through-intro-level experience, all five lessons ported to 3D with progress saved, and a UI/pipeline hardening pass — so a young child can complete the 3D game without errors or adult help, with progress saved. The remaining five phases deliver the alpha-v0.0.4 feature ideas from `docs/roadmap.md` on top of that 3D foundation: Dutch voice-over, production-quality mobile touch controls, a working Web export, a local parent dashboard, and additional lesson content.
 
+## Current delivery status — 2026-09-19
+
+PR #10 is merged (`c00504d`). The phase descriptions below retain their original acceptance targets; implemented does not mean human-accepted. [REQUIREMENTS.md](REQUIREMENTS.md) is the current per-requirement evidence register. The original phase 1–3 plans total 18, of which 17 executed; later integration work is tracked in the workspace instead of fabricated plan completions. Phase 03.1 belongs to this milestone.
+
 ## Phases
 
 **Phase Numbering:**
@@ -251,11 +255,11 @@ Integration order: 1 → 2 → 3 → 03.1 → 4 → 5 → 6 → 7 → 8 → 9. I
 | 2. Playable 3D Intro Experience | 6/6 | Complete    | 2026-09-12 |
 | 3. 3D Lesson Parity & Progress Persistence | 5/6 | Process restart verified; human playtest open | - |
 | 03.1. Camiel model and animations | — | Model probes passed; human visual acceptance open | - |
-| 4. Accessibility & Release Pipeline Hardening | — | Implemented; integrated acceptance open | - |
-| 5. Dutch Voice-Over | — | Implemented; integrated acceptance open | - |
-| 6. Mobile Touch Controls | — | Implemented; integrated acceptance open | - |
-| 7. Web Export | — | Implemented; integrated acceptance open | - |
-| 8. Parent Dashboard | — | Implemented; integrated acceptance open | - |
-| 9. Additional Lesson Levels | — | Implemented; integrated acceptance open | - |
+| 4. Accessibility & Release Pipeline Hardening | — | Text contrast and CI verified; tagged release open | - |
+| 5. Dutch Voice-Over | — | Voice probes pass; human listening open | - |
+| 6. Mobile Touch Controls | — | Simulated input passes; physical touch open | - |
+| 7. Web Export | — | CI export and local browser pass; CI-artifact play open | - |
+| 8. Parent Dashboard | — | HTTP/browser/import verified; no cloud data | - |
+| 9. Additional Lesson Levels | — | Lesson 6 and persistence verified; human playtest open | - |
 
 Integration evidence update, 2026-09-19: the isolated integrated headless gate passed, including model, accessibility, touch, voice and six-lesson probes. A fresh process reloaded all six lesson identifiers with an unchanged save hash. Final technical gates, desktop/browser visual checks, source/build matching and Python test remediation are complete; human acceptance, physical touch and Windows/Linux native execution remain open. No new phase-completion checkboxes are claimed by this update.

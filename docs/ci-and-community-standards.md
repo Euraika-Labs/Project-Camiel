@@ -4,10 +4,10 @@
 
 The repository includes these workflows:
 
-- `CI`: verifies repository hygiene, imports the Godot project, runs the Godot verification script, smoke-tests the main scene, and exports a Windows artifact.
+- `CI`: verifies repository hygiene, imports the Godot project, runs the Godot verifier and behavioral probes plus failure-injection self-tests, and exports Windows, Linux, macOS and Web artifacts.
 - `CodeQL`: scans GitHub Actions workflow code with CodeQL.
 - `Dependency Review`: checks dependency changes in pull requests.
-- `Release`: builds Windows release artifacts and uploads them to a GitHub Release for matching tags.
+- `Release`: reuses the complete CI chain and uploads all four platform packages to a GitHub Release for matching tags.
 
 ## AI Quality Gate
 
@@ -33,7 +33,7 @@ Project Camiel is primarily written in GDScript. CodeQL does not currently suppo
 
 CodeQL is configured for GitHub Actions workflow analysis. The repository is public as of 2026-04-26, so GitHub code scanning can upload CodeQL results without requiring a private-repository Code Security purchase.
 
-If supported source languages are added later, the CodeQL setup can be expanded.
+The observed PR checks also include `Analyze (python)` from CodeQL - Code Quality. This does not analyze GDScript gameplay.
 
 ## Community Health Files
 
@@ -51,32 +51,13 @@ The repository includes:
 
 ## Repository Settings
 
-The repository has these GitHub settings configured:
-
-- Repository visibility is public.
-- Issues enabled.
-- Wiki enabled.
-- Discussions enabled.
-- Projects enabled.
-- Merge commits disabled.
-- Squash merging enabled.
-- Rebase merging enabled.
-- Auto-merge enabled.
-- Always suggest updating pull request branches enabled.
-- Delete branch on merge enabled.
-- Web-based commit signoff enabled.
-- Release immutability enabled.
-- Dependabot alerts enabled.
-- Dependabot automated security fixes enabled.
-- Private vulnerability reporting enabled.
-- Secret scanning enabled.
-- Secret scanning push protection enabled.
+Repository settings are mutable GitHub configuration, not enforced by this document. Read them with `gh api repos/Euraika-Labs/Project-Camiel` before relying on a particular hosting or merge setting.
 
 ## Main Branch Protection
 
 The `main` branch is protected.
 
-Required checks:
+Required checks (observed 19 September 2026):
 
 - `Repository hygiene`
 - `Verify Godot project`
@@ -86,14 +67,14 @@ Required checks:
 Protection rules:
 
 - Pull request required before merging.
-- One approving review required.
-- Approval from someone other than the last pusher required.
+- The current required approving-review count is zero.
+- Last-pusher approval is not currently required.
 - Stale approvals are dismissed when new commits are pushed.
 - Branch must be up to date before merge.
 - Conversation resolution required before merge.
 - Linear history required.
 - Signed commits required.
-- Protection applies to administrators.
+- Administrator enforcement is currently disabled.
 - Force pushes disabled.
 - Branch deletion disabled.
 
@@ -105,3 +86,5 @@ Build outputs go to:
 
 - GitHub Actions artifacts for CI builds.
 - GitHub Release assets for published alpha builds.
+
+`Export Windows build` is the stable required status name. The actual reusable export job is `export-builds / Export windows build`; the stable gate depends on successful completion of the four-platform export workflow and fails for failed, skipped or cancelled exports. See [build evidence](build-and-release.md).

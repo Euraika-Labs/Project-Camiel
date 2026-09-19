@@ -1,50 +1,13 @@
-# Project Overview
+# Projectoverzicht — alpha-v0.0.4
 
-## Goal
+Camiel is een Nederlandstalig educatief 3D-spel in Godot 4.7.2 voor kinderen vanaf ongeveer drie jaar. Het spel werkt offline, zonder accounts, telemetrie of externe opslag van kindgegevens.
 
-Project Camiel is a child-friendly educational game concept. The long-term idea is to help young children learn in a fun and gentle way.
+Via het titelscherm en hoofdmenu zijn de introductie en zes lessen bereikbaar. De lessen oefenen kleurherkenning, tellen, vormen en volgorde. Camiel heeft een 3D-model met idle-, loop- en springanimaties. Instructies en feedback bevatten gebundelde Nederlandse spraak. De instellingen bieden hoog contrast en afzonderlijke audiovolumes; aanraakbediening ondersteunt bewegen en springen.
 
-For `alpha-v0.0.1`, the scope is intentionally small: only a playable intro/test scene.
+Lesafrondingen worden lokaal bewaard. Het ouderdashboard leest een handmatig gekozen voortgangsbestand via een lokale webinterface; het verzamelt geen gegevens van andere apparaten.
 
-## Target Audience
+## Beschikbaarheid en acceptatie
 
-- Children from around 3 years old.
-- Very simple interactions.
-- Large readable text.
-- Bright, friendly colors.
-- No complex menus, scores, or pressure in the first alpha.
+De implementatie is gemergd via [PR #10](https://github.com/Euraika-Labs/Project-Camiel/pull/10). CI exporteert Windows, Linux, macOS en Web. De technische tests, lokale macOS-flow en lokale browserflow zijn uitgevoerd; native Windows/Linux-uitvoering, fysiek touchscreengebruik en menselijke speelacceptatie staan nog open. Een gepubliceerde alpha-v0.0.4-release is hiermee niet aangetoond.
 
-## Current Alpha
-
-The current alpha contains:
-
-- A playable intro scene.
-- Camiel as the main character.
-- Basic movement with physics.
-- A simple grass floor and small platform.
-- Three basic color blocks: `rood`, `geel`, `blauw`.
-- Text feedback when the player walks, jumps, sits, or sleeps.
-
-## Controls
-
-- Left / right arrows or `A` / `D`: walk.
-- `Shift`: run.
-- `Space`, `W`, or up arrow: jump.
-- `S` or down arrow: sit.
-- `X`: sleep.
-
-## Repository
-
-GitHub repository:
-
-https://github.com/Euraika-Labs/Project-Camiel
-
-The repository is public as of 2026-04-26.
-
-## Release
-
-Alpha release:
-
-https://github.com/Euraika-Labs/Project-Camiel/releases/tag/alpha-v0.0.1
-
-The Windows `.exe` and `.zip` build files are stored as release assets, not committed to git.
+Zie [snel starten](quick-start.md) voor bediening, [bouwen en releasen](build-and-release.md) voor pakketten en [roadmap](roadmap.md) voor bewijsgrenzen. De 2D-versie is geschiedenis, terug te vinden onder tag `archive/2d-alpha-v0.0.3`.

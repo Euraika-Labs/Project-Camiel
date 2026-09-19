@@ -1,6 +1,6 @@
 # Camiel starten
 
-Camiel is een Nederlandstalig 3D-leerspel. Alpha-v0.0.4 wordt technisch geverifieerd; beoordeling door kinderen en begeleiders blijft afzonderlijk nodig.
+Camiel is een Nederlandstalig 3D-leerspel. Alpha-v0.0.4 is technisch geïntegreerd en gemergd; beoordeling door kinderen en begeleiders blijft afzonderlijk nodig.
 
 ## Vanuit de broncode
 
@@ -15,7 +15,7 @@ Pak het complete platformarchief uit; houd het uitvoerbestand en eventuele bijbe
 
 ## In de browser
 
-Een echte Web-export en browserproef zijn uitgevoerd. Een nieuw broncommit vereist een nieuwe buildcontrole; een lokale proef bewijst geen uitgevoerde GitHub CI-run.
+Een lokale Web-export en browserproef zijn uitgevoerd; ook de remote CI-export slaagt. De browserproef geldt voor de lokale build, niet voor een apart gedownload CI-artifact. Zie [bouwbewijs](build-and-release.md) voor commits en grenzen.
 
 Pak de webbuild uit in `builds/web` en voer vanuit de repository uit:
 

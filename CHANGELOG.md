@@ -1,5 +1,18 @@
 # Changelog
 
+## [alpha-v0.0.4] — geïntegreerd op 2026-09-19, release nog niet gepubliceerd
+
+- 3D-herbouw op Godot 4.7.2; oude 2D-runtime gearchiveerd.
+- Titelscherm, intro, zes lessen, lesselectie en lokale voortgang.
+- Camiel GLB met idle-, loop- en springanimaties; Nederlandse offline spraak.
+- Hoogcontrastinstelling, onafhankelijke audiovolumes en gedeelde touchbediening.
+- Lokaal ouderdashboard en exports voor Windows, Linux, macOS en Web.
+- CI-foutinjectietests en compatibele verplichte Windows-exportcheck.
+- Gemergd via PR #10 (`c00504d`); menselijke speeltest, fysieke touchtest, native Windows/Linux-tests en getagde publicatie blijven open.
+
+Onderstaande secties zijn historische 2D-releasenotities en bewijzen geen actuele 3D-functionaliteit.
+
+
 ## [alpha-v0.0.3] — 2026-06-05
 ### Added
 - Educational micro-tasks: red block, blue target, count challenge (lesson_1.tscn)
