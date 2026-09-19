@@ -15,6 +15,8 @@ var _transitioning := false
 
 
 func _ready() -> void:
+	VoiceManager.bind_scene(self, "main_menu")
+	_add_settings_button()
 	%StartButton.pressed.connect(_on_start_button_pressed)
 	%StartButton.grab_focus()
 
@@ -53,3 +55,37 @@ func _on_sfx_slider_value_changed(value: float) -> void:
 
 func _on_bgm_slider_value_changed(value: float) -> void:
 	AudioManager.set_bgm_volume(value / 100.0)
+
+
+func _add_settings_button() -> void:
+	var button := Button.new()
+	button.text = "Instellingen"
+	button.position = Vector2(24, 24)
+	button.custom_minimum_size = Vector2(220, 64)
+	button.name = "SettingsButton"
+	add_child(button)
+	%BgmSlider.focus_next = %BgmSlider.get_path_to(button)
+	%BgmSlider.focus_neighbor_bottom = %BgmSlider.focus_next
+	button.focus_previous = button.get_path_to(%BgmSlider)
+	button.focus_neighbor_top = button.focus_previous
+	button.focus_next = button.get_path_to(%StartButton)
+	button.focus_neighbor_bottom = button.focus_next
+	%StartButton.focus_previous = %StartButton.get_path_to(button)
+	%StartButton.focus_neighbor_top = %StartButton.focus_previous
+	button.pressed.connect(_open_settings)
+
+
+func _open_settings() -> void:
+	if get_node_or_null("Settings") != null:
+		return
+	var panel := CanvasLayer.new()
+	panel.set_script(load("res://scripts/ui/settings_panel.gd"))
+	panel.name = "Settings"
+	add_child(panel)
+	panel.tree_exited.connect(_restore_menu_focus)
+
+
+func _restore_menu_focus() -> void:
+	var start := get_node_or_null("%StartButton") as Control
+	if is_inside_tree() and start != null and start.is_inside_tree():
+		start.grab_focus()

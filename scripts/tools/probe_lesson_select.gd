@@ -25,7 +25,7 @@ const INTRO_LEVEL_PATH := "res://scenes/intro_level.tscn"
 ## this file iterates the table and would therefore pass just as happily on a
 ## table holding four -- which is what shipped in the archive, where the screen
 ## that should have offered five offered one.
-const EXPECTED_LESSON_COUNT := 5
+const EXPECTED_LESSON_COUNT := 6
 
 # ── Internal state ───────────────────────────────────────────────
 

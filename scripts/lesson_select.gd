@@ -30,6 +30,7 @@ const LESSONS: Array[Dictionary] = [
 	{"id": "lesson_3", "path": "res://scenes/lesson_3.tscn", "label": "Les 3", "icon": "lesson_sequence"},
 	{"id": "lesson_4", "path": "res://scenes/lesson_4.tscn", "label": "Les 4", "icon": "lesson_colors"},
 	{"id": "lesson_5", "path": "res://scenes/lesson_5.tscn", "label": "Les 5", "icon": "lesson_sequence"},
+	{"id": "lesson_6", "path": "res://scenes/lesson_6.tscn", "label": "Les 6", "icon": "lesson_sequence"},
 ]
 
 const MENU_BUTTON_PATH := "res://scenes/ui/menu_button.tscn"
@@ -44,6 +45,7 @@ var _buttons: Array[Button] = []
 # ── Lifecycle ────────────────────────────────────────────────────
 
 func _ready() -> void:
+	VoiceManager.bind_scene(self, "lesson_select")
 	_build_buttons()
 	_wire_focus_order()
 	%BackButton.pressed.connect(_on_back_button_pressed)

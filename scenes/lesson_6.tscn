@@ -1,0 +1,72 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/lesson_6.gd" id="1_a4btp"]
+[ext_resource type="PackedScene" path="res://scenes/lesson_room.tscn" id="2_m2hkb"]
+[ext_resource type="PackedScene" path="res://scenes/camiel.tscn" id="3_lt0o7"]
+[ext_resource type="Script" path="res://scripts/camiel_controller.gd" id="4_xypfh"]
+[ext_resource type="PackedScene" path="res://scenes/ui/lesson_hud.tscn" id="5_r5efs"]
+[ext_resource type="Script" path="res://scripts/ui/lesson_hud.gd" id="6_sxvuy"]
+[ext_resource type="PackedScene" path="res://scenes/lesson_target.tscn" id="7_shd5c"]
+[ext_resource type="Script" path="res://scripts/lesson_target.gd" id="8_j0rmm"]
+
+[node name="Lesson6" type="Node3D" unique_id=1013624667]
+script = ExtResource("1_a4btp")
+
+[node name="LessonRoom" type="Node3D" parent="." unique_id=1248342695 instance=ExtResource("2_m2hkb")]
+
+[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=1271368917]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 4.5)
+
+[node name="Camiel" type="CharacterBody3D" parent="." unique_id=1761816634 instance=ExtResource("3_lt0o7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 4.5)
+script = ExtResource("4_xypfh")
+
+[node name="Hud" type="CanvasLayer" parent="." unique_id=851995517 instance=ExtResource("5_r5efs")]
+unique_name_in_owner = true
+process_mode = 3
+script = ExtResource("6_sxvuy")
+
+[node name="Step1Target" type="Area3D" parent="." unique_id=429791032 instance=ExtResource("7_shd5c")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 0.5, 2.4)
+script = ExtResource("8_j0rmm")
+task_id = "step_1"
+target_color = Color(0.16, 0.55, 0.65, 1)
+display_text = "1"
+requires_activation = true
+
+[node name="Step2Target" type="Area3D" parent="." unique_id=803619448 instance=ExtResource("7_shd5c")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0.5, 3)
+script = ExtResource("8_j0rmm")
+task_id = "step_2"
+target_color = Color(0.16, 0.55, 0.65, 1)
+display_text = "2"
+requires_activation = true
+
+[node name="Step3Target" type="Area3D" parent="." unique_id=355300967 instance=ExtResource("7_shd5c")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.5, -1)
+script = ExtResource("8_j0rmm")
+task_id = "step_3"
+target_color = Color(0.16, 0.55, 0.65, 1)
+display_text = "3"
+requires_activation = true
+
+[node name="Step4Target" type="Area3D" parent="." unique_id=1964931026 instance=ExtResource("7_shd5c")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 0.5, -3.6)
+script = ExtResource("8_j0rmm")
+task_id = "step_4"
+target_color = Color(0.16, 0.55, 0.65, 1)
+display_text = "4"
+requires_activation = true
+
+[node name="Step5Target" type="Area3D" parent="." instance=ExtResource("7_shd5c")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 0.5, -3.6)
+script = ExtResource("8_j0rmm")
+task_id = "step_5"
+target_color = Color(0.16, 0.55, 0.65, 1)
+display_text = "5"
+requires_activation = true

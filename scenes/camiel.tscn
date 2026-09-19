@@ -2,27 +2,17 @@
 
 [ext_resource type="Script" path="res://scripts/camiel_controller.gd" id="1_c7np5"]
 
+[ext_resource type="PackedScene" path="res://assets/characters/camiel/camiel.glb" id="2_model"]
+[ext_resource type="Script" path="res://scripts/characters/camiel_visual.gd" id="3_visual"]
+
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dai7t"]
 radius = 0.35
 height = 1.2
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0ak00"]
-albedo_color = Color(0.93, 0.62, 0.3, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_jr4j0"]
-material = SubResource("StandardMaterial3D_0ak00")
-radius = 0.35
-height = 1.2
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jjbn0"]
-albedo_color = Color(0.35, 0.22, 0.12, 1)
-
-[sub_resource type="SphereMesh" id="SphereMesh_ybaom"]
-material = SubResource("StandardMaterial3D_jjbn0")
-radius = 0.12
-height = 0.24
-
 [sub_resource type="SphereShape3D" id="SphereShape3D_u50kx"]
+radius = 0.25
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_head"]
 radius = 0.25
 
 [node name="Camiel" type="CharacterBody3D" unique_id=1761816634]
@@ -32,13 +22,14 @@ script = ExtResource("1_c7np5")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 shape = SubResource("CapsuleShape3D_dai7t")
 
-[node name="Body" type="MeshInstance3D" parent="." unique_id=141061585]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
-mesh = SubResource("CapsuleMesh_jr4j0")
+[node name="HeadCollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.94, -0.30)
+shape = SubResource("SphereShape3D_head")
 
-[node name="Nose" type="MeshInstance3D" parent="." unique_id=1069842629]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.33)
-mesh = SubResource("SphereMesh_ybaom")
+[node name="Visual" type="Node3D" parent="."]
+script = ExtResource("3_visual")
+
+[node name="CamielModel" parent="Visual" instance=ExtResource("2_model")]
 
 [node name="CameraPivot" type="Node3D" parent="." unique_id=506175728]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

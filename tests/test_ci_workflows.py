@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import re
+import os
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -93,6 +96,7 @@ class CiWorkflowTests(unittest.TestCase):
     def setUp(self) -> None:
         self.ci_text = CI_PATH.read_text(encoding="utf-8")
         self.release_text = RELEASE_PATH.read_text(encoding="utf-8")
+        self.export_text = (CI_PATH.parent / "export.yml").read_text(encoding="utf-8")
 
     def _assert_downloads_verify_sha512(
         self, workflow_text: str, job_ids: list[str]
@@ -152,7 +156,7 @@ class CiWorkflowTests(unittest.TestCase):
 
     def test_ci_downloads_verify_sha512(self) -> None:
         self._assert_downloads_verify_sha512(
-            self.ci_text, ["verify-godot", "export-windows"]
+            self.ci_text, ["verify-godot"]
         )
 
     def test_hygiene_runs_workflow_tests(self) -> None:
@@ -171,27 +175,92 @@ class CiWorkflowTests(unittest.TestCase):
         yaml.safe_load(self.ci_text)
         yaml.safe_load(self.release_text)
 
-    def test_release_env_pins_godot_4_7_2(self) -> None:
-        self.assertIn("GODOT_VERSION: 4.7.2", self.release_text)
-        self.assertIn("GODOT_STATUS: stable", self.release_text)
-        self.assertIn("GODOT_TEMPLATE_VERSION: 4.7.2.stable", self.release_text)
-        self.assertIn(
-            "GODOT_BIN: Godot_v4.7.2-stable_linux.x86_64", self.release_text
-        )
+    def test_export_env_pins_godot_4_7_2(self) -> None:
+        workflow = yaml.safe_load(self.export_text)
+        self.assertEqual("4.7.2", workflow["env"]["GODOT_VERSION"])
+        self.assertEqual("stable", workflow["env"]["GODOT_STATUS"])
+        self.assertEqual("4.7.2.stable", workflow["env"]["GODOT_TEMPLATE_VERSION"])
 
-    def test_release_verify_step_runs_headless_check(self) -> None:
-        steps = _job_steps(self.release_text, "release-windows")
-        matches = [(name, run) for name, run in steps if name == "Verify project"]
-        self.assertEqual(1, len(matches))
-        _, run_text = matches[0]
-        self.assertIn(
-            'GODOT="$RUNNER_TEMP/godot/${GODOT_BIN}" bash scripts/tools/run_headless_check.sh',
-            run_text,
-        )
-        self.assertNotIn("verify_camiel_resources", self.release_text)
+    def test_export_downloads_verify_sha512(self) -> None:
+        self._assert_downloads_verify_sha512(self.export_text, ["export"])
 
-    def test_release_downloads_verify_sha512(self) -> None:
-        self._assert_downloads_verify_sha512(self.release_text, ["release-windows"])
+    def test_release_reuses_full_ci_before_publication(self) -> None:
+        release = yaml.safe_load(self.release_text)
+        ci = yaml.safe_load(self.ci_text)
+        self.assertEqual("./.github/workflows/ci.yml", release["jobs"]["build"]["uses"])
+        self.assertEqual(["validate-tag"], release["jobs"]["build"]["needs"])
+        self.assertEqual(["validate-tag", "build"], release["jobs"]["publish"]["needs"])
+        self.assertEqual(["verify-godot"], ci["jobs"]["export-builds"]["needs"])
+        self.assertEqual("./.github/workflows/export.yml", ci["jobs"]["export-builds"]["uses"])
+        self.assertIn("test_headless_check.sh", self.ci_text)
+        self.assertIn("release_version.py --tag", self.release_text)
+
+    def test_exactly_one_release_creator_with_file_attachments(self) -> None:
+        creators = []
+        for path in CI_PATH.parent.glob("*.yml"):
+            workflow = yaml.safe_load(path.read_text())
+            for job in workflow.get("jobs", {}).values():
+                for step in job.get("steps", []):
+                    if "action-gh-release@" in step.get("uses", "") or "gh release create" in step.get("run", ""):
+                        creators.append((path, step))
+        self.assertEqual(1, len(creators))
+        path, step = creators[0]
+        self.assertEqual(RELEASE_PATH, path)
+        self.assertRegex(step["uses"], r"@[0-9a-f]{40}$")
+        self.assertTrue(step["with"]["fail_on_unmatched_files"])
+        files = step["with"]["files"].splitlines()
+        self.assertEqual(4, len(files))
+        for suffix in ("windows.zip", "linux.tar.gz", "macos.zip", "web.zip"):
+            self.assertTrue(any(f.endswith(suffix) for f in files))
+        self.assertTrue(all("*" not in f for f in files))
+        self.assertNotIn("|| true", self.release_text)
+        self.assertIn("merge-multiple: true", self.release_text)
+
+    def test_trigger_and_permission_boundaries(self) -> None:
+        # BaseLoader preserves YAML's 'on' key instead of coercing it to True.
+        release = yaml.load(self.release_text, Loader=yaml.BaseLoader)
+        export = yaml.load(self.export_text, Loader=yaml.BaseLoader)
+        ci = yaml.load(self.ci_text, Loader=yaml.BaseLoader)
+        self.assertEqual(["push"], list(release["on"]))
+        self.assertEqual(["alpha-v*", "v*"], release["on"]["push"]["tags"])
+        self.assertEqual(["workflow_call"], list(export["on"]))
+        self.assertIn("workflow_call", ci["on"])
+        self.assertEqual("false", release["concurrency"]["cancel-in-progress"])
+        for workflow in (release, ci, export):
+            self.assertEqual("read", workflow["permissions"]["contents"])
+        self.assertEqual("write", release["jobs"]["publish"]["permissions"]["contents"])
+        self.assertIn("github.workflow", ci["concurrency"]["group"])
+
+    def test_exports_include_web_and_use_versioned_helper(self) -> None:
+        export = yaml.safe_load(self.export_text)
+        job = export["jobs"]["export"]
+        self.assertEqual(["windows", "linux", "macos", "web"], job["strategy"]["matrix"]["target"])
+        self.assertIn("build_release.py", self.export_text)
+        upload = next(s for s in job["steps"] if "upload-artifact" in s.get("uses", ""))
+        self.assertEqual("error", upload["with"]["if-no-files-found"])
+        for text in (self.ci_text, self.export_text, self.release_text):
+            self.assertNotIn("alpha-v0.0.1", text)
+            self.assertNotIn("continue-on-error", text)
+
+    def test_publish_guard_executes_and_rejects_missing_or_directory_attachment(self) -> None:
+        workflow = yaml.safe_load(self.release_text)
+        step = next(s for s in workflow["jobs"]["publish"]["steps"]
+                    if s.get("name") == "Require complete file attachments")
+        with tempfile.TemporaryDirectory() as directory:
+            release = Path(directory) / "release"
+            release.mkdir()
+            for suffix in ("windows.zip", "linux.tar.gz", "macos.zip", "web.zip"):
+                (release / f"Camiel-v1.2.3-{suffix}").write_bytes(b"archive")
+            def run_guard():
+                return subprocess.run(["bash", "-e", "-o", "pipefail", "-c", step["run"]],
+                                      cwd=directory, env={**os.environ, "VERSION": "v1.2.3"},
+                                      capture_output=True).returncode
+            self.assertEqual(0, run_guard())
+            linux = release / "Camiel-v1.2.3-linux.tar.gz"
+            linux.unlink()
+            self.assertNotEqual(0, run_guard())
+            linux.mkdir()
+            self.assertNotEqual(0, run_guard())
 
     def test_contributing_names_check(self) -> None:
         text = CONTRIBUTING_PATH.read_text(encoding="utf-8")

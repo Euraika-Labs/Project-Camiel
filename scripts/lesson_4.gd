@@ -63,6 +63,7 @@ var _transitioning := false
 # ── Lifecycle ────────────────────────────────────────────────────
 
 func _ready() -> void:
+	VoiceManager.bind_scene(self, LESSON_ID)
 	_start_time_msec = Time.get_ticks_msec()
 
 	%YellowTarget.task_completed.connect(_on_task_completed)
@@ -96,6 +97,7 @@ func _on_task_completed(task_id: String) -> void:
 	if _count_task_ids.has(task_id):
 		if not _gathered_count_objects.has(task_id):
 			_gathered_count_objects.append(task_id)
+			VoiceManager.play("correct")
 		if _gathered_count_objects.size() < COUNT_TOTAL:
 			return
 		_mark_task(COUNT_TASK_ID)
@@ -122,6 +124,7 @@ func _on_hud_back_requested() -> void:
 func _mark_task(task_id: String) -> void:
 	if not _completed_tasks.has(task_id):
 		_completed_tasks.append(task_id)
+		VoiceManager.play("correct")
 	%Hud.set_step(_completed_tasks.size(), TOTAL_TASKS)
 	if _completed_tasks.size() == TOTAL_TASKS:
 		_apply_lesson_complete()
@@ -140,3 +143,4 @@ func _apply_lesson_complete() -> void:
 	%Hud.show_win()
 	_camiel.set_physics_process(false)
 	AudioManager.play_sfx("finish")
+	VoiceManager.play("complete")

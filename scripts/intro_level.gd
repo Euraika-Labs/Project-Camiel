@@ -36,6 +36,7 @@ var _transitioning := false
 # ── Lifecycle ────────────────────────────────────────────────────
 
 func _ready() -> void:
+	VoiceManager.bind_scene(self, "intro")
 	%FinishMarker.finished.connect(_on_finish_marker_finished)
 	%Collectible.collected.connect(_on_collectible_collected)
 	%ReplayButton.pressed.connect(_on_replay_button_pressed)
@@ -49,6 +50,7 @@ func _ready() -> void:
 ## the archived two-listener defect (CONCERNS.md) cannot recur here.
 func _on_collectible_collected() -> void:
 	AudioManager.play_sfx("collect")
+	VoiceManager.play("collected")
 
 
 ## Reached whether or not %Collectible was ever picked up (D-21: the finish
@@ -64,6 +66,7 @@ func _on_finish_marker_finished() -> void:
 	%ReplayButton.grab_focus()
 	_camiel.set_physics_process(false)
 	AudioManager.play_sfx("finish")
+	VoiceManager.play("intro_complete")
 
 
 ## Same one-shot guard and deferred scene change title_screen.gd and
@@ -81,6 +84,7 @@ func _on_go_to_menu_button_pressed() -> void:
 ## carries no one-shot guard; that guard belongs only on handlers that
 ## change scene.
 func _on_replay_button_pressed() -> void:
+	VoiceManager.play("intro")
 	replay_requested.emit()
 	%WinLayer.visible = false
 	_camiel.set_physics_process(true)

@@ -1,0 +1,23 @@
+{
+  "language": "nl-BE",
+  "voice": "Ellen",
+  "rate": 155,
+  "format": "PCM WAV mono 22050 Hz 16-bit",
+  "clips": {
+    "title": "Hallo! Ik ben Camiel. Druk op spelen om te beginnen.",
+    "main_menu": "Welkom! Kies start om te oefenen, of kies lessen. Bij instellingen kun je het spraakvolume veranderen.",
+    "lesson_select": "Kies een les. Je mag elke les proberen. Met terug ga je naar het menu.",
+    "intro": "Loop met de pijltjestoetsen, of gebruik de knoppen op het scherm. Spring met de spatiebalk of de springknop. Pak de zwevende bol en loop naar de finish.",
+    "lesson_1": "Raak rood en blauw aan. Verzamel ook de drie telvoorwerpen. Je mag zelf kiezen waarmee je begint.",
+    "lesson_2": "Raak de vormen in volgorde aan. Eerst de cirkel, dan het vierkant, en dan de driehoek.",
+    "lesson_3": "Loop naar de cijfers in volgorde. Eerst één, dan twee, dan drie.",
+    "lesson_4": "Raak geel en groen aan. Verzamel ook de drie telvoorwerpen. Je mag zelf kiezen waarmee je begint.",
+    "lesson_5": "Loop naar de cijfers in volgorde. Eén, twee, drie, vier.",
+    "correct": "Goed zo! Ga maar verder.",
+    "retry": "Probeer het nog eens. Zoek het volgende doel.",
+    "complete": "Goed gedaan! Je hebt de les afgemaakt. Kies terug naar lessen om verder te spelen.",
+    "intro_complete": "Goed gedaan! Je bent bij de finish. Kies nog een keer, of ga naar het menu.",
+    "collected": "Goed zo! Je hebt de bol gevonden.",
+    "lesson_6": "Loop naar één, dan twee, drie, vier en vijf."
+  }
+}

@@ -48,13 +48,14 @@ const LESSON_1_PATH := "res://scenes/lesson_1.tscn"
 const LESSON_2_PATH := "res://scenes/lesson_2.tscn"
 const LESSON_3_PATH := "res://scenes/lesson_3.tscn"
 const LESSON_4_PATH := "res://scenes/lesson_4.tscn"
+const LESSON_6_PATH := "res://scenes/lesson_6.tscn"
 const LESSON_5_PATH := "res://scenes/lesson_5.tscn"
 const LESSON_SELECT_PATH := "res://scenes/lesson_select.tscn"
 const LESSON_SELECT_SCRIPT_PATH := "res://scripts/lesson_select.gd"
 
 ## How many lessons this milestone promises a child (LESSON-06), stated so the
 ## closing case cannot silently check a shorter table than the screen offers.
-const EXPECTED_LESSON_COUNT := 5
+const EXPECTED_LESSON_COUNT := 6
 
 ## The least two lesson colours may differ and still be two colours rather than
 ## two shades of one. Measured as the straight-line distance between the two
@@ -115,8 +116,11 @@ func _initialize() -> void:
 	await _case_lesson_5_order_enforced()
 	if _failed:
 		return
+	await _case_lesson_6_order_enforced()
+	if _failed:
+		return
 	# Last, deliberately: it reads what the five cases above actually wrote.
-	await _case_all_five_lessons_on_disk()
+	await _case_all_lessons_on_disk()
 	if _failed:
 		return
 
@@ -908,9 +912,13 @@ func _drive_ordered_lesson(
 		if completion_links != 2:
 			_fail(case_name, "%s.task_completed has %d connections, 2 wanted (the lesson's own handler and this probe's counter)" % [target.name, completion_links])
 			return false
-		var refusal_links := target.get_signal_connection_list("rejected").size()
-		if refusal_links != 1:
-			_fail(case_name, "%s.rejected has %d connections, 1 wanted (this probe's counter alone -- the orchestrator listens for completion only)" % [target.name, refusal_links])
+		var refusal_connections := target.get_signal_connection_list("rejected")
+		var expected_refusals := 1
+		var voice := root.get_node_or_null("VoiceManager")
+		if voice != null and target.is_connected("rejected", Callable(voice, "_on_rejected")):
+			expected_refusals += 1
+		if refusal_connections.size() != expected_refusals:
+			_fail(case_name, "%s has unexpected rejection handlers beyond probe and narration" % target.name)
 			return false
 
 	if not _assert_only_active(case_name, targets, 0):
@@ -1009,6 +1017,12 @@ func _drive_ordered_lesson(
 	var entries_after := _disk_entry_count()
 	if entries_after != entries_before + 1:
 		_fail(case_name, "the progress file holds %d entries, %d wanted -- one completion appends exactly one entry (D-40)" % [entries_after, entries_before + 1])
+		return false
+
+	# A stale completion notification must not append a second saved result.
+	lesson._on_task_completed(String(targets[-1].task_id))
+	if _disk_entry_count() != entries_after or _lesson_completed_count != 1:
+		_fail(case_name, "a duplicate completion notification saved or celebrated twice")
 		return false
 
 	if not await _assert_win_return_is_one_shot(case_name, lesson, win_back_button):
@@ -1696,8 +1710,8 @@ func _case_lesson_5_order_enforced() -> void:
 ## its row lands -- and a lesson whose script files its progress under an
 ## identifier the table does not know fails here too, which no per-lesson case
 ## can see because each of those only ever checks its own entry.
-func _case_all_five_lessons_on_disk() -> void:
-	var case_name := "all_five_lessons_on_disk"
+func _case_all_lessons_on_disk() -> void:
+	var case_name := "all_lessons_on_disk"
 
 	var table_source: GDScript = load(LESSON_SELECT_SCRIPT_PATH)
 	if table_source == null:
@@ -1760,4 +1774,31 @@ func _case_all_five_lessons_on_disk() -> void:
 	# from case_name like its siblings, so the line the whole phase's gate is
 	# checked for can be found by searching this file for it. A success line that
 	# only exists once the process has run is a poor thing to depend on.
-	print("PASS all_five_lessons_on_disk")
+	print("PASS all_lessons_on_disk")
+
+
+func _case_lesson_6_order_enforced() -> void:
+	var case_name := "lesson_6_order_enforced"
+	if not await _drive_ordered_lesson(
+		case_name, LESSON_6_PATH, "lesson_6",
+		["Step1Target", "Step2Target", "Step3Target", "Step4Target", "Step5Target"],
+		[4, 2, 1], ["1", "2", "3", "4", "5"], "text", 5,
+		"Stap: 0 / 5", "Stap: 5 / 5"
+	):
+		return
+	if not await _assert_in_play_return_is_one_shot(case_name, LESSON_6_PATH):
+		return
+	# Reload through a fresh tracker instance; no in-memory singleton shortcut.
+	var tracker := load("res://scripts/progress_tracker.gd").new() as Node
+	root.add_child(tracker)
+	var entries: Array = tracker.get_entries()
+	var found := false
+	for entry: Dictionary in entries:
+		if entry.get("lesson_id") == "lesson_6" and entry.get("stars") == 3:
+			found = true
+	tracker.queue_free()
+	if not found:
+		_fail(case_name, "fresh tracker did not reload lesson 6 completion from disk")
+		return
+	_cases_run += 1
+	print("PASS lesson_6_order_enforced")

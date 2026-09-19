@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="nl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Camiel — Ouderdashboard</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body><main>
+<header><p class="eyebrow">CAMIEL · VOORTGANG</p><h1>Ouderdashboard</h1><p>Bekijk de afgeronde lessen van je kind, op je eigen apparaat.</p></header>
+<section aria-labelledby="upload-title"><h2 id="upload-title">Voortgang openen</h2><p>Kies het bestand <strong>progress.json</strong> uit het spel. Je spelvoortgang blijft ongewijzigd. De weergave verdwijnt wanneer je de dashboardserver stopt.</p>
+<form id="upload"><label for="file">Voortgangsbestand (maximaal 2 MiB)</label><input id="file" name="file" type="file" accept=".json,application/json" required><button type="submit">Voortgang bekijken</button></form><p id="status" role="status" aria-live="polite">Voortgang laden…</p></section>
+<section aria-labelledby="summary-title"><h2 id="summary-title">Overzicht</h2><p>Elke lesafronding telt mee, ook als dezelfde les opnieuw is gespeeld.</p><dl class="cards"><div><dt>Afgeronde lessen</dt><dd id="lessons">0</dd></div><div><dt>Verdiende sterren</dt><dd id="stars">0</dd></div><div><dt>Totale speeltijd</dt><dd id="time">0 seconden</dd></div><div><dt>Laatste afronding</dt><dd id="last">Nog geen</dd></div></dl><h3>Sterrenverdeling</h3><p id="breakdown"></p><p class="note">Het huidige spel geeft drie sterren per afronding. Dit is geen beoordeling van vaardigheid. Datums volgen de lokale klok van het spel.</p></section>
+<section aria-labelledby="history-title"><h2 id="history-title">Lesgeschiedenis</h2><p id="empty">Nog geen voortgang. Kies hierboven een bestand.</p><div class="table-wrap"><table><caption>Alle afrondingen in opgeslagen volgorde</caption><thead><tr><th scope="col">Les</th><th scope="col">Sterren</th><th scope="col">Speeltijd</th><th scope="col">Afgerond op</th></tr></thead><tbody id="history"></tbody></table></div></section>
+<footer>Alleen lokaal · Geen accounts · Geen externe verbindingen</footer>
+</main></body></html>

@@ -26,10 +26,17 @@ process_mode = 3
 script = ExtResource("1_21sae")
 
 [node name="TopBar" type="Control" parent="." unique_id=2026008640]
+theme = ExtResource("3_b0w4e")
 layout_mode = 3
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 96.0
+
+[node name="Background" type="ColorRect" parent="TopBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(1, 0.9647059, 0.9098039, 1)
+mouse_filter = 2
 
 [node name="Margin" type="MarginContainer" parent="TopBar" unique_id=1002750281]
 layout_mode = 0
@@ -73,6 +80,7 @@ label_text = "Naar lessen"
 icon_kind = "home"
 
 [node name="WinRoot" type="Control" parent="." unique_id=1651980744]
+theme = ExtResource("3_b0w4e")
 unique_name_in_owner = true
 visible = false
 layout_mode = 3

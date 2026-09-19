@@ -14,6 +14,12 @@ var _transitioning := false
 
 
 func _ready() -> void:
+	VoiceManager.bind_scene(self, "title")
+	var version := Label.new()
+	version.text = ProjectSettings.get_setting("application/config/version", "")
+	version.position = Vector2(24, 24)
+	version.theme_type_variation = "SmallLabel"
+	add_child(version)
 	%PlayButton.pressed.connect(_on_play_button_pressed)
 	%PlayButton.grab_focus()
 
