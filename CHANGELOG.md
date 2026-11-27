@@ -3,6 +3,7 @@
 ## [alpha-v0.0.45] — werkversie
 
 - Camiel heeft een nieuw 3D-model met vloeiende poten, hangoren, een ivoorkleurige bles en een gebogen groene halsdoek. Tijdens het spelen bewegen zijn oren mee en in rust knippert hij met zijn ogen.
+- De automatische Godot-import wacht tot alle assets zijn verwerkt voordat de projectcontrole of export doorgaat.
 
 ## [alpha-v0.0.44] — werkversie
 

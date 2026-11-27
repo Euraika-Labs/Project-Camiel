@@ -143,7 +143,7 @@ Which phases cover which requirements.
 | INTRO-04 | Phase 2 | Complete |
 | INTRO-05 | Phase 2 | Complete |
 | INTRO-06 | Phase 2 | Complete |
-| MODEL-01 | Phase 03.1 | Technical pass: model/movement probes; human recognition and animation feel open |
+| MODEL-01 | Phase 03.1 | Alpha-v0.0.45 model and movement probes pass. The Windows intro and Chrome title rendered the updated model. Human recognition and animation feel remain open. |
 | LESSON-01 | Phase 3 | Technical pass: lesson-order/select probes; required human five-lesson playtest open |
 | LESSON-02 | Phase 3 | Technical pass: lesson-order/select probes; required human five-lesson playtest open |
 | LESSON-03 | Phase 3 | Technical pass: lesson-order/select probes; required human five-lesson playtest open |
@@ -167,7 +167,7 @@ Which phases cover which requirements.
 | MOBILE-02 | Phase 6 | Technical pass. The alpha-v0.0.43 Web build accepted two simulated contacts for movement and jumping on HTTPS at 568 × 260. Physical touch remains open. |
 | MOBILE-03 | Phase 6 | Verified: shared controller attaches touch UI in intro and all six lessons |
 | WEB-01 | Phase 7 | Verified: local export and Chromium WebGL gameplay |
-| WEB-02 | Phase 7 | Partial. The historical CI Web export passed and its archive expired. The current workflow checks the freshly packaged archive in Chrome before upload. The local alpha-v0.0.42 package boots and a damaged WebAssembly file is rejected. First GitHub run with the new check remains open. |
+| WEB-02 | Phase 7 | The export workflow checks the packaged archive in Chrome before upload. The local alpha-v0.0.45 package boots with the updated model. The alpha-v0.0.42 test rejected a damaged WebAssembly file. [PR #13 checks](https://github.com/Euraika-Labs/Project-Camiel/pull/13/checks) show the status of the GitHub run. |
 | WEB-03 | Phase 7 | Verified: availability and evidence boundaries aligned |
 | DASH-01 | Phase 8 | Verified: actual Godot save imported; browser statistics checked |
 | DASH-02 | Phase 8 | Verified: HTTP tests and browser import match version-1 contract |

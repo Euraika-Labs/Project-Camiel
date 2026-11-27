@@ -9,6 +9,8 @@ Project Camiel is een Nederlandstalig educatief 3D-spel in Godot, met Camiel de 
 
 De huidige werkversie is **alpha-v0.0.45**. In de intro laat Camiel zien en horen hoe je loopt en springt. Daarna volg je stapstenen naar de eindring en speel je door naar de lessen en het tuinfeest. Na een herstart gaat **Verder spelen** door naar de eerste onafgeronde les. De zes lessen hebben elk eigen tuindecor dat je op de leskaarten ziet. In de kleurenlessen benoemt Camiel de gevonden kleuren en telt hij de stenen hardop. In de vormen- en tellessen noemt hij bij elke stap de volgende vorm of het volgende getal. Een afgerond doel wordt kleiner op zijn voetstuk en krijgt een vinkje. Een korte klank bevestigt de aanraking. Een pijl helpt je verder als het doel buiten beeld ligt. Je kunt pauzeren om geluid en contrast aan te passen. De eerdere technische integratie van **alpha-v0.0.4** is gemergd via [PR #10](https://github.com/Euraika-Labs/Project-Camiel/pull/10).
 
+Het vernieuwde 3D-model heeft zachte hangoren, een ivoorkleurige bles en een groene halsdoek. Camiel knippert in rust en zijn oren bewegen mee als hij loopt en springt.
+
 De 3D-codebasis bevat een titelscherm, hoofdmenu, introductiewereld en lesselectie. Lessen oefenen kleuren, vormen, tellen en volgordes. Camiel bewaart per resultaat de les, sterren, speelduur en voltooiingstijd. Op desktop staan die gegevens in `user://progress.json`. In de webversie delen tabbladen op hetzelfde webadres de browseropslag.
 
 Karakteranimaties, toegankelijkheidsinstellingen, Nederlandse spraak, aanraakbediening, webexport en het lokale ouderdashboard zijn geïntegreerd. Actuele speeltests en de resultaten per platform staan in de [snelstartgids](docs/quick-start.md#verificatiegrenzen).
@@ -47,6 +49,8 @@ De Godot-controles staan in `scripts/tools/run_headless_check.sh`. Deze voeren o
 
 ## Documentatie
 
+- [Overzicht van alle projectgidsen](docs/README.md)
+- [GitHub-wiki](https://github.com/Euraika-Labs/Project-Camiel/wiki)
 - [Ouder- en leerkrachtnotities](docs/parent-teacher-notes.md)
 - [Lokaal ouderdashboard](docs/parent-dashboard.md)
 - [Toegankelijkheidsrapport](docs/accessibility-report.md)

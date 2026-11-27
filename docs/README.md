@@ -1,6 +1,6 @@
 # Project Camiel-documentatie
 
-Deze handleidingen beschrijven de geïntegreerde **3D-versie alpha-v0.0.4**. De technische implementatie is gemergd; menselijke acceptatie en releasepublicatie blijven afzonderlijke stappen.
+Deze handleidingen beschrijven de **3D-werkversie alpha-v0.0.45**. De ontwikkelstatus en de checks bij de voorgestelde wijziging staan bij [PR #13](https://github.com/Euraika-Labs/Project-Camiel/pull/13). Speeltesten met kinderen en de publicatie van een release staan nog open.
 
 ## Spelen en begeleiden
 
@@ -23,4 +23,4 @@ Deze handleidingen beschrijven de geïntegreerde **3D-versie alpha-v0.0.4**. De 
 
 ## Geschiedenis
 
-De [ontwikkellog](development-log.md) en oudere changelogsecties beschrijven de voormalige 2D-versie. Zij zijn geen handleiding voor de huidige runtime. De actuele repositorydocumentatie heeft voorrang op oudere wiki- of fasebeschrijvingen.
+De [ontwikkellog](development-log.md) en oudere changelogsecties beschrijven de voormalige 2D-versie. De [GitHub-wiki](https://github.com/Euraika-Labs/Project-Camiel/wiki) bevat ook de oorspronkelijke productvisie en het projectverhaal.

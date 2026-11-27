@@ -18,7 +18,7 @@ The 3D foundation, title/menu/intro flow, six lessons, local persistence, charac
 
 ### Acceptance still open
 
-Human lesson playtesting (03-06), character recognition, movement feel, listening on target devices and physical touch remain open. The local alpha-v0.0.44 Windows package and Chrome Web build completed all six lessons with automated input and restored progress. Alpha-v0.0.42 completed the same route in a Debian VM, and alpha-v0.0.44 startup narration was recorded in that environment. Physical Linux hardware, the first GitHub run with the new Web startup check and tagged release publication remain open. [Current play and build evidence](../docs/quick-start.md#verificatiegrenzen)
+Human lesson playtesting (03-06), character recognition, movement feel, listening on target devices and physical touch remain open. Alpha-v0.0.45 updates Camiel's model and is tracked in [PR #13](https://github.com/Euraika-Labs/Project-Camiel/pull/13). The Windows package passed the intro movement checks and Chrome showed the new portrait. The local alpha-v0.0.44 Windows package and Chrome Web build completed all six lessons with automated input and restored progress. Alpha-v0.0.42 completed the same route in a Debian VM. Testing on physical Linux hardware and publishing a tagged release remain open. [Current play and build evidence](../docs/quick-start.md#verificatiegrenzen)
 
 ### Out of Scope
 

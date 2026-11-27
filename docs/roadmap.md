@@ -1,22 +1,22 @@
 # Roadmap
 
-## Alpha-v0.0.4 — geïntegreerd, acceptatie open
+## Werkversie alpha-v0.0.45
 
 Camiel is opgebouwd als Nederlandstalig 3D-spel in Godot 4.7.2 met Compatibility-rendering. De oude 2D-runtime is gearchiveerd onder `archive/2d-alpha-v0.0.3`; historische 2D-functies zijn geen claims over de huidige build.
 
 | Onderdeel | Geïmplementeerd | Bewijs en grens |
 |---|---|---|
-| Intro en lessen | Titelscherm, hoofdmenu, lesselectie, introductie en zes lessen | Headless flows en lesregels getest; menselijke speelbeoordeling open |
-| Voortgang | Lokale lesafrondingen met sterren, tijd en datum | Alle zes lessen na echte procesexit teruggelezen |
-| Camiel | GLB-karakter met idle-, loop- en springanimatie | Model- en bewegingsprobes; menselijke herkenbaarheid en animatiegevoel open |
+| Intro en lessen | Intro, zes lessen met gesproken begeleiding en een herhaalbaar tuinfeest | De volledige route doorlopen in Windows en Chrome met geautomatiseerde invoer in alpha-v0.0.44 |
+| Voortgang | Lokale lesafrondingen met sterren, tijd en datum | In alpha-v0.0.44 de zes resultaten teruggelezen na een herstart in Windows en na herladen in Chrome |
+| Camiel | Vernieuwd 3D-model met knipperen en bewegende hangoren | Het portret is getest in Windows en Chrome. Lopen, springen en landen zijn getest in Windows |
 | Toegankelijkheid | Leesbare themakleuren en instelling voor hoog contrast | Gemeten kleurparen en live themaprobe; geen volledige WCAG-conformiteitsclaim |
 | Nederlandse spraak | Gebundelde instructies en feedback, eigen volumebus | Audiobus en assetprobes; luisteren op doelapparaten apart |
 | Touch | Proportionele joystick, gelijktijdig springen, vrijgeven en focusverlies | Inputprobes in intro en alle lessen; fysiek touchscreen open |
-| Web | Web-preset, lokale server en CI-exportconfiguratie | Echte browserles en opslag na herladen getest; bron/buildmatching gecontroleerd; remote CI-export geslaagd; CI-artifact zelf nog niet in browser gespeeld |
+| Web | Web-preset, lokale server en een Chrome-opstartproef voor upload | De lokale Chrome-proef slaagde in alpha-v0.0.45. Zie de [PR-checks](https://github.com/Euraika-Labs/Project-Camiel/pull/13/checks) voor de GitHub-run |
 | Ouderdashboard | Lokale import, voortgang en samenvatting | HTTP- en browsercontroles; geen accounts of cloudopslag |
-| Releases | Versiebron, vier exportdoelen en één releaseworkflow | Lokale gates, remote CI en vier exportjobs geslaagd; getagde GitHub-release niet uitgevoerd |
+| Releases | Versiebron, vier exportdoelen en één releaseworkflow | Lokale Windows- en Webpakketten voor alpha-v0.0.45 gecontroleerd. Getagde releasepublicatie staat open |
 
-De volledige geïntegreerde Godot-gate is geslaagd. Een eerder aangetroffen importcrash en testfouten worden in het acceptatiebewijs bewaard; een latere geslaagde run maakt die waarnemingen niet ongedaan. Builds moeten aan de daadwerkelijk geteste broninhoud worden gekoppeld. Het technische bewijs staat in de workspace-taak **Onafhankelijke controle en speelbare oplevering**; de projectplanning houdt open acceptatiecriteria zichtbaar.
+De [snelstartgids](quick-start.md#verificatiegrenzen) vermeldt per werkversie welke speelroutes en platformen zijn getest. [PR #13](https://github.com/Euraika-Labs/Project-Camiel/pull/13) volgt de integratie van de werkversie.
 
 ## Starten en bouwen
 
@@ -31,7 +31,7 @@ Eén opdracht tegelijk, duidelijke kleuren, grote bedieningsvlakken, weinig toet
 
 ## Buiten deze mijlpaal
 
-Accounts, telemetrie, cloudopslag, multiplayer, Android APK en betaalde codesigning zijn geen onderdeel van deze oplevering. Windows- en Linux-uitvoering, fysiek touchscreengebruik en menselijke acceptatie worden niet uit macOS- of headless resultaten afgeleid.
+Fysieke touchscreenbediening, hoorbaarheid op verschillende apparaten en zelfstandig spelen door jonge kinderen staan nog ter beoordeling. Accounts, telemetrie, cloudopslag, multiplayer, Android APK en betaalde codesigning vallen buiten deze werkversie.
 
 ## Bewijs na integratie — 19 september 2026
 
