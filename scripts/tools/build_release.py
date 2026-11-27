@@ -110,7 +110,7 @@ def build(
             preset, extension = TARGETS[target]
             entry = payload / ("index.html" if target == "web" else stem + extension)
             export_action = "--export-release"
-        run_godot(engine, "--headless", "--editor", "--path", str(root), "--quit")
+        run_godot(engine, "--headless", "--path", str(root), "--import")
         run_godot(engine, "--headless", "--path", str(root), export_action, preset, str(entry))
         if not entry.is_file() or entry.stat().st_size == 0:
             raise ValueError(f"Export did not produce {entry.name}")

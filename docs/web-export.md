@@ -27,7 +27,7 @@ drukt de exacte pakketnaam af. Rechtstreeks exporteren kan ook.
 
 ```bash
 mkdir -p builds/web
-godot --headless --editor --path . --quit
+godot --headless --path . --import
 godot --headless --path . --export-release "Web" builds/web/index.html
 python3 scripts/tools/serve_web.py builds/web
 ```
