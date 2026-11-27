@@ -13,6 +13,15 @@ if (!directory || !browser) {
     throw new Error("Usage: node verify_web_boot.mjs WEB_DIRECTORY CHROME [PYTHON]");
 }
 
+const commandTimeout = 8000;
+const startupRetryTimeout = 20000;
+
+class ChromeCommandTimeout extends Error {
+    constructor(method) {
+        super("Chrome did not answer " + method);
+    }
+}
+
 function browserPipe(chrome, errors) {
     const input = chrome.stdio[3];
     const output = chrome.stdio[4];
@@ -50,7 +59,7 @@ function browserPipe(chrome, errors) {
         }
     });
 
-    return (method, params = {}, sessionId) => new Promise((resolve, reject) => {
+    return (method, params = {}, sessionId, timeout = commandTimeout) => new Promise((resolve, reject) => {
         if (closed) {
             reject(closed);
             return;
@@ -61,7 +70,7 @@ function browserPipe(chrome, errors) {
             pending.delete(id);
             callback(result);
         }
-        const timer = setTimeout(() => settle(reject, new Error("Chrome did not answer " + method)), 8000);
+        const timer = setTimeout(() => settle(reject, new ChromeCommandTimeout(method)), timeout);
         pending.set(id, {
             resolve: result => settle(resolve, result),
             reject: error => settle(reject, error),
@@ -75,6 +84,41 @@ async function stop(child) {
     const closed = once(child, "close");
     child.kill();
     await closed;
+}
+
+async function closeBrowser(chrome, profile) {
+    try {
+        await stop(chrome);
+    } finally {
+        await rm(profile, { recursive: true, force: true, maxRetries: 6, retryDelay: 100 });
+    }
+}
+
+async function launchBrowser(errors) {
+    for (const timeout of [commandTimeout, startupRetryTimeout]) {
+        const profile = await mkdtemp(join(tmpdir(), "camiel-web-"));
+        let chrome;
+        let startupLog = "";
+        try {
+            chrome = spawn(browser, [
+                "--headless", "--no-first-run", "--disable-background-networking", "--no-proxy-server",
+                "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
+                "--user-data-dir=" + profile, "--remote-debugging-pipe", "about:blank",
+            ], { stdio: ["ignore", "ignore", "pipe", "pipe", "pipe"], windowsHide: true });
+            chrome.stderr.setEncoding("utf8");
+            chrome.stderr.on("data", chunk => { startupLog = (startupLog + chunk).slice(-4096); });
+            const send = browserPipe(chrome, errors);
+            const { product } = await send("Browser.getVersion", {}, undefined, timeout);
+            return { chrome, profile, send, product };
+        } catch (error) {
+            await closeBrowser(chrome, profile);
+            if (timeout === startupRetryTimeout || !(error instanceof ChromeCommandTimeout)) {
+                if (startupLog.trim()) console.error(startupLog.trim());
+                throw error;
+            }
+            console.warn(error.message + ". Retrying Chrome once with a fresh profile.");
+        }
+    }
 }
 
 async function bootUrl(server) {
@@ -121,23 +165,16 @@ async function waitForTitle(page, errors) {
 }
 
 const pack = createHash("sha256").update(await readFile(join(directory, "index.pck"))).digest("hex");
-const profile = await mkdtemp(join(tmpdir(), "camiel-web-"));
 const server = spawn(python, [fileURLToPath(new URL("./serve_web.py", import.meta.url)), directory, "--port", "0"], {
     stdio: ["ignore", "pipe", "inherit"],
     windowsHide: true,
 });
-let chrome;
-let send;
+let connection;
 const errors = [];
 try {
     const url = await bootUrl(server);
-    chrome = spawn(browser, [
-        "--headless", "--no-first-run", "--disable-background-networking", "--no-proxy-server",
-        "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
-        "--user-data-dir=" + profile, "--remote-debugging-pipe", "about:blank",
-    ], { stdio: ["ignore", "ignore", "ignore", "pipe", "pipe"], windowsHide: true });
-    send = browserPipe(chrome, errors);
-    const { product } = await send("Browser.getVersion");
+    connection = await launchBrowser(errors);
+    const { send, product } = connection;
     const { targetId } = await send("Target.createTarget", { url: "about:blank" });
     const { sessionId } = await send("Target.attachToTarget", { targetId, flatten: true });
     const page = (method, params) => send(method, params, sessionId);
@@ -152,8 +189,12 @@ try {
     console.log("Camiel drew the title screen in " + product + " at " + width + "x" + height);
     console.log("index.pck SHA256 " + pack);
 } finally {
-    if (send) await send("Browser.close").catch(() => undefined);
-    await stop(chrome);
-    await stop(server);
-    await rm(profile, { recursive: true, force: true, maxRetries: 6, retryDelay: 100 });
+    try {
+        if (connection) {
+            await connection.send("Browser.close").catch(() => undefined);
+            await closeBrowser(connection.chrome, connection.profile);
+        }
+    } finally {
+        await stop(server);
+    }
 }
