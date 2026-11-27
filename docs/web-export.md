@@ -44,6 +44,8 @@ De browserproef wacht op het door Godot getekende titelscherm. Bij succes staat
 de SHA-256 van `index.pck` in het joblogboek. Bij een opstartfout stopt de job
 vóór het uploaden.
 
+Als Chrome bij de eerste start geen antwoord geeft, start de proef de browser één keer opnieuw met een nieuw profiel. De Webjob wacht vervolgens op het getekende titelscherm.
+
 Dezelfde proef werkt lokaal met Node.js, Chrome en Python. Geef de uitgepakte
 exportmap en de naam of het pad van Chrome mee. De proef start zelf een
 tijdelijke server. Geef eventueel het pad naar Python als derde argument.
