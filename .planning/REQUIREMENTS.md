@@ -67,7 +67,7 @@ Requirements for this milestone (3D foundation + lesson parity, then the alpha-v
 ### Web Export
 
 - [x] **WEB-01**: The Web export preset uses the correct Godot 4 platform identifier and the Compatibility renderer, and produces a build via the Godot 4.7.2 editor or CLI
-- [ ] **WEB-02**: A CI job builds the Web export, and the resulting build is verified to load
+- [x] **WEB-02**: A CI job builds the Web export, and the resulting build is verified to load
 - [x] **WEB-03**: `docs/web-export.md`, `docs/quick-start.md`, and `docs/roadmap.md` agree with each other, and with the shipped state, on the Web export's actual availability
 
 ### Parent Dashboard
@@ -167,7 +167,7 @@ Which phases cover which requirements.
 | MOBILE-02 | Phase 6 | Technical pass. The alpha-v0.0.43 Web build accepted two simulated contacts for movement and jumping on HTTPS at 568 × 260. Physical touch remains open. |
 | MOBILE-03 | Phase 6 | Verified: shared controller attaches touch UI in intro and all six lessons |
 | WEB-01 | Phase 7 | Verified: local export and Chromium WebGL gameplay |
-| WEB-02 | Phase 7 | The export workflow checks the packaged archive in Chrome before upload. The local alpha-v0.0.45 package boots with the updated model. The alpha-v0.0.42 test rejected a damaged WebAssembly file. [PR #13 checks](https://github.com/Euraika-Labs/Project-Camiel/pull/13/checks) show the status of the GitHub run. |
+| WEB-02 | Phase 7 | [GitHub Web export job](https://github.com/Euraika-Labs/Project-Camiel/actions/runs/45969430808/job/140407195200) built alpha-v0.0.45 from `04eff83`, rendered the packaged title screen in Chrome, logged the package hash and uploaded the archive. The local alpha-v0.0.42 test also rejected a damaged WebAssembly file. |
 | WEB-03 | Phase 7 | Verified: availability and evidence boundaries aligned |
 | DASH-01 | Phase 8 | Verified: actual Godot save imported; browser statistics checked |
 | DASH-02 | Phase 8 | Verified: HTTP tests and browser import match version-1 contract |
@@ -183,4 +183,4 @@ Which phases cover which requirements.
 
 ---
 *Requirements defined: 2026-09-11*
-*Last updated: 2026-11-27 — recorded alpha-v0.0.44 startup narration in Chrome, Firefox and the Linux build*
+*Last updated: 2026-11-27 — recorded the alpha-v0.0.45 GitHub Web export and Chrome startup check*
