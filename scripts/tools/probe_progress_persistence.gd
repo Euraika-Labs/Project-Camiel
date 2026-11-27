@@ -31,7 +31,16 @@ func _initialize() -> void:
 	await _case_second_write_replaces_and_keeps_both()
 	if _failed:
 		return
+	await _case_trackers_open_at_the_same_time()
+	if _failed:
+		return
 	await _case_corrupt_file_recovers_silently()
+	if _failed:
+		return
+	await _case_garden_completion()
+	if _failed:
+		return
+	await _case_garden_cheer()
 	if _failed:
 		return
 
@@ -42,6 +51,93 @@ func _initialize() -> void:
 	_restore_progress_backup()
 	print("Progress persistence probe passed.")
 	quit(0)
+
+
+func _case_garden_completion() -> void:
+	var case_name := "garden_completion"
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(PROGRESS_PATH))
+	var tracker := root.get_node("ProgressTracker")
+	var menu_scene: PackedScene = load("res://scenes/main_menu.tscn")
+	var picker_scene: PackedScene = load("res://scenes/lesson_select.tscn")
+	var menu := menu_scene.instantiate()
+	var picker := picker_scene.instantiate()
+	root.add_child(menu)
+	root.add_child(picker)
+	await process_frame
+	var start: Button = menu.get_node("%StartButton")
+	var celebration: Button = picker.get_node("%CelebrationButton")
+	var grid: GridContainer = picker.get_node("%LessonGrid")
+	var first_lesson: Button = grid.get_node("lesson_1")
+	var first_badge: Control = first_lesson.get_node("%Completed")
+	if first_badge.visible or celebration.visible:
+		_fail(case_name, "the open lesson picker should begin without completed lessons")
+		return
+	for id: String in ["lesson_6", "lesson_4", "lesson_1", "lesson_6", "lesson_5", "lesson_3", "unknown"]:
+		var result: Dictionary = tracker.record_lesson_result(id, 1.0)
+		if not result["saved"] or result["garden_completed"]:
+			_fail(case_name, "a replay, unknown lesson or incomplete garden triggered the celebration")
+			return
+	if tracker.completed_lesson_ids().size() != 5:
+		_fail(case_name, "the completion count did not match the five distinct lessons")
+		return
+	if not first_badge.visible or not start.caption.begins_with("Les 2") or celebration.visible:
+		_fail(case_name, "the open menus did not update after five distinct lessons")
+		return
+	var last: Dictionary = tracker.record_lesson_result("lesson_2", 1.0)
+	if not last["saved"] or not last["garden_completed"]:
+		_fail(case_name, "the last missing lesson did not trigger the celebration")
+		return
+	var back: Button = picker.get_node("%BackButton")
+	if start.label_text != "Tuinfeest" or not celebration.visible or back.get_node(back.focus_next) != celebration:
+		_fail(case_name, "the open menus should offer the garden immediately, including by keyboard")
+		return
+	menu.queue_free()
+	picker.queue_free()
+	tracker = await _make_tracker()
+	if tracker.completed_lesson_ids().size() != 6:
+		_fail(case_name, "the full garden did not remain complete after reopening the save")
+		return
+	var replay: Dictionary = tracker.record_lesson_result("lesson_2", 1.0)
+	if not replay["saved"] or replay["garden_completed"]:
+		_fail(case_name, "replaying a lesson triggered a second final completion")
+		return
+	_free_tracker(tracker)
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+func _case_garden_cheer() -> void:
+	var case_name := "garden_cheer"
+	var previous_save := FileAccess.get_file_as_string(PROGRESS_PATH)
+	var garden := (load("res://scenes/garden_celebration.tscn") as PackedScene).instantiate()
+	root.add_child(garden)
+	await process_frame
+	var effect: Control = garden.get_node("%PartyConfetti")
+	var cheer: Button = garden.get_node("%CheerButton")
+	var menu: Button = garden.get_node("%MenuButton")
+	var lessons: Button = garden.get_node("%LessonsButton")
+	if not effect.is_processing() or root.gui_get_focus_owner() != lessons:
+		_fail(case_name, "the party should begin with the return to lessons focused")
+		return
+	if menu.get_node(menu.focus_next) != cheer or cheer.get_node(cheer.focus_next) != lessons:
+		_fail(case_name, "the party button was left out of the keyboard focus order")
+		return
+	for frame in 64:
+		await process_frame
+	cheer.pressed.emit()
+	for frame in 103:
+		await process_frame
+	if effect.is_processing():
+		_fail(case_name, "pressing during the party prolonged the same celebration")
+		return
+	cheer.pressed.emit()
+	if not effect.is_processing() or FileAccess.get_file_as_string(PROGRESS_PATH) != previous_save:
+		_fail(case_name, "the party should replay without changing the saved lessons")
+		return
+	garden.queue_free()
+	await process_frame
+	_cases_run += 1
+	print("PASS %s" % case_name)
 
 
 func _fail(case_name: String, detail: String) -> void:
@@ -254,6 +350,32 @@ func _case_second_write_replaces_and_keeps_both() -> void:
 		return
 
 	_free_tracker(tracker)
+	_cases_run += 1
+	print("PASS %s" % case_name)
+
+
+func _case_trackers_open_at_the_same_time() -> void:
+	var case_name := "trackers_open_at_the_same_time"
+	var first := await _make_tracker()
+	var second := await _make_tracker()
+	if first.get_entries().size() != 2 or second.get_entries().size() != 2:
+		_fail(case_name, "both trackers must start from the same existing history")
+		return
+
+	first.record_lesson_complete("lesson_3", 3.0)
+	second.record_lesson_complete("lesson_4", 4.0)
+	var data := _read_progress_file(case_name)
+	if _failed:
+		return
+	var entries: Array = data["entries"]
+	if entries.size() != 4 or entries[2]["lesson_id"] != "lesson_3" or entries[3]["lesson_id"] != "lesson_4":
+		_fail(case_name, "a second tracker overwrote another tracker's new lesson")
+		return
+	if FileAccess.get_file_as_string(PROGRESS_PATH).contains("\"stars\": 3.0"):
+		_fail(case_name, "rewriting a prior result changed the dashboard's integer star field")
+		return
+	_free_tracker(first)
+	_free_tracker(second)
 	_cases_run += 1
 	print("PASS %s" % case_name)
 

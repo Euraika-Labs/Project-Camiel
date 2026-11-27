@@ -505,10 +505,19 @@ func _assert_win_return_is_one_shot(case_name: String, lesson: Node, win_back_bu
 	_transition_target = ""
 	lesson.transition_requested.connect(_on_transition_requested_counted)
 
-	if not win_back_button.has_focus():
-		_fail(case_name, "the win panel's return control does not hold focus after the lesson finished")
+	var hud := lesson.get_node("%Hud")
+	var celebration: Button = hud.get_node("%CelebrationButton")
+	var next_lesson: Button = hud.get_node("%NextButton")
+	var primary := win_back_button
+	if celebration.visible:
+		primary = celebration
+	elif next_lesson.visible:
+		primary = next_lesson
+	if not primary.has_focus():
+		_fail(case_name, "the expected action does not hold focus after the lesson finished")
 		return false
 
+	win_back_button.grab_focus()
 	_press_focused()
 	await process_frame
 	await process_frame
@@ -903,22 +912,19 @@ func _drive_ordered_lesson(
 	_watch_ordered_targets(targets)
 	lesson.lesson_completed.connect(_on_lesson_completed_counted)
 
-	# Two listeners on every completion (the lesson's handler and this probe's
-	# counter) and exactly one on every refusal (this probe's counter alone).
-	# A future extra listener changes these numbers, and the numbers are in the
-	# messages so the change is obvious rather than mysterious.
+	# Each target has one completion handler and one guidance handler in the
+	# lesson, plus the probe's counters.
 	for target: Area3D in targets:
 		var completion_links := target.get_signal_connection_list("task_completed").size()
 		if completion_links != 2:
 			_fail(case_name, "%s.task_completed has %d connections, 2 wanted (the lesson's own handler and this probe's counter)" % [target.name, completion_links])
 			return false
 		var refusal_connections := target.get_signal_connection_list("rejected")
-		var expected_refusals := 1
-		var voice := root.get_node_or_null("VoiceManager")
-		if voice != null and target.is_connected("rejected", Callable(voice, "_on_rejected")):
-			expected_refusals += 1
-		if refusal_connections.size() != expected_refusals:
-			_fail(case_name, "%s has unexpected rejection handlers beyond probe and narration" % target.name)
+		if not target.is_connected("rejected", Callable(lesson, "_on_wrong_target")):
+			_fail(case_name, "%s is missing the lesson's guidance handler" % target.name)
+			return false
+		if refusal_connections.size() != 2:
+			_fail(case_name, "%s has unexpected rejection handlers beyond the probe and guidance" % target.name)
 			return false
 
 	if not _assert_only_active(case_name, targets, 0):

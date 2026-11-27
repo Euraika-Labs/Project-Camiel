@@ -9,6 +9,8 @@
 # scripts/tools/run_headless_check.sh.
 extends SceneTree
 
+const INTRO_COMPLETION_PATH := preload("res://scripts/progress_tracker.gd").INTRO_COMPLETION_PATH
+
 var _fire_count := 0
 var _fired_target := ""
 var _failed := false
@@ -20,9 +22,11 @@ var _level_transition_target := ""
 var _collected_signal_count := 0
 var _drain_audio_manager: Node = null
 var _replay_signal_count := 0
+var _had_intro_completion := false
 
 
 func _initialize() -> void:
+	_had_intro_completion = FileAccess.file_exists(INTRO_COMPLETION_PATH)
 	await _case_title_screen()
 	if _failed:
 		return
@@ -33,6 +37,9 @@ func _initialize() -> void:
 	if _failed:
 		return
 	await _case_finish_marker()
+	if _failed:
+		return
+	await _case_main_menu("main_menu_after_intro")
 	if _failed:
 		return
 	await _case_collectible()
@@ -46,18 +53,26 @@ func _initialize() -> void:
 		return
 
 	if _cases_run == 0:
-		push_error("no case ran; the probe would verify nothing")
-		quit(1)
+		_fail("screen_flow", "no case ran; the probe would verify nothing")
 		return
 
 	print("Screen flow probe passed.")
-	quit(0)
+	_finish(0)
 
 
 func _fail(case_name: String, detail: String) -> void:
 	_failed = true
 	push_error("%s: %s" % [case_name, detail])
-	quit(1)
+	_finish(1)
+
+
+func _finish(exit_code: int) -> void:
+	if not _had_intro_completion and FileAccess.file_exists(INTRO_COMPLETION_PATH):
+		var error := DirAccess.remove_absolute(ProjectSettings.globalize_path(INTRO_COMPLETION_PATH))
+		if error != OK:
+			push_error("Could not remove the intro completion created by this probe: %s" % error_string(error))
+			exit_code = 1
+	quit(exit_code)
 
 
 func _on_transition_requested(target_path: String) -> void:
@@ -153,8 +168,15 @@ func _case_title_screen() -> void:
 	await _run_screen_case("title_screen", "res://scenes/title_screen.tscn", "%PlayButton", "res://scenes/main_menu.tscn")
 
 
-func _case_main_menu() -> void:
-	await _run_screen_case("main_menu", "res://scenes/main_menu.tscn", "%StartButton", "res://scenes/intro_level.tscn")
+func _case_main_menu(case_name := "main_menu") -> void:
+	var tracker := root.get_node("ProgressTracker")
+	var completed: Dictionary = tracker.completed_lesson_ids()
+	var catalog := preload("res://scripts/lesson_catalog.gd")
+	var path := "res://scenes/intro_level.tscn"
+	if tracker.has_completed_intro() or not completed.is_empty():
+		var index: int = catalog.next_unfinished_index(completed)
+		path = catalog.LESSONS[index]["path"] if index >= 0 else catalog.CELEBRATION_PATH
+	await _run_screen_case(case_name, "res://scenes/main_menu.tscn", "%StartButton", path)
 
 
 func _on_finish_marker_finished_counted() -> void:
@@ -184,9 +206,11 @@ func _case_finish_marker() -> void:
 
 	var finish_marker: Area3D = level.get_node("%FinishMarker")
 	var win_layer: CanvasLayer = level.get_node("%WinLayer")
-	var replay_button: Button = level.get_node("%ReplayButton")
+	var continue_button: Button = level.get_node("%ContinueButton")
 	var go_to_menu_button: Button = level.get_node("%GoToMenuButton")
 	var camiel: CharacterBody3D = level.get_node("Camiel")
+	var tracker := root.get_node("ProgressTracker")
+	var previous_entries: Array[Dictionary] = tracker.get_entries()
 
 	_finish_signal_count = 0
 	finish_marker.finished.connect(_on_finish_marker_finished_counted)
@@ -215,8 +239,11 @@ func _case_finish_marker() -> void:
 	if not win_layer.visible:
 		_fail(case_name, "%WinLayer.visible is false after finished fired")
 		return
-	if not replay_button.has_focus():
-		_fail(case_name, "%ReplayButton does not hold focus after the win overlay appeared")
+	if not continue_button.has_focus():
+		_fail(case_name, "%ContinueButton does not hold focus after the win overlay appeared")
+		return
+	if not tracker.has_completed_intro() or tracker.get_entries() != previous_entries:
+		_fail(case_name, "finishing the intro should save its completion without adding a lesson result")
 		return
 
 	for _i in range(60):
@@ -254,6 +281,14 @@ func _case_finish_marker() -> void:
 		return
 	if _level_transition_target != "res://scenes/main_menu.tscn":
 		_fail(case_name, "transition_requested target was %s, expected res://scenes/main_menu.tscn" % _level_transition_target)
+		return
+	for frame in 6:
+		if current_scene != null:
+			break
+		await process_frame
+	if previous_entries.is_empty() and (current_scene == null or current_scene.get_node("%StartButton").label_text != "Verder spelen"
+			or not current_scene.get_node("%IntroButton").visible):
+		_fail(case_name, "the menu should offer to continue and keep intro replay available before any lesson")
 		return
 
 	await _drain_scene_change()
@@ -483,6 +518,16 @@ func _on_replay_requested_counted() -> void:
 	_replay_signal_count += 1
 
 
+func _send_down_arrow(pressed: bool, echo := false) -> void:
+	var key := InputEventKey.new()
+	key.keycode = KEY_DOWN
+	key.physical_keycode = KEY_DOWN
+	key.pressed = pressed
+	key.echo = echo
+	Input.parse_input_event(key)
+	Input.flush_buffered_events()
+
+
 # Plan 02-04 Task 3: the in-place replay reset (D-28), the explicit
 # ReplayButton -> GoToMenuButton focus order (D-14), and each win button
 # proved one-shot independently — including a second lap after a replay,
@@ -502,11 +547,13 @@ func _case_win_buttons() -> void:
 	var finish_marker: Area3D = level.get_node("%FinishMarker")
 	var collectible: Area3D = level.get_node("%Collectible")
 	var win_layer: CanvasLayer = level.get_node("%WinLayer")
+	var continue_button: Button = level.get_node("%ContinueButton")
 	var replay_button: Button = level.get_node("%ReplayButton")
 	var go_to_menu_button: Button = level.get_node("%GoToMenuButton")
 	var camiel: CharacterBody3D = level.get_node("Camiel")
 	var player_spawn: Marker3D = level.get_node("PlayerSpawn")
 
+	_send_down_arrow(true)
 	camiel.teleport_to(finish_marker.global_position)
 	var frames_waited := 0
 	while not win_layer.visible and frames_waited < 120:
@@ -516,8 +563,21 @@ func _case_win_buttons() -> void:
 		_fail(case_name, "%WinLayer never became visible after teleporting Camiel onto the finish marker")
 		return
 
+	if not continue_button.has_focus():
+		_fail(case_name, "%ContinueButton does not hold focus when the overlay appears")
+		return
+
+	_send_down_arrow(true, true)
+	var stayed_focused := continue_button.has_focus()
+	_send_down_arrow(false)
+	if not stayed_focused:
+		_fail(case_name, "A movement arrow held at the finish changed the win button focus")
+		return
+
+	_send_down_arrow(true)
+	_send_down_arrow(false)
 	if not replay_button.has_focus():
-		_fail(case_name, "%ReplayButton does not hold focus when the overlay appears")
+		_fail(case_name, "A fresh arrow press did not move focus after the movement key was released")
 		return
 
 	var neighbor_path: NodePath = replay_button.focus_neighbor_right

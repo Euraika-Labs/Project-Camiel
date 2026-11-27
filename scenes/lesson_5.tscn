@@ -13,6 +13,7 @@
 script = ExtResource("1_a4btp")
 
 [node name="LessonRoom" type="Node3D" parent="." unique_id=1248342695 instance=ExtResource("2_m2hkb")]
+chapter = 5
 
 [node name="PlayerSpawn" type="Marker3D" parent="." unique_id=1271368917]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 4.5)

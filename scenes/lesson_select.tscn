@@ -5,6 +5,15 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="3_3p0yd"]
 [ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="4_o5sed"]
 
+[sub_resource type="Gradient" id="Gradient_woodland"]
+colors = PackedColorArray(0.75, 0.83, 0.64, 1, 0.94, 0.93, 0.85, 1)
+
+[sub_resource type="GradientTexture2D" id="Texture_woodland"]
+gradient = SubResource("Gradient_woodland")
+width = 2
+height = 256
+fill_to = Vector2(0, 1)
+
 [node name="LessonSelect" type="Control" unique_id=420370801]
 layout_mode = 3
 anchors_preset = 0
@@ -15,11 +24,13 @@ grow_vertical = 2
 theme = ExtResource("1_vnpbn")
 script = ExtResource("2_tjccm")
 
-[node name="Background" type="ColorRect" parent="." unique_id=1528150443]
+[node name="Background" type="TextureRect" parent="." unique_id=1528150443]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.62, 0.82, 0.95, 1)
+mouse_filter = 2
+texture = SubResource("Texture_woodland")
+expand_mode = 1
 
 [node name="CenterContainer" type="CenterContainer" parent="." unique_id=1391962352]
 layout_mode = 0
@@ -28,35 +39,69 @@ anchor_bottom = 1.0
 
 [node name="MarginContainer" type="MarginContainer" parent="CenterContainer" unique_id=1872387652]
 layout_mode = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 32
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 18
 
 [node name="Content" type="VBoxContainer" parent="CenterContainer/MarginContainer" unique_id=1295849688]
 layout_mode = 2
-theme_override_constants/separation = 40
+theme_override_constants/separation = 16
 alignment = 1
 
-[node name="HeadingLabel" type="Label" parent="CenterContainer/MarginContainer/Content" unique_id=206019674]
+[node name="Header" type="HBoxContainer" parent="CenterContainer/MarginContainer/Content"]
 layout_mode = 2
+mouse_filter = 2
+
+[node name="HeadingLabel" type="Label" parent="CenterContainer/MarginContainer/Content/Header" unique_id=206019674]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 42
 text = "Kies een les"
-horizontal_alignment = 1
+
+[node name="ProgressSummary" type="Label" parent="CenterContainer/MarginContainer/Content/Header"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_font_sizes/font_size = 19
+vertical_alignment = 1
 
 [node name="LessonGrid" type="GridContainer" parent="CenterContainer/MarginContainer/Content" unique_id=2021608013]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/h_separation = 32
-theme_override_constants/v_separation = 32
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 18
 columns = 3
 
-[node name="BackButton" type="Button" parent="CenterContainer/MarginContainer/Content" unique_id=1313707963 instance=ExtResource("3_3p0yd")]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 112)
+[node name="Footer" type="HBoxContainer" parent="CenterContainer/MarginContainer/Content"]
 layout_mode = 2
-size_flags_horizontal = 4
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="BackButton" type="Button" parent="CenterContainer/MarginContainer/Content/Footer" unique_id=1313707963 instance=ExtResource("3_3p0yd")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(198, 90)
+layout_mode = 2
+size_flags_horizontal = 0
 theme = ExtResource("1_vnpbn")
 script = ExtResource("4_o5sed")
 label_text = "Naar menu"
 icon_kind = "home"
+compact = true
+
+[node name="Space" type="Control" parent="CenterContainer/MarginContainer/Content/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="CelebrationButton" parent="CenterContainer/MarginContainer/Content/Footer" instance=ExtResource("3_3p0yd")]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(198, 90)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+label_text = "Tuinfeest"
+icon_kind = "paw"
+compact = true

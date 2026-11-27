@@ -14,8 +14,15 @@ class VoiceAssets(unittest.TestCase):
         catalog = json.loads((AUDIO / "catalog.json").read_text())
         cues = catalog["clips"]
         required = {"title", "main_menu", "lesson_select", "intro", "correct",
-                    "retry", "complete", "intro_complete", "collected"}
+                    "retry", "complete", "garden_complete", "intro_complete", "intro_finish", "collected"}
+        required.update(("intro_touch", "intro_ball", "move_keyboard", "move_touch"))
         required.update(f"lesson_{i}" for i in range(1, 7))
+        required.update(f"goal_{shape}" for shape in ("circle", "square", "triangle"))
+        required.update(f"goal_step_{i}" for i in range(1, 6))
+        required.update(f"color_{color}" for color in ("red", "blue", "yellow", "green"))
+        required.update(f"counted_{i}" for i in range(1, 4))
+        required.add("goal_stones")
+        required.update(("menu_continue", "menu_garden", "lesson_continue", "garden_ready"))
         self.assertTrue(required.issubset(cues))
         for cue, text in cues.items():
             with self.subTest(cue=cue):

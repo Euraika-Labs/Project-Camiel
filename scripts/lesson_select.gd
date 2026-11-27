@@ -24,16 +24,10 @@ signal transition_requested(target_path: String)
 ## yet fails the lesson-select probe loudly, which is the whole point -- the
 ## probe iterates this table and loads every path, so the table can never
 ## advertise a lesson that is not there.
-const LESSONS: Array[Dictionary] = [
-	{"id": "lesson_1", "path": "res://scenes/lesson_1.tscn", "label": "Les 1", "icon": "lesson_colors"},
-	{"id": "lesson_2", "path": "res://scenes/lesson_2.tscn", "label": "Les 2", "icon": "lesson_shapes"},
-	{"id": "lesson_3", "path": "res://scenes/lesson_3.tscn", "label": "Les 3", "icon": "lesson_sequence"},
-	{"id": "lesson_4", "path": "res://scenes/lesson_4.tscn", "label": "Les 4", "icon": "lesson_colors"},
-	{"id": "lesson_5", "path": "res://scenes/lesson_5.tscn", "label": "Les 5", "icon": "lesson_sequence"},
-	{"id": "lesson_6", "path": "res://scenes/lesson_6.tscn", "label": "Les 6", "icon": "lesson_sequence"},
-]
+const LESSON_CATALOG := preload("res://scripts/lesson_catalog.gd")
+const LESSONS := LESSON_CATALOG.LESSONS
 
-const MENU_BUTTON_PATH := "res://scenes/ui/menu_button.tscn"
+const LESSON_CARD := preload("res://scenes/ui/lesson_card.tscn")
 const MAIN_MENU_PATH := "res://scenes/main_menu.tscn"
 
 # ── Private state ────────────────────────────────────────────────
@@ -47,8 +41,12 @@ var _buttons: Array[Button] = []
 func _ready() -> void:
 	VoiceManager.bind_scene(self, "lesson_select")
 	_build_buttons()
-	_wire_focus_order()
+	_refresh_progress()
+	ProgressTracker.progress_changed.connect(_refresh_progress)
+	ScreenLayout.layout_changed.connect(_layout_screen)
+	_layout_screen(ScreenLayout.portrait)
 	%BackButton.pressed.connect(_on_back_button_pressed)
+	%CelebrationButton.pressed.connect(_on_lesson_button_pressed.bind(LESSON_CATALOG.CELEBRATION_PATH))
 	if not _buttons.is_empty():
 		_buttons[0].grab_focus()
 
@@ -60,40 +58,87 @@ func _ready() -> void:
 ## child order, and each entry's path is carried into the handler through bound
 ## context rather than a wrapper lambda (this project's convention).
 func _build_buttons() -> void:
-	var packed: PackedScene = load(MENU_BUTTON_PATH)
-	if packed == null:
-		push_warning("[LessonSelect] Could not load ", MENU_BUTTON_PATH)
-		return
-
 	var grid: GridContainer = %LessonGrid
 	for lesson: Dictionary in LESSONS:
-		var button: Button = packed.instantiate()
+		var button := LESSON_CARD.instantiate() as Button
 		button.name = String(lesson["id"])
 		# Safe before the node enters the tree: menu_button.gd stores both
 		# exported values and applies them in its own ready callback.
 		button.label_text = String(lesson["label"])
 		button.icon_kind = String(lesson["icon"])
+		button.icon_colors = PackedColorArray(lesson.get("icon_colors", []))
+		button.caption = String(lesson["caption"])
+		button.accessibility_name = "%s, %s" % [button.label_text, button.caption]
+		var illustration: TextureRect = button.get_node("%Illustration")
+		illustration.texture = load(String(lesson["preview"])) as Texture2D
 		grid.add_child(button)
 		button.pressed.connect(_on_lesson_button_pressed.bind(String(lesson["path"])))
 		_buttons.append(button)
 
 
-## Declares the focus cycle explicitly rather than leaving it to the engine's
-## tree-order inference (D-32), because the probe is written against the
-## declared order -- the same focus-neighbour property the shipped win-screen
-## probe already reads and resolves.
+func _refresh_progress() -> void:
+	var completed := ProgressTracker.completed_lesson_ids()
+	for button: Button in _buttons:
+		button.completed = completed.has(String(button.name))
+		button.accessibility_description = "Afgerond" if button.completed else ""
+	%ProgressSummary.text = "%d van %d afgerond" % [completed.size(), LESSONS.size()]
+	%ProgressSummary.visible = not completed.is_empty()
+	var celebration: Button = %CelebrationButton
+	var can_celebrate := completed.size() == LESSONS.size()
+	if celebration.visible != can_celebrate:
+		celebration.visible = can_celebrate
+		_wire_focus_order()
+
+
+func _layout_screen(portrait: bool) -> void:
+	%LessonGrid.columns = 2 if portrait else 3
+	var card_size := Vector2(348, 226)
+	var photo_height := 142.0
+	if portrait:
+		card_size = Vector2(276, 194)
+		photo_height = 110.0
+	elif ScreenLayout.short_landscape:
+		card_size.y = 172.0
+		photo_height = 86.0
+	for button: Button in _buttons:
+		button.custom_minimum_size = card_size
+		button.get_node("%Photo").custom_minimum_size.y = photo_height
+	var footer_height := 104.0 if ScreenLayout.short_landscape else 90.0
+	%BackButton.custom_minimum_size.y = footer_height
+	%CelebrationButton.custom_minimum_size.y = footer_height
+	_wire_focus_order()
+
+
+## Arrows follow the visible rows. Tab visits every card and the exit.
 func _wire_focus_order() -> void:
 	var total := _buttons.size()
+	var columns: int = %LessonGrid.columns
+	var back: Button = %BackButton
+	var celebration: Button = %CelebrationButton
 	if total == 0:
 		return
+	var final_button := celebration if celebration.visible else back
 	for i in total:
 		var button := _buttons[i]
-		var next := _buttons[(i + 1) % total]
-		var previous := _buttons[(i - 1 + total) % total]
-		button.focus_neighbor_right = button.get_path_to(next)
-		button.focus_neighbor_bottom = button.get_path_to(next)
-		button.focus_neighbor_left = button.get_path_to(previous)
-		button.focus_neighbor_top = button.get_path_to(previous)
+		var is_left_edge := i % columns == 0
+		var is_right_edge := i % columns == columns - 1 or i == total - 1
+		button.focus_neighbor_left = button.get_path_to(button if is_left_edge else _buttons[i - 1])
+		button.focus_neighbor_right = button.get_path_to(button if is_right_edge else _buttons[i + 1])
+		button.focus_neighbor_top = button.get_path_to(_buttons[i - columns] if i >= columns else button)
+		var bottom := celebration if celebration.visible and i % columns > 0 else back
+		button.focus_neighbor_bottom = button.get_path_to(_buttons[i + columns] if i + columns < total else bottom)
+		button.focus_previous = button.get_path_to(final_button if i == 0 else _buttons[i - 1])
+		button.focus_next = button.get_path_to(back if i == total - 1 else _buttons[i + 1])
+	back.focus_neighbor_top = back.get_path_to(_buttons[maxi(0, total - columns)])
+	back.focus_neighbor_bottom = back.get_path_to(_buttons[0])
+	back.focus_previous = back.get_path_to(_buttons.back())
+	back.focus_next = back.get_path_to(celebration if celebration.visible else _buttons[0])
+	back.focus_neighbor_right = back.get_path_to(final_button)
+	celebration.focus_previous = celebration.get_path_to(back)
+	celebration.focus_next = celebration.get_path_to(_buttons[0])
+	celebration.focus_neighbor_left = celebration.focus_previous
+	celebration.focus_neighbor_top = celebration.get_path_to(_buttons.back())
+	celebration.focus_neighbor_bottom = celebration.focus_next
 
 
 # ── Signal handlers ──────────────────────────────────────────────
@@ -115,3 +160,9 @@ func _on_back_button_pressed() -> void:
 	_transitioning = true
 	transition_requested.emit(MAIN_MENU_PATH)
 	get_tree().change_scene_to_file.call_deferred(MAIN_MENU_PATH)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_on_back_button_pressed()

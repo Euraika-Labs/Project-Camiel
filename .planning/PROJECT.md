@@ -18,7 +18,7 @@ The 3D foundation, title/menu/intro flow, six lessons, local persistence, charac
 
 ### Acceptance still open
 
-Human lesson playtesting (03-06), character recognition and movement feel, listening on target devices, physical touch, native Windows/Linux execution and tagged release publication remain unverified. A technical pass does not close these acceptance gates.
+Human lesson playtesting (03-06), character recognition, movement feel, listening on target devices and physical touch remain open. The local alpha-v0.0.44 Windows package and Chrome Web build completed all six lessons with automated input and restored progress. Alpha-v0.0.42 completed the same route in a Debian VM, and alpha-v0.0.44 startup narration was recorded in that environment. Physical Linux hardware, the first GitHub run with the new Web startup check and tagged release publication remain open. [Current play and build evidence](../docs/quick-start.md#verificatiegrenzen)
 
 ### Out of Scope
 
@@ -69,4 +69,4 @@ Decisions marked **Locked** were made explicitly by the user and should not be r
 | Windows is the primary target, Linux secondary; Web and mobile-touch are this milestone's scope, implemented with explicit verification boundaries | User-set target runtime priority for this milestone, unchanged by the pivot | Implemented; final acceptance remains open |
 
 ---
-*Last updated: 2026-09-19 — synchronized with merged 3D delivery and evidence boundaries*
+*Last updated: 2026-11-27 — current local build and remaining acceptance checks reviewed*

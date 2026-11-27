@@ -18,15 +18,15 @@ progress:
 
 # Project State
 
-## Current integration evidence — 2026-09-19
+## Current integration evidence — 2026-11-27
 
 Alpha-v0.0.4 implementation is merged via PR #10; final acceptance remains open. The isolated integration run passed the complete Godot headless gate and a real write-process exit followed by a fresh reader process: nine completion entries cover all six lessons, with identical save hashes. Evidence is in the workspace acceptance task `aa38adeb-5b83-4b69-8110-59add2e0c7d5`; local logs and source manifests are under `/private/tmp/camiel-final-aa38adeb/`. A durable workspace copy of the evidence is in `builds/verification/acceptance/`; playable packages are in `builds/release/`.
 
-Technical delivery checks passed: the dashboard transport-test race is fixed, the earlier integration run passed 41 Python tests and 13 Godot probes, and current web/native macOS flows have been checked. Final milestone acceptance remains open for the human/platform boundaries below. Human assessment of child friendliness, character recognition and movement feel is not replaced by automation. Physical touchscreen and Windows/Linux native execution require separate evidence. Earlier phase counters below describe historical plan execution, not completion of the current integrated milestone.
+The installed alpha-v0.0.45 Windows and Web builds share the game package with Camiel's updated model. The Windows package passed the introduction's walk, jump and landing checks, and Chrome rendered the new title portrait. Both platforms previously reached the garden through the intro and all six lessons in alpha-v0.0.44 and restored progress after restart or reload. The Linux package completed a full alpha-v0.0.42 route in a Debian VM, and alpha-v0.0.44 startup narration was recorded in that environment. Human playtesting, physical touch, testing on physical Linux hardware and remote release verification remain open. The phase counters below describe the original phase plans. [Current play and build evidence](../docs/quick-start.md#verificatiegrenzen)
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-09-19)
+See: .planning/PROJECT.md (updated 2026-11-27)
 
 **Core value:** A young child can go from the title screen through every lesson, entirely on their own, without hitting a bug or needing adult help — and their progress is remembered afterward.
 **Current focus:** Human milestone acceptance and platform verification

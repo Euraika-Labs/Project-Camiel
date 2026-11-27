@@ -75,6 +75,16 @@ jobs:
         run: |
           GODOT="$RUNNER_TEMP/godot/${GODOT_BIN}" python3 scripts/tools/build_release.py "$TARGET"
 
+      - name: Open packaged Web build in Chrome
+        if: matrix.target == 'web'
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          version="$(python3 scripts/tools/release_version.py)"
+          web_dir="$(mktemp -d "$RUNNER_TEMP/camiel-web.XXXXXX")"
+          unzip -q "builds/release/Camiel-$version-web.zip" -d "$web_dir"
+          node scripts/tools/verify_web_boot.mjs "$web_dir" google-chrome
+
       - name: Upload packaged artifact
         uses: actions/upload-artifact@v7
         with:

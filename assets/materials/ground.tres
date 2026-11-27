@@ -1,4 +1,6 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/materials/meadow.gdshader" id="1_meadow"]
 
 [resource]
-albedo_color = Color(0.55, 0.78, 0.45, 1)
+shader = ExtResource("1_meadow")

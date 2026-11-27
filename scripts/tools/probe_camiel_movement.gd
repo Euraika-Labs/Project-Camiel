@@ -212,6 +212,10 @@ func _run_portable_cases() -> void:
 	if _failed:
 		return
 	_portable_pass_count += 1
+	await _case_reverse_directions()
+	if _failed:
+		return
+	_portable_pass_count += 1
 	await _case_jump()
 	if _failed:
 		return
@@ -317,6 +321,34 @@ func _case_same_direction_keys() -> void:
 		_fail("same_direction_keys", "horizontal speed %.4f m/s > walk_speed + 0.05 (%.4f)" % [horizontal_speed, walk_speed + 0.05])
 		return
 	_pass("same_direction_keys")
+
+
+func _case_reverse_directions() -> void:
+	var pivot := _camiel.get_node("CameraPivot") as Node3D
+	for diagonal: bool in [false, true]:
+		var case_name := "back_diagonal" if diagonal else "backward"
+		_reset(Vector3.ZERO)
+		await _wait_frames(12)
+		var start := _camiel.global_position
+		var heading := pivot.rotation.y
+		var screen_direction := Vector3(1.0 if diagonal else 0.0, 0.0, 1.0).normalized()
+		var direction := pivot.global_basis * screen_direction
+		_send_key(KEY_DOWN, true)
+		if diagonal:
+			_send_key(KEY_RIGHT, true)
+		await _wait_frames(60)
+		_release_all_keys()
+		var displacement := _camiel.global_position - start
+		var distance := displacement.dot(direction)
+		var sideways := displacement - direction * distance
+		sideways.y = 0.0
+		if distance < 1.5 or sideways.length() > 0.1:
+			_fail(case_name, "held input curved or went the wrong way: %s" % displacement)
+			return
+		if absf(wrapf(pivot.rotation.y - heading, -PI, PI)) > 0.03:
+			_fail(case_name, "camera changed direction while a movement key was held")
+			return
+		_pass(case_name)
 
 
 func _case_opposite_keys() -> void:
@@ -506,7 +538,7 @@ func _case_soft_return() -> void:
 
 func _case_wall() -> void:
 	_release_all_keys()
-	_camiel.steering_mode = STEERING_CAMERA_RELATIVE
+	_camiel.steering_mode = STEERING_TURN_AND_WALK
 	_camiel.rotation.y = PI
 	_camiel.teleport_to(Vector3(0, 0, -4.8))
 	await _wait_frames(30)

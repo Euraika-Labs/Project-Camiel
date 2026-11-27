@@ -258,6 +258,17 @@ class CiWorkflowTests(unittest.TestCase):
             self.assertNotIn("alpha-v0.0.1", text)
             self.assertNotIn("continue-on-error", text)
 
+    def test_web_archive_must_boot_before_upload(self) -> None:
+        steps = yaml.safe_load(self.export_text)["jobs"]["export"]["steps"]
+        names = [step["name"] for step in steps]
+        index = names.index("Open packaged Web build in Chrome")
+        self.assertLess(names.index("Export and package"), index)
+        self.assertLess(index, names.index("Upload packaged artifact"))
+        smoke = steps[index]
+        self.assertEqual("matrix.target == 'web'", smoke["if"])
+        self.assertIn('unzip -q "builds/release/Camiel-$version-web.zip"', smoke["run"])
+        self.assertIn('verify_web_boot.mjs "$web_dir" google-chrome', smoke["run"])
+
     def test_publish_guard_executes_and_rejects_missing_or_directory_attachment(self) -> None:
         workflow = yaml.safe_load(self.release_text)
         step = next(s for s in workflow["jobs"]["publish"]["steps"]

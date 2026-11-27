@@ -5,6 +5,31 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_mixfv"]
 radius = 0.55
 
+[sub_resource type="StandardMaterial3D" id="Material_plinth"]
+albedo_color = Color(0.67, 0.47, 0.29, 1)
+roughness = 0.91
+
+[sub_resource type="CylinderMesh" id="Mesh_plinth"]
+material = SubResource("Material_plinth")
+top_radius = 0.50
+bottom_radius = 0.55
+height = 0.12
+radial_segments = 24
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="Material_guide"]
+albedo_color = Color(1, 0.82, 0.35, 1)
+emission_enabled = true
+emission = Color(1, 0.75, 0.27, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="TorusMesh" id="Mesh_guide"]
+material = SubResource("Material_guide")
+inner_radius = 0.54
+outer_radius = 0.61
+rings = 24
+ring_segments = 10
+
 [node name="LessonTarget" type="Area3D" unique_id=429791032]
 script = ExtResource("1_4gust")
 
@@ -13,10 +38,23 @@ shape = SubResource("SphereShape3D_mixfv")
 
 [node name="Mesh" type="MeshInstance3D" parent="." unique_id=1129027977]
 
+[node name="Pedestal" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.43, 0)
+mesh = SubResource("Mesh_plinth")
+
+[node name="GuideRing" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.30, 0)
+mesh = SubResource("Mesh_guide")
+
 [node name="Label" type="Label3D" parent="." unique_id=525277845]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
 billboard = 1
 modulate = Color(1, 1, 1, 1)
-outline_modulate = Color(0, 0, 0, 1)
-outline_size = 24
+outline_modulate = Color(0.14, 0.24, 0.17, 1)
+outline_size = 18
 font_size = 96
+
+[node name="Check" type="MeshInstance3D" parent="."]
+visible = false
+position = Vector3(0, 1.20, 0)
+cast_shadow = 0

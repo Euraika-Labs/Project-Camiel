@@ -96,7 +96,34 @@ func _check_scene_bindings() -> void:
 		root.add_child(scene)
 		await process_frame
 		await process_frame
-		_check(_voice.current_cue == scenes[scene_name], "Scene cue " + scene_name)
+		var entry_cue: String = scenes[scene_name]
+		if scene_name == "main_menu":
+			match scene.get_node("%StartButton").label_text:
+				"Verder spelen":
+					entry_cue = "menu_continue"
+				"Tuinfeest":
+					entry_cue = "menu_garden"
+		elif scene_name == "intro_level" and scene.get_node("Camiel").has_touch_controls():
+			entry_cue = "intro_touch"
+		_check(_voice.current_cue == entry_cue, "Scene cue " + scene_name)
+		if scene_name == "intro_level":
+			var player: CharacterBody3D = scene.get_node("Camiel")
+			var listen: Button = scene.get_node("%IntroListenButton")
+			listen.pressed.emit()
+			_check(_voice.current_cue == entry_cue, "Listen repeats the motion cue for the active controls")
+			player.teleport_to(player.global_position + Vector3(0, 0, -0.75))
+			for frame in 8:
+				await process_frame
+			listen.pressed.emit()
+			_check(_voice.current_cue == "intro_ball", "Listen names the ball after the player has moved")
+			var ball: Area3D = scene.get_node("%Collectible")
+			player.teleport_to(ball.global_position - Vector3(0, 0.4, 0))
+			for frame in 12:
+				await physics_frame
+			_check(_voice.current_cue == "collected", "Intro pickup speaks feedback")
+			_check("intro_finish" in _voice._queue, "Intro pickup queues the direction to the finish")
+			listen.pressed.emit()
+			_check(_voice.current_cue == "intro_finish", "Listen repeats the current intro task")
 		if scene_name == "main_menu":
 			scene._open_settings()
 			await process_frame
@@ -111,16 +138,97 @@ func _check_scene_bindings() -> void:
 					_check(saved.load(_voice.SETTINGS_PATH) == OK, "Volume persisted")
 					_check(is_equal_approx(float(saved.get_value("voice", "volume", -1.0)), 0.35), "Saved volume matches slider")
 		if scene_name == "lesson_2":
-			scene.get_node("SquareTarget").rejected.emit()
-			_check(_voice.current_cue == "retry", "Rejected target speaks feedback")
-			scene._on_task_completed("circle")
-			_check(_voice.current_cue == "correct", "Accepted target speaks feedback")
-			if OS.get_user_data_dir().contains("camiel-voice-probe-"):
-				scene._on_task_completed("square")
-				scene._on_task_completed("triangle")
-				_check(_voice.current_cue == "complete", "Lesson completion speaks celebration")
+			await _check_narration_pause(scene)
+			await _check_shape_guidance(scene)
+		if scene_name == "lesson_4" and OS.get_user_data_dir().contains("camiel-voice-probe-"):
+			await _check_color_counting(scene)
 		scene.emit_signal("transition_requested", "res://scenes/main_menu.tscn")
 		_check(not _voice.is_playing(), "Navigation stops " + scene_name)
 		scene.queue_free()
 		await process_frame
 		await process_frame
+
+
+func _check_narration_pause(scene: Node) -> void:
+	var player := _voice.get_node("Narration") as AudioStreamPlayer
+	var pause_button := scene.get_node("%Hud").get_node("%PauseButton") as Button
+	_voice.play("lesson_2")
+	_voice.enqueue("goal_circle")
+	var playback := player.get_stream_playback()
+	pause_button.pressed.emit()
+	await process_frame
+	var dialog := pause_button.get_node_or_null("Settings")
+	_check(paused and dialog != null, "Pause opens the in-game settings dialog")
+	_check(player.stream_paused and player.has_stream_playback(), "Pause suspends the active narration")
+	_check(_voice.current_cue == "lesson_2" and _voice._queue == ["goal_circle"], "Pause preserves the narration queue")
+	if dialog == null:
+		paused = false
+		return
+	dialog.get_node("%CloseButton").pressed.emit()
+	await process_frame
+	await process_frame
+	_check(not paused and not player.stream_paused, "Continue releases the narration pause")
+	_check(player.has_stream_playback() and player.get_stream_playback() == playback, "Continue resumes the same narration playback")
+
+	pause_button.pressed.emit()
+	scene.emit_signal("transition_requested", "res://scenes/main_menu.tscn")
+	var cancel := InputEventAction.new()
+	cancel.action = "ui_cancel"
+	cancel.pressed = true
+	root.push_input(cancel)
+	await process_frame
+	await process_frame
+	_check(not paused and not player.has_stream_playback() and _voice._queue.is_empty(),
+		"Navigation during pause discards the old scene's narration")
+
+
+func _check_shape_guidance(scene: Node) -> void:
+	var hud := scene.get_node("%Hud")
+	var speaker: Button = hud.get_node("%ListenButton")
+	var spoken: Array[String] = []
+	var track := func(cue: String) -> void: spoken.append(cue)
+	_voice.cue_started.connect(track)
+	scene.get_node("SquareTarget").rejected.emit()
+	scene.get_node("TriangleTarget").rejected.emit()
+	_check(spoken == ["goal_circle"], "Repeated wrong guesses must not restart help for the same shape")
+	scene._on_task_completed("circle")
+	_check(_voice.current_cue == "correct", "Accepted target speaks feedback")
+	var deadline := Time.get_ticks_msec() + 4000
+	while _voice.current_cue != "goal_square" and Time.get_ticks_msec() < deadline:
+		await process_frame
+	_check(_voice.current_cue == "goal_square", "Accepted target must announce the next shape after feedback")
+	_voice.stop()
+	speaker.pressed.emit()
+	_check(_voice.current_cue == "goal_square", "Listen must repeat the current shape")
+	if OS.get_user_data_dir().contains("camiel-voice-probe-"):
+		scene._on_task_completed("square")
+		_check(_voice._queue == ["goal_triangle"], "The next shape must replace the previous hint")
+		scene._on_task_completed("triangle")
+		_check(_voice.current_cue == _win_cue(hud) and _voice._queue.is_empty(), "Finishing replaces in-progress guidance")
+		_check(not hud.get_node("%HintLabel").visible, "The win overlay must not keep showing the previous instruction")
+	_voice.cue_started.disconnect(track)
+
+
+func _check_color_counting(scene: Node) -> void:
+	var hud := scene.get_node("%Hud")
+	var spoken: Array[String] = []
+	var track := func(cue: String) -> void: spoken.append(cue)
+	_voice.cue_started.connect(track)
+	for id: String in ["green", "yellow", "count_2", "count_2", "count_3", "count_1"]:
+		scene._on_task_completed(id)
+	_check(hud.is_win_visible(), "The colour lesson finishes after both colours and three unique stones")
+	var cue := _win_cue(hud)
+	var deadline := Time.get_ticks_msec() + 5500
+	while _voice.current_cue != cue and Time.get_ticks_msec() < deadline:
+		await process_frame
+	_check(spoken == ["color_green", "color_yellow", "counted_1", "counted_2", "counted_3", cue],
+		"Quick pickups must speak each count once, including the last stone before the celebration")
+	_voice.cue_started.disconnect(track)
+
+
+func _win_cue(hud: CanvasLayer) -> String:
+	if hud.get_node("%CelebrationButton").visible:
+		return "garden_ready"
+	if hud.get_node("%NextButton").visible:
+		return "lesson_continue"
+	return "complete"

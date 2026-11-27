@@ -11,13 +11,11 @@
 [ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="9_2oxm2"]
 [ext_resource type="PackedScene" path="res://scenes/collectible.tscn" id="10_4ioru"]
 [ext_resource type="Script" path="res://scripts/collectible.gd" id="11_jcxbg"]
-
-[sub_resource type="Environment" id="Environment_aimfc"]
-background_mode = 1
-background_color = Color(0.62, 0.82, 0.95, 1)
-ambient_light_source = 2
-ambient_light_color = Color(1, 1, 1, 1)
-ambient_light_energy = 0.5
+[ext_resource type="Script" path="res://scripts/world/garden_scenery.gd" id="garden_art"]
+[ext_resource type="Script" path="res://scripts/ui/goal_direction.gd" id="goal_direction"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_button.tscn" id="pause_button"]
+[ext_resource type="Script" path="res://scripts/ui/vector_icon.gd" id="vector_icon"]
+[ext_resource type="Script" path="res://scripts/ui/held_arrows.gd" id="held_arrows"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_nmhdb"]
 size = Vector3(16, 1, 16)
@@ -29,31 +27,16 @@ size = Vector3(16, 1, 16)
 size = Vector3(16, 2.5, 0.5)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bhot5"]
-albedo_color = Color(0.55, 0.7, 0.95, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_4ioru"]
-material = SubResource("StandardMaterial3D_bhot5")
-size = Vector3(16, 2.5, 0.5)
+albedo_color = Color(0.51, 0.34, 0.22, 1)
+roughness = 0.9
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_jcxbg"]
-size = Vector3(16, 2.5, 0.5)
-
-[sub_resource type="BoxMesh" id="BoxMesh_n8fro"]
-material = SubResource("StandardMaterial3D_bhot5")
 size = Vector3(16, 2.5, 0.5)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_2oxm2"]
 size = Vector3(0.5, 2.5, 16)
 
-[sub_resource type="BoxMesh" id="BoxMesh_cgx0p"]
-material = SubResource("StandardMaterial3D_bhot5")
-size = Vector3(0.5, 2.5, 16)
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_i6lkt"]
-size = Vector3(0.5, 2.5, 16)
-
-[sub_resource type="BoxMesh" id="BoxMesh_qkqhi"]
-material = SubResource("StandardMaterial3D_bhot5")
 size = Vector3(0.5, 2.5, 16)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_fcn4p"]
@@ -61,7 +44,15 @@ size = Vector3(3, 0.4, 3)
 
 [sub_resource type="BoxMesh" id="BoxMesh_4egoh"]
 material = SubResource("StandardMaterial3D_bhot5")
-size = Vector3(3, 0.4, 3)
+size = Vector3(3, 0.36, 3)
+
+[sub_resource type="StandardMaterial3D" id="Material_deck"]
+albedo_color = Color(0.69, 0.49, 0.32, 1)
+roughness = 0.94
+
+[sub_resource type="BoxMesh" id="Mesh_deck_plank"]
+material = SubResource("Material_deck")
+size = Vector3(2.94, 0.04, 0.46)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cgx0p"]
 content_margin_left = 32.0
@@ -82,13 +73,11 @@ corner_radius_bottom_left = 32
 [node name="IntroLevel" type="Node3D" unique_id=1870252191]
 script = ExtResource("1_kclwk")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=716390162]
-environment = SubResource("Environment_aimfc")
-
-[node name="Sun" type="DirectionalLight3D" parent="." unique_id=362053582]
-transform = Transform3D(0.8660254, 0, 0.5, 0.38302222, 0.64278764, -0.66341394, -0.32139382, 0.76604444, 0.5566704, 0, 0, 0)
-light_color = Color(1, 0.98, 0.9, 1)
-shadow_enabled = true
+[node name="Garden" type="Node3D" parent="."]
+script = ExtResource("garden_art")
+half_extent = 8.0
+show_trail = true
+north_gate_opening = Vector2(-6.28, -3.72)
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=654100484]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
@@ -104,39 +93,31 @@ mesh = SubResource("BoxMesh_t5ni6")
 
 [node name="WallNorth" type="StaticBody3D" parent="Walls" unique_id=128908056]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, -8)
+collision_layer = 4
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/WallNorth" unique_id=1162338193]
 shape = SubResource("BoxShape3D_kclwk")
 
-[node name="Mesh" type="MeshInstance3D" parent="Walls/WallNorth" unique_id=1766461981]
-mesh = SubResource("BoxMesh_4ioru")
-
 [node name="WallSouth" type="StaticBody3D" parent="Walls" unique_id=1869383749]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 8)
+collision_layer = 4
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/WallSouth" unique_id=2070780620]
 shape = SubResource("BoxShape3D_jcxbg")
 
-[node name="Mesh" type="MeshInstance3D" parent="Walls/WallSouth" unique_id=1687980138]
-mesh = SubResource("BoxMesh_n8fro")
-
 [node name="WallEast" type="StaticBody3D" parent="Walls" unique_id=1509450103]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.25, 0)
+collision_layer = 4
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/WallEast" unique_id=253327877]
 shape = SubResource("BoxShape3D_2oxm2")
 
-[node name="Mesh" type="MeshInstance3D" parent="Walls/WallEast" unique_id=853160360]
-mesh = SubResource("BoxMesh_cgx0p")
-
 [node name="WallWest" type="StaticBody3D" parent="Walls" unique_id=450123429]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.25, 0)
+collision_layer = 4
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/WallWest" unique_id=1781525071]
 shape = SubResource("BoxShape3D_i6lkt")
-
-[node name="Mesh" type="MeshInstance3D" parent="Walls/WallWest" unique_id=1030501457]
-mesh = SubResource("BoxMesh_qkqhi")
 
 [node name="Ramp" type="StaticBody3D" parent="." unique_id=938715304]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.2, -4)
@@ -146,6 +127,30 @@ shape = SubResource("BoxShape3D_fcn4p")
 
 [node name="Mesh" type="MeshInstance3D" parent="Ramp" unique_id=1001535971]
 mesh = SubResource("BoxMesh_4egoh")
+
+[node name="Plank1" type="MeshInstance3D" parent="Ramp"]
+position = Vector3(0, 0.18, -1.25)
+mesh = SubResource("Mesh_deck_plank")
+
+[node name="Plank2" type="MeshInstance3D" parent="Ramp"]
+position = Vector3(0, 0.18, -0.75)
+mesh = SubResource("Mesh_deck_plank")
+
+[node name="Plank3" type="MeshInstance3D" parent="Ramp"]
+position = Vector3(0, 0.18, -0.25)
+mesh = SubResource("Mesh_deck_plank")
+
+[node name="Plank4" type="MeshInstance3D" parent="Ramp"]
+position = Vector3(0, 0.18, 0.25)
+mesh = SubResource("Mesh_deck_plank")
+
+[node name="Plank5" type="MeshInstance3D" parent="Ramp"]
+position = Vector3(0, 0.18, 0.75)
+mesh = SubResource("Mesh_deck_plank")
+
+[node name="Plank6" type="MeshInstance3D" parent="Ramp"]
+position = Vector3(0, 0.18, 1.25)
+mesh = SubResource("Mesh_deck_plank")
 
 [node name="PlayerSpawn" type="Marker3D" parent="." unique_id=1327510953]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
@@ -158,6 +163,99 @@ script = ExtResource("3_q6uy0")
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -6)
 script = ExtResource("6_4ioru")
+
+[node name="TrailMarker" type="MeshInstance3D" parent="."]
+unique_name_in_owner = true
+visible = false
+cast_shadow = 0
+
+[node name="ExploreHud" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+
+[node name="GoalDirection" type="Control" parent="ExploreHud"]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("goal_direction")
+
+[node name="Guide" type="PanelContainer" parent="ExploreHud"]
+unique_name_in_owner = true
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -608.0
+offset_top = 18.0
+offset_right = -24.0
+theme = ExtResource("7_jcxbg")
+theme_type_variation = &"HudPanel"
+
+[node name="GuideRow" type="HBoxContainer" parent="ExploreHud/Guide"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Directions" type="VBoxContainer" parent="ExploreHud/Guide/GuideRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="ExploreHud/Guide/GuideRow/Directions"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 27
+text = "Verken de bostuin"
+
+[node name="Task" type="Label" parent="ExploreHud/Guide/GuideRow/Directions"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 21
+text = "Loop naar de gouden bol."
+autowrap_mode = 3
+
+[node name="ControlHints" type="HBoxContainer" parent="ExploreHud/Guide/GuideRow/Directions"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ArrowKeys" type="Control" parent="ExploreHud/Guide/GuideRow/Directions/ControlHints"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 46)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("vector_icon")
+icon_kind = "arrow_keys"
+
+[node name="Controls" type="Label" parent="ExploreHud/Guide/GuideRow/Directions/ControlHints"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SmallLabel"
+text = "Pijltjes om te lopen\nSpatie om te springen"
+autowrap_mode = 3
+
+[node name="IntroListenButton" type="Button" parent="ExploreHud/Guide/GuideRow" instance=ExtResource("8_n8fro")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(115, 76)
+layout_mode = 2
+label_text = "Luister"
+icon_kind = "speaker"
+compact = true
+
+[node name="PauseButton" parent="ExploreHud/Guide/GuideRow" instance=ExtResource("pause_button")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ExploreBackButton" type="Button" parent="ExploreHud" instance=ExtResource("8_n8fro")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(174, 76)
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -98.0
+offset_right = 198.0
+offset_bottom = -22.0
+label_text = "Naar menu"
+icon_kind = "home"
+compact = true
 
 [node name="WinLayer" type="CanvasLayer" parent="." unique_id=1682431681]
 unique_name_in_owner = true
@@ -174,6 +272,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("7_jcxbg")
+script = ExtResource("held_arrows")
 
 [node name="ColorRect" type="ColorRect" parent="WinLayer/Scrim" unique_id=988767117]
 layout_mode = 0
@@ -193,7 +292,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_cgx0p")
 
 [node name="WinContent" type="VBoxContainer" parent="WinLayer/Scrim/CenterContainer/WinPanel" unique_id=1334751413]
 layout_mode = 2
-theme_override_constants/separation = 32
+theme_override_constants/separation = 18
 alignment = 1
 
 [node name="WinTitle" type="Label" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent" unique_id=2077373709]
@@ -202,29 +301,50 @@ theme_type_variation = &"HeadingLabel"
 text = "Goed zo!"
 horizontal_alignment = 1
 
-[node name="ButtonRow" type="HBoxContainer" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent" unique_id=512371767]
-layout_mode = 2
-theme_override_constants/separation = 48
-
-[node name="ReplayButton" type="Button" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent/ButtonRow" unique_id=1313707963 instance=ExtResource("8_n8fro")]
+[node name="ContinueButton" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent" instance=ExtResource("8_n8fro")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 112)
 layout_mode = 2
+focus_neighbor_bottom = NodePath("../ButtonRow/ReplayButton")
+focus_next = NodePath("../ButtonRow/ReplayButton")
+focus_previous = NodePath("../ButtonRow/GoToMenuButton")
+theme_type_variation = &"PrimaryButton"
+label_text = "Naar les 1"
+icon_kind = "play"
+
+[node name="ButtonRow" type="GridContainer" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent" unique_id=512371767]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 12
+columns = 2
+
+[node name="ReplayButton" type="Button" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent/ButtonRow" unique_id=1313707963 instance=ExtResource("8_n8fro")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(216, 92)
+layout_mode = 2
 focus_neighbor_right = NodePath("../GoToMenuButton")
+focus_neighbor_top = NodePath("../../ContinueButton")
+focus_next = NodePath("../GoToMenuButton")
+focus_previous = NodePath("../../ContinueButton")
 theme = ExtResource("7_jcxbg")
 script = ExtResource("9_2oxm2")
 label_text = "Nog een keer"
 icon_kind = "replay"
+compact = true
 
 [node name="GoToMenuButton" type="Button" parent="WinLayer/Scrim/CenterContainer/WinPanel/WinContent/ButtonRow" unique_id=489977991 instance=ExtResource("8_n8fro")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 112)
+custom_minimum_size = Vector2(216, 92)
 layout_mode = 2
 focus_neighbor_left = NodePath("../ReplayButton")
+focus_neighbor_top = NodePath("../../ContinueButton")
+focus_next = NodePath("../../ContinueButton")
+focus_previous = NodePath("../ReplayButton")
 theme = ExtResource("7_jcxbg")
 script = ExtResource("9_2oxm2")
 label_text = "Naar menu"
 icon_kind = "home"
+compact = true
 
 [node name="Collectible" type="Area3D" parent="." unique_id=1327767782 instance=ExtResource("10_4ioru")]
 unique_name_in_owner = true

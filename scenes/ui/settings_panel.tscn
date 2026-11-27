@@ -1,0 +1,130 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/settings_panel.gd" id="2_settings"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="3_button"]
+[ext_resource type="Script" path="res://scripts/ui/volume_slider.gd" id="4_volume"]
+[ext_resource type="Script" path="res://scripts/ui/held_arrows.gd" id="5_held"]
+
+[node name="Settings" type="CanvasLayer"]
+process_mode = 3
+layer = 20
+script = ExtResource("2_settings")
+
+[node name="Shade" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.16, 0.12, 0.54)
+script = ExtResource("5_held")
+
+[node name="Center" type="CenterContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme = ExtResource("1_theme")
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+layout_mode = 2
+
+[node name="Rows" type="VBoxContainer" parent="Center/Panel"]
+custom_minimum_size = Vector2(510, 0)
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Center/Panel/Rows"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "Instellingen"
+
+[node name="Volumes" type="GridContainer" parent="Center/Panel/Rows"]
+layout_mode = 2
+theme_override_constants/h_separation = 18
+theme_override_constants/v_separation = 4
+columns = 3
+
+[node name="MusicLabel" type="Label" parent="Center/Panel/Rows/Volumes"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_font_sizes/font_size = 24
+text = "Muziek"
+
+[node name="MusicVolume" type="HSlider" parent="Center/Panel/Rows/Volumes"]
+unique_name_in_owner = true
+script = ExtResource("4_volume")
+custom_minimum_size = Vector2(258, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+accessibility_name = "Muziek"
+max_value = 100.0
+step = 5.0
+
+[node name="MusicValue" type="Label" parent="Center/Panel/Rows/Volumes"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(67, 0)
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+horizontal_alignment = 2
+
+[node name="EffectsLabel" type="Label" parent="Center/Panel/Rows/Volumes"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_font_sizes/font_size = 24
+text = "Geluid"
+
+[node name="EffectsVolume" type="HSlider" parent="Center/Panel/Rows/Volumes"]
+unique_name_in_owner = true
+script = ExtResource("4_volume")
+custom_minimum_size = Vector2(258, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+accessibility_name = "Geluid"
+max_value = 100.0
+step = 5.0
+
+[node name="EffectsValue" type="Label" parent="Center/Panel/Rows/Volumes"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(67, 0)
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+horizontal_alignment = 2
+
+[node name="VoiceLabel" type="Label" parent="Center/Panel/Rows/Volumes"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_font_sizes/font_size = 24
+text = "Stem"
+
+[node name="VoiceVolume" type="HSlider" parent="Center/Panel/Rows/Volumes"]
+unique_name_in_owner = true
+script = ExtResource("4_volume")
+custom_minimum_size = Vector2(258, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+accessibility_name = "Stem"
+max_value = 100.0
+step = 5.0
+
+[node name="VoiceValue" type="Label" parent="Center/Panel/Rows/Volumes"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(67, 0)
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+horizontal_alignment = 2
+
+[node name="Contrast" type="CheckButton" parent="Center/Panel/Rows"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+accessibility_name = "Hoog contrast"
+theme_override_font_sizes/font_size = 24
+text = "Hoog contrast"
+
+[node name="CloseButton" parent="Center/Panel/Rows" instance=ExtResource("3_button")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 90)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+label_text = "Terug"
+icon_kind = "play"
+compact = true

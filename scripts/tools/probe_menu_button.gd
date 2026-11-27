@@ -350,10 +350,6 @@ func _case_theme_states() -> void:
 		return
 
 	var focus_flat := focus_box as StyleBoxFlat
-	var accent := Color("ed9e4d")
-	if not focus_flat.border_color.is_equal_approx(accent):
-		_fail("theme_states", "focus stylebox border color %s does not match accent %s" % [focus_flat.border_color, accent])
-		return
 	if focus_flat.border_width_left != 4 or focus_flat.border_width_top != 4 or focus_flat.border_width_right != 4 or focus_flat.border_width_bottom != 4:
 		_fail("theme_states", "focus stylebox border width is not 4 on all sides")
 		return

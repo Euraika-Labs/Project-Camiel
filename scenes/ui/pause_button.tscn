@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="1_button"]
+[ext_resource type="Script" path="res://scripts/ui/pause_button.gd" id="2_pause"]
+
+[node name="PauseButton" instance=ExtResource("1_button")]
+custom_minimum_size = Vector2(92, 90)
+size_flags_vertical = 4
+tooltip_text = "Pauze (P)"
+accessibility_name = "Pauze en instellingen"
+script = ExtResource("2_pause")
+label_text = "Pauze"
+icon_kind = "pause"
+compact = true

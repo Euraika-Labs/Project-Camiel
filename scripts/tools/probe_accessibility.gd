@@ -32,6 +32,10 @@ func _run() -> void:
 	var menu := load("res://scenes/main_menu.tscn").instantiate() as Control
 	root.add_child(menu)
 	await process_frame
+	var start := menu.get_node("%StartButton") as Button
+	var lessons := menu.get_node("%LessonsButton") as Button
+	_check_button_contrast(start)
+	_check_button_contrast(lessons)
 	var settings_button: Button
 	for child: Node in menu.get_children():
 		if child is Button and child.text == "Instellingen":
@@ -43,15 +47,21 @@ func _run() -> void:
 		var overlay := menu.get_node_or_null("Settings")
 		_check(overlay != null, "settings button did not open overlay")
 		if overlay != null:
+			var close := overlay.get_node("%CloseButton") as Button
+			_check_button_contrast(close)
 			var toggles := overlay.find_children("*", "CheckButton", true, false)
 			_check(not toggles.is_empty(), "contrast toggle missing")
 			if not toggles.is_empty():
+				_check(toggles[0].text == "Hoog contrast (uit)", "contrast label should show the initial off state")
 				toggles[0].button_pressed = true
 				await process_frame
 				_check(accessibility.high_contrast, "UI toggle did not change setting")
+				_check(toggles[0].text == "Hoog contrast (aan)", "contrast label did not update to on")
 				_check(theme.get_color("font_color", "SmallLabel") == Color.BLACK, "live cached theme unchanged")
 				_check(theme.get_stylebox("normal", "Button").bg_color == Color.WHITE, "contrast background unchanged")
 				_check(theme.get_stylebox("grabber_area", "HSlider").bg_color == Color.BLACK, "volume fill invisible on white panel")
+				_check_button_contrast(close)
+				_check_button_contrast(toggles[0])
 				var persisted := ConfigFile.new()
 				_check(persisted.load(prefs_path) == OK and persisted.get_value("accessibility", "high_contrast", false), "contrast not persisted")
 			var cancel := InputEventAction.new()
@@ -80,6 +90,26 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		_failed = true
 		push_error(message)
+
+
+func _check_button_contrast(button: Button) -> void:
+	var focus := button.get_theme_stylebox(&"focus") as StyleBoxFlat
+	_check(focus != null, "%s has no flat focus style" % button.name)
+	if focus == null:
+		return
+	_check(not focus.draw_center and focus.expand_margin_left > focus.border_width_left,
+		"%s focus ring needs a gap separating it from the button border" % button.name)
+	var icon := button.get_node_or_null("%Icon")
+	for state: StringName in [&"normal", &"hover", &"pressed"]:
+		var style := button.get_theme_stylebox(state) as StyleBoxFlat
+		if style == null:
+			_check(false, "%s has no flat style for %s" % [button.name, state])
+			continue
+		_check(_contrast(focus.border_color, style.bg_color) >= 3.0,
+			"%s has insufficient focus contrast in state %s" % [button.name, state])
+		if icon != null:
+			_check(_contrast(icon.icon_color, style.bg_color) >= 3.0,
+				"%s has insufficient icon contrast in state %s" % [button.name, state])
 
 
 func _linear(value: float) -> float:

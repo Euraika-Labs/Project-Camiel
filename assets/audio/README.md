@@ -6,9 +6,16 @@ This directory holds all audio files used by the game.
 
 | File | Purpose | Format | Notes |
 |------|---------|--------|-------|
-| `bgm_ambient.ogg` | Looping background music for menus and gameplay | OGG Vorbis, stereo, ~8 s | Two low sine voices (220 Hz, 330 Hz), 50 ms fade in/out so the loop seam does not click. Loops (`loop=true`) |
-| `sfx_collect.ogg` | Collectible pickup sound | OGG Vorbis, stereo, ~0.4 s | Bright 880 Hz chime, short attack, exponential decay. Does not loop |
-| `sfx_finish.ogg` | Level complete / flag reached fanfare | OGG Vorbis, stereo, ~1.2 s | Three warm rising tones (523 Hz, 659 Hz, 784 Hz) in sequence, fading out at the end. Does not loop |
+| `bgm_ambient.ogg` | Muziek voor menu en spel | Ogg Vorbis, stereo, 45,71 s | Zestien maten met geplukte klanken en zachte bas. Loopt door (`loop=true`) |
+| `sfx_collect.ogg` | Bevestiging bij een opgepakt voorwerp of geraakt lesdoel | Ogg Vorbis, stereo, 0,42 s | Twee korte klanken |
+| `sfx_finish.ogg` | Bereikte eindring of afgeronde les | Ogg Vorbis, stereo, 1,34 s | Vier stijgende noten met een zachte slotklank |
+
+`scripts/tools/generate_game_audio.py` bevat de partituur en rendert de drie bestanden op 32 kHz. De staarten van de laatste noten lopen door over het begin van de muziek. Installeer voor het opnieuw genereren NumPy en SoundFile in je ontwikkelomgeving en voer het script uit vanuit de repository.
+
+```bash
+python3 -m pip install numpy soundfile==0.13.1
+python3 scripts/tools/generate_game_audio.py
+```
 
 ## OGG-bestanden moeten echte Vorbis bevatten, geen Opus
 
@@ -22,34 +29,6 @@ delete the stale `.ogg.import` sidecar (a sidecar recording an unsuccessful
 import is skipped forever, not retried) and reimport from a genuine Vorbis
 file.
 
-`bgm_ambient.ogg` was generated with:
-
-```
-ffmpeg -y -f lavfi -i "sine=frequency=220:duration=8" -f lavfi -i "sine=frequency=330:duration=8" \
-  -filter_complex "[0:a]afade=t=in:st=0:d=0.05,afade=t=out:st=7.95:d=0.05[a0];[1:a]afade=t=in:st=0:d=0.05,afade=t=out:st=7.95:d=0.05[a1];[a0][a1]amix=inputs=2:duration=first:dropout_transition=0,volume=0.5[aout]" \
-  -map "[aout]" -ac 2 -threads 1 -c:a vorbis -strict -2 -qscale:a 4 assets/audio/bgm_ambient.ogg
-```
-
-`-ac 2` (stereo) is mandatory — ffmpeg's native `vorbis` encoder only accepts
-2 channels; a mono `-ac 1` input errors outright.
-
-`sfx_collect.ogg` and `sfx_finish.ogg` were generated the same way, each
-with `loop=false` left in the reimported sidecar — a one-shot sound effect
-that loops would never stop:
-
-```
-ffmpeg -y -f lavfi -i "sine=frequency=880:duration=0.4" \
-  -filter_complex "[0:a]volume=0.33,afade=t=in:st=0:d=0.02,afade=t=out:st=0.1:d=0.3[aout]" \
-  -map "[aout]" -ac 2 -threads 1 -c:a vorbis -strict -2 -qscale:a 4 assets/audio/sfx_collect.ogg
-
-ffmpeg -y \
-  -f lavfi -i "sine=frequency=523:duration=0.35" \
-  -f lavfi -i "sine=frequency=659:duration=0.35" \
-  -f lavfi -i "sine=frequency=784:duration=0.5" \
-  -filter_complex "[0:a]volume=0.35,afade=t=in:st=0:d=0.01,afade=t=out:st=0.3:d=0.05[a0];[1:a]volume=0.35,afade=t=in:st=0:d=0.01,afade=t=out:st=0.3:d=0.05[a1];[2:a]volume=0.35,afade=t=in:st=0:d=0.01,afade=t=out:st=0.35:d=0.15[a2];[a0][a1][a2]concat=n=3:v=0:a=1[aout]" \
-  -map "[aout]" -ac 2 -threads 1 -c:a vorbis -strict -2 -qscale:a 4 assets/audio/sfx_finish.ogg
-```
-
 ## Looping is a stream property, not a player property
 
 `AudioStreamPlayer` (the node) has no `loop` property in Godot 4. Looping is
@@ -60,7 +39,16 @@ resulting `AudioStreamOggVorbis`. Only `bgm_ambient.ogg.import` sets
 
 ## Nederlandse spraak
 
-`speech_nl/catalog.json` bevat de Nederlandse teksten en generatiegegevens (Ellen, nl-BE). De meegeleverde clips zijn PCM WAV, mono, 22050 Hz, 16-bit. `scripts/tools/generate_voice_assets.py` genereert ze op macOS; tijdens het spelen is geen spraakdienst nodig. `scripts/voice_manager.gd` routeert de clips naar de onafhankelijke Voice-bus. Verstaanbaarheid op doelapparaten vereist menselijke beoordeling.
+`speech_nl/catalog.json` bevat de Nederlandse teksten en de gebruikte modelversie. Alle clips gebruiken de Vlaamse Nathalie-stem. Piper Voices vermeldt MIT voor het modelarchief en CC0 voor de trainingsdataset van Nathalie. [Modelkaart van Nathalie](https://huggingface.co/rhasspy/piper-voices/blob/0ca208afc2a2ee102b1e961e72e0a7e4907be3d0/nl/nl_BE/nathalie/medium/MODEL_CARD)
+
+De meegeleverde bestanden zijn mono PCM WAV op 22.050 Hz en 16 bit. Het spel speelt ze lokaal af via de onafhankelijke Voice-bus. Verstaanbaarheid op doelapparaten vereist menselijke beoordeling.
+
+Installeer voor het opnieuw genereren Piper 1.8.0 in je ontwikkelomgeving. Plaats `nl_BE-nathalie-medium.onnx` en het overeenkomstige `.onnx.json`-bestand uit de modelversie in dezelfde map. Geef het pad naar het lokale model op bij het uitvoeren van de generator. [Modelbestanden van Nathalie](https://huggingface.co/rhasspy/piper-voices/tree/0ca208afc2a2ee102b1e961e72e0a7e4907be3d0/nl/nl_BE/nathalie/medium)
+
+```bash
+python3 -m pip install piper-tts==1.8.0
+python3 scripts/tools/generate_voice_assets.py /pad/naar/nl_BE-nathalie-medium.onnx
+```
 
 ## Implementation
 

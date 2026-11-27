@@ -7,6 +7,7 @@ extends SceneTree
 
 const BUS_MUSIC := "Music"
 const BUS_SFX := "SFX"
+const VOLUME_SETTINGS_PATH := "user://audio.cfg"
 
 # Autoload singletons are only resolvable as bare global identifiers (e.g.
 # "AudioManager.play_music(...)") when the engine boots a normal scene tree.
@@ -19,6 +20,9 @@ const BUS_SFX := "SFX"
 var _audio_manager: Node
 
 var _cases_run := 0
+var _preserve_settings := false
+var _had_settings := false
+var _original_settings := PackedByteArray()
 
 
 func _initialize() -> void:
@@ -35,6 +39,10 @@ func _initialize() -> void:
 	# Let both settle before touching AudioManager's player state.
 	await process_frame
 	await process_frame
+	_preserve_settings = true
+	_had_settings = FileAccess.file_exists(VOLUME_SETTINGS_PATH)
+	if _had_settings:
+		_original_settings = FileAccess.get_file_as_bytes(VOLUME_SETTINGS_PATH)
 
 	await _case_bus_layout()
 	if _cases_run == 0:
@@ -48,6 +56,7 @@ func _initialize() -> void:
 	await _case_menu_sfx_slider()
 	await _case_menu_bgm_slider()
 	await _case_menu_focus_order()
+	_case_volume_storage()
 
 	if _cases_run == 0:
 		push_error("Audio bus probe ran no cases.")
@@ -56,6 +65,35 @@ func _initialize() -> void:
 
 	print("Audio bus probe passed.")
 	quit(0)
+
+
+func _case_volume_storage() -> void:
+	_audio_manager.set_bgm_volume(0.25, true)
+	_audio_manager.set_sfx_volume(0.35, true)
+	var config := ConfigFile.new()
+	if config.load(VOLUME_SETTINGS_PATH) != OK:
+		push_error("Music and effects settings were not written.")
+		return
+	if not is_equal_approx(float(config.get_value("volume", "music", -1.0)), 0.25):
+		push_error("Storing effects did not retain the saved music setting.")
+		return
+	if not is_equal_approx(float(config.get_value("volume", "effects", -1.0)), 0.35):
+		push_error("The effects setting was not stored.")
+		return
+	_cases_run += 1
+	print("PASS volume_storage")
+
+
+func _finalize() -> void:
+	if not _preserve_settings:
+		return
+	if _had_settings:
+		var saved := FileAccess.open(VOLUME_SETTINGS_PATH, FileAccess.WRITE)
+		if saved != null:
+			saved.store_buffer(_original_settings)
+			saved.close()
+	else:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(VOLUME_SETTINGS_PATH))
 
 
 # ── Shared helper ────────────────────────────────────────────────
@@ -428,10 +466,11 @@ func _case_menu_focus_order() -> void:
 
 	var start_button: Control = menu.get_node_or_null("%StartButton")
 	var lessons_button: Control = menu.get_node_or_null("%LessonsButton")
+	var intro_button: Control = menu.get_node_or_null("%IntroButton")
 	var sfx_slider: Control = menu.get_node_or_null("%SfxSlider")
 	var bgm_slider: Control = menu.get_node_or_null("%BgmSlider")
-	if start_button == null or lessons_button == null or sfx_slider == null or bgm_slider == null:
-		push_error("menu_focus_order: one of %StartButton/%LessonsButton/%SfxSlider/%BgmSlider is missing.")
+	if start_button == null or lessons_button == null or intro_button == null or sfx_slider == null or bgm_slider == null:
+		push_error("menu_focus_order: a menu button or slider is missing.")
 		menu.queue_free()
 		quit(1)
 		return
@@ -454,9 +493,20 @@ func _case_menu_focus_order() -> void:
 		sfx_slider: {"down": bgm_slider, "up": lessons_button},
 		bgm_slider: {"down": null, "up": sfx_slider},
 	}
+	if intro_button.visible:
+		expectations[intro_button] = {"down": sfx_slider, "up": start_button}
 	for control: Control in expectations.keys():
 		var expected_down: Variant = expectations[control]["down"]
 		var expected_up: Variant = expectations[control]["up"]
+		var expected_next: Variant = expected_down
+		var expected_previous: Variant = expected_up
+		if intro_button.visible:
+			if control == lessons_button:
+				expected_next = intro_button
+			elif control == intro_button:
+				expected_previous = lessons_button
+			elif control == sfx_slider:
+				expected_previous = intro_button
 
 		var down_path: NodePath = control.focus_neighbor_bottom
 		var down_node: Node = control.get_node_or_null(down_path) if not down_path.is_empty() else null
@@ -476,16 +526,16 @@ func _case_menu_focus_order() -> void:
 
 		var next_path: NodePath = control.focus_next
 		var next_node: Node = control.get_node_or_null(next_path) if not next_path.is_empty() else null
-		if expected_down != null and next_node != expected_down:
-			push_error("menu_focus_order: %s's focus_next is %s, expected %s." % [control.name, next_node, expected_down])
+		if expected_next != null and next_node != expected_next:
+			push_error("menu_focus_order: %s's focus_next is %s, expected %s." % [control.name, next_node, expected_next])
 			menu.queue_free()
 			quit(1)
 			return
 
 		var prev_path: NodePath = control.focus_previous
 		var prev_node: Node = control.get_node_or_null(prev_path) if not prev_path.is_empty() else null
-		if expected_up != null and prev_node != expected_up:
-			push_error("menu_focus_order: %s's focus_previous is %s, expected %s." % [control.name, prev_node, expected_up])
+		if expected_previous != null and prev_node != expected_previous:
+			push_error("menu_focus_order: %s's focus_previous is %s, expected %s." % [control.name, prev_node, expected_previous])
 			menu.queue_free()
 			quit(1)
 			return
