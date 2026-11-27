@@ -381,7 +381,7 @@ def build():
         doc['animations'].append(anim)
 
     # Key every animated transform in every clip so a blend always restores the pose.
-    for name, duration in (('idle', 3.2), ('walk', .62), ('jump', .70)):
+    def add_clip(name, duration):
         walking, jumping = name == 'walk', name == 'jump'
 
         def head_pose(t):
@@ -427,6 +427,9 @@ def build():
         if name == 'idle':
             samples = sorted([*samples, .558, .579, .590, .603, .622])
         animation(name, duration, channels, samples)
+
+    for clip_name, clip_duration in (('idle', 3.2), ('walk', .62), ('jump', .70)):
+        add_clip(clip_name, clip_duration)
 
     doc['images'] = [dict(name='CamielPaint', mimeType='image/png', bufferView=buffer_view(encode_atlas(paintings)))]
     doc['textures'] = [dict(source=0, sampler=0)]
