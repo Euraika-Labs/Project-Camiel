@@ -1,11 +1,12 @@
 # camiel_controller.gd
 # Camiel's 3D movement controller: InputMap-driven walking and jumping
 # (D-07), camera-relative and turn-and-walk steering models (D-11 playtest
-# switch), a lazily-following camera rig with no mouse-look (D-05), and a
+# switch), a follow camera with a stable heading, and a
 # soft fall-and-return to the last safe spot (D-06).
 extends CharacterBody3D
 
 signal returned_to_safe_spot(position: Vector3)
+signal jumped
 
 enum SteeringMode { CAMERA_RELATIVE, TURN_AND_WALK }
 
@@ -22,17 +23,17 @@ enum SteeringMode { CAMERA_RELATIVE, TURN_AND_WALK }
 @export var jump_velocity := 4.5
 @export var turn_to_face_speed := 10.0
 @export var turn_speed := 2.2
-@export var camera_follow_speed := 2.0
 @export var max_fall_speed := 30.0
 @export var safe_spot_margin := 0.75
 @export var safe_spot_sample_interval := 0.2
 
 @onready var _camera_pivot: Node3D = $CameraPivot
 @onready var _spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
+@onready var _camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
 @onready var _return_sound: AudioStreamPlayer = $ReturnSound
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
-var _spawn_position: Vector3
+var _camera_heading := 0.0
 var _last_safe_position: Vector3
 var _safe_spot_timer := 0.0
 var _is_returning := false
@@ -42,11 +43,16 @@ var _touch_controls: Control
 func _ready() -> void:
 	add_to_group("player")
 	_spring_arm.add_excluded_object(get_rid())
-	_spawn_position = global_position
+	_camera_heading = global_rotation.y
 	_last_safe_position = global_position
 	apply_steering_arguments(OS.get_cmdline_user_args())
 	_return_sound.stream = _build_return_tone()
-	_snap_camera_behind()
+	_update_camera()
+	ScreenLayout.layout_changed.connect(_frame_camera)
+	_frame_camera(ScreenLayout.portrait)
+	# Frame the spawn before the spring arm's first physics tick.
+	_camera.position.z = _spring_arm.spring_length
+	reset_physics_interpolation()
 	var touch_layer := CanvasLayer.new()
 	touch_layer.name = "TouchLayer"
 	touch_layer.layer = 5
@@ -59,6 +65,15 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	# Win panels disable player physics without pausing the scene tree.
 	_touch_controls.visible = _touch_controls.available and is_physics_processing()
+
+
+func has_touch_controls() -> bool:
+	return _touch_controls.available
+
+
+func show_touch_hints(walk: bool, jump: bool) -> void:
+	if has_touch_controls():
+		_touch_controls.set_hints(walk, jump)
 
 
 func _physics_process(delta: float) -> void:
@@ -76,15 +91,12 @@ func _physics_process(delta: float) -> void:
 		velocity.y = max(velocity.y - _gravity * delta, -max_fall_speed)
 	elif Input.is_action_just_pressed("jump") or touch_jump:
 		velocity.y = jump_velocity
+		jumped.emit()
 
 	move_and_slide()
 	_sample_safe_spot(delta)
 
-	if steering_mode == SteeringMode.TURN_AND_WALK:
-		_camera_pivot.global_position = global_position + Vector3(0, 1.0, 0)
-		_camera_pivot.rotation.y = rotation.y
-	else:
-		_update_camera(delta)
+	_update_camera()
 
 
 func _process_camera_relative(input_dir: Vector2, delta: float) -> void:
@@ -96,18 +108,11 @@ func _process_camera_relative(input_dir: Vector2, delta: float) -> void:
 	right = right.normalized()
 	var direction: Vector3 = right * input_dir.x - forward * input_dir.y
 
-	_apply_horizontal_velocity(direction * walk_speed, direction.length() > 0.01, delta)
-
-	# Only turn to face the travel direction on a genuine forward/back push.
-	# Turning to face pure lateral (strafe-only) input would make the camera
-	# (which lazily follows Camiel's own facing) chase a target derived from
-	# its own orientation every frame — a closed loop with no fixed point,
-	# which spins Camiel in an endless circle instead of a straight sideways
-	# step. Bad for a 3-year-old holding one arrow key, and it stops Camiel
-	# from ever reaching an edge by strafing toward it (D-06).
-	if absf(input_dir.y) > 0.01 and direction.length() > 0.01:
+	var moving := direction.length_squared() > 0.0001
+	_apply_horizontal_velocity(direction * walk_speed, moving, delta)
+	if moving:
 		var target_yaw := atan2(-direction.x, -direction.z)
-		rotation.y = lerp_angle(rotation.y, target_yaw, turn_to_face_speed * delta)
+		rotation.y = lerp_angle(rotation.y, target_yaw, clampf(turn_to_face_speed * delta, 0.0, 1.0))
 
 
 func _process_turn_and_walk(input_dir: Vector2, delta: float) -> void:
@@ -128,9 +133,20 @@ func _apply_horizontal_velocity(target_velocity: Vector3, has_input: bool, delta
 	velocity.z = horizontal_velocity.z
 
 
-func _update_camera(delta: float) -> void:
+func _update_camera() -> void:
 	_camera_pivot.global_position = global_position + Vector3(0, 1.0, 0)
-	_camera_pivot.rotation.y = lerp_angle(_camera_pivot.rotation.y, rotation.y, clampf(camera_follow_speed * delta, 0.0, 1.0))
+	# Directional input uses this same view, so chasing Camiel's facing would
+	# rotate the input direction while a child held a single key or the stick.
+	_camera_pivot.rotation.y = global_rotation.y if steering_mode == SteeringMode.TURN_AND_WALK else _camera_heading
+
+
+func _frame_camera(portrait: bool) -> void:
+	_camera.keep_aspect = Camera3D.KEEP_WIDTH if portrait else Camera3D.KEEP_HEIGHT
+	_camera.fov = 67.0 if portrait else 61.0
+	_camera.rotation_degrees.x = 0.0 if portrait else 9.0
+	_spring_arm.rotation_degrees.x = -43.0 if portrait else -30.0
+	_spring_arm.spring_length = 5.15 if portrait else 4.65
+	_camera_pivot.reset_physics_interpolation()
 
 
 func _sample_safe_spot(_delta: float) -> void:
@@ -185,12 +201,8 @@ func apply_steering_arguments(args: PackedStringArray) -> void:
 func teleport_to(target: Vector3) -> void:
 	global_position = target
 	velocity = Vector3.ZERO
-	_snap_camera_behind()
-
-
-func _snap_camera_behind() -> void:
-	_camera_pivot.global_position = global_position + Vector3(0, 1.0, 0)
-	_camera_pivot.rotation.y = rotation.y
+	_update_camera()
+	reset_physics_interpolation()
 
 
 func _build_return_tone() -> AudioStreamWAV:

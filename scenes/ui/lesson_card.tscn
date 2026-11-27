@@ -1,0 +1,107 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="2_button"]
+[ext_resource type="Script" path="res://scripts/ui/vector_icon.gd" id="3_icon"]
+
+[sub_resource type="StyleBoxFlat" id="Style_completion"]
+content_margin_left = 29.0
+content_margin_right = 6.0
+bg_color = Color(0.13, 0.30, 0.23, 1)
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
+
+[node name="LessonCard" type="Button"]
+custom_minimum_size = Vector2(348, 226)
+theme = ExtResource("1_theme")
+script = ExtResource("2_button")
+
+[node name="Content" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -10.0
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="Photo" type="Control" parent="Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 142)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+clip_contents = true
+
+[node name="Illustration" type="TextureRect" parent="Content/Photo"]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Completed" type="Label" parent="Content/Photo"]
+unique_name_in_owner = true
+visible = false
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -126.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 38.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.97, 0.87, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_completion")
+text = "Afgerond"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CheckIcon" type="Control" parent="Content/Photo/Completed"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 6.0
+offset_top = -8.0
+offset_right = 22.0
+offset_bottom = 8.0
+mouse_filter = 2
+script = ExtResource("3_icon")
+icon_kind = "check"
+icon_color = Color(1, 0.97, 0.87, 1)
+
+[node name="Description" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 9
+
+[node name="Icon" type="Control" parent="Content/Description"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(51, 47)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+script = ExtResource("3_icon")
+
+[node name="Labels" type="VBoxContainer" parent="Content/Description"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="Content/Description/Labels"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+theme_override_font_sizes/font_size = 17
+
+[node name="Caption" type="Label" parent="Content/Description/Labels"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 24

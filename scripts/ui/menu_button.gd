@@ -20,10 +20,33 @@ extends Button
 		if is_node_ready():
 			%Icon.icon_kind = icon_kind
 
+@export var caption := "":
+	set(value):
+		caption = value
+		if is_node_ready():
+			%Caption.text = caption
+			%Caption.visible = not caption.is_empty()
+@export var compact := false
+var icon_colors := PackedColorArray()
+var completed := false:
+	set(value):
+		completed = value
+		if is_node_ready():
+			%Completed.visible = completed
+
 
 func _ready() -> void:
 	%Label.text = label_text
 	%Icon.icon_kind = icon_kind
+	%Icon.shape_colors = icon_colors
+	%Caption.text = caption
+	%Caption.visible = not caption.is_empty()
+	%Completed.visible = completed
+	if compact:
+		%Icon.custom_minimum_size = Vector2(36, 34)
+		%Label.add_theme_font_size_override("font_size", 22)
+	if not caption.is_empty():
+		%Icon.custom_minimum_size = Vector2(51, 47)
 	# Restates the engine default (VF18) rather than changing it; kept
 	# because the UI contract names it and a future theme/scene edit could
 	# plausibly clear it.

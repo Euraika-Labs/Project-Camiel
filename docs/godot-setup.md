@@ -29,9 +29,9 @@ spelwereld bestaat uit 3D-scenes; de oude 2D/SpriteFrames-verifier geldt niet
 voor deze build.
 
 Audio en voortgang worden beheerd door autoloads. Voortgang blijft lokaal in
-Godots `user://`-directory. Verander `config/name` of de custom user-directory
-niet zonder migratie: bestaande saves kunnen anders onzichtbaar worden.
-De releaseversie staat afzonderlijk in `application/config/version`.
+Godots `user://`-directory. `config/custom_user_dir_name` wijst per platform
+naar de map van eerdere builds van Camiel. Voor een wijziging van die map is
+een migratie van bestaande saves nodig. Zie [versie en releasekanaal](build-and-release.md#versiebron).
 
 ## Verificatie
 

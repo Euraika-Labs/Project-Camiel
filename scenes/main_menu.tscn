@@ -5,6 +5,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="3_rtw2f"]
 [ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="4_oa1go"]
 [ext_resource type="Script" path="res://scripts/ui/vector_icon.gd" id="6_bgm01"]
+[ext_resource type="Script" path="res://scripts/ui/camiel_portrait.gd" id="7_portrait"]
+[ext_resource type="Script" path="res://scripts/ui/volume_slider.gd" id="8_volume"]
 
 [node name="MainMenu" type="Control" unique_id=363801507]
 layout_mode = 3
@@ -20,11 +22,21 @@ script = ExtResource("2_8ln24")
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.62, 0.82, 0.95, 1)
+mouse_filter = 2
+color = Color(0.992, 0.961, 0.894, 1)
+
+[node name="CamielPortrait" type="SubViewportContainer" parent="."]
+layout_mode = 0
+anchor_left = 0.55
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+stretch = true
+script = ExtResource("7_portrait")
 
 [node name="CenterContainer" type="CenterContainer" parent="." unique_id=1047068865]
 layout_mode = 0
-anchor_right = 1.0
+anchor_right = 0.55
 anchor_bottom = 1.0
 
 [node name="MarginContainer" type="MarginContainer" parent="CenterContainer" unique_id=1978740896]
@@ -36,39 +48,68 @@ theme_override_constants/margin_bottom = 32
 
 [node name="Content" type="VBoxContainer" parent="CenterContainer/MarginContainer" unique_id=589495484]
 layout_mode = 2
-theme_override_constants/separation = 32
+theme_override_constants/separation = 17
 alignment = 1
+
+[node name="Heading" type="Label" parent="CenterContainer/MarginContainer/Content"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "Waar gaan we spelen?"
 
 [node name="StartButton" type="Button" parent="CenterContainer/MarginContainer/Content" unique_id=1313707963 instance=ExtResource("3_rtw2f")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 112)
+custom_minimum_size = Vector2(280, 132)
 layout_mode = 2
-focus_neighbor_bottom = NodePath("../LessonsButton")
-focus_next = NodePath("../LessonsButton")
+focus_neighbor_bottom = NodePath("../OtherChoices/LessonsButton")
+focus_next = NodePath("../OtherChoices/LessonsButton")
 theme = ExtResource("1_wu84c")
+theme_type_variation = &"PrimaryButton"
 script = ExtResource("4_oa1go")
 label_text = "Start"
-icon_kind = "walk"
+icon_kind = "paw"
+caption = "Verken de bostuin"
 
-[node name="LessonsButton" type="Button" parent="CenterContainer/MarginContainer/Content" unique_id=1170553464 instance=ExtResource("3_rtw2f")]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 112)
+[node name="OtherChoices" type="HBoxContainer" parent="CenterContainer/MarginContainer/Content"]
 layout_mode = 2
-focus_neighbor_top = NodePath("../StartButton")
-focus_neighbor_bottom = NodePath("../AudioPanel/AudioRows/SfxRow/SfxSlider")
-focus_next = NodePath("../AudioPanel/AudioRows/SfxRow/SfxSlider")
-focus_previous = NodePath("../StartButton")
+theme_override_constants/separation = 14
+
+[node name="LessonsButton" type="Button" parent="CenterContainer/MarginContainer/Content/OtherChoices" unique_id=1170553464 instance=ExtResource("3_rtw2f")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 132)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_neighbor_top = NodePath("../../StartButton")
+focus_neighbor_bottom = NodePath("../../AudioPanel/AudioRows/SfxRow/SfxSlider")
+focus_next = NodePath("../../AudioPanel/AudioRows/SfxRow/SfxSlider")
+focus_previous = NodePath("../../StartButton")
 theme = ExtResource("1_wu84c")
 script = ExtResource("4_oa1go")
 label_text = "Lessen"
 icon_kind = "lesson_shapes"
+caption = "Kies uit zes opdrachten"
+
+[node name="IntroButton" parent="CenterContainer/MarginContainer/Content/OtherChoices" instance=ExtResource("3_rtw2f")]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 132)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_neighbor_left = NodePath("../LessonsButton")
+focus_neighbor_top = NodePath("../../StartButton")
+focus_neighbor_bottom = NodePath("../../AudioPanel/AudioRows/SfxRow/SfxSlider")
+focus_next = NodePath("../../AudioPanel/AudioRows/SfxRow/SfxSlider")
+focus_previous = NodePath("../LessonsButton")
+accessibility_name = "Intro opnieuw spelen"
+label_text = "Intro"
+icon_kind = "walk"
+caption = "Opnieuw oefenen"
 
 [node name="AudioPanel" type="PanelContainer" parent="CenterContainer/MarginContainer/Content" unique_id=2087255942]
 layout_mode = 2
 
 [node name="AudioRows" type="VBoxContainer" parent="CenterContainer/MarginContainer/Content/AudioPanel" unique_id=2102474019]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 12
 
 [node name="SfxRow" type="HBoxContainer" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows" unique_id=1561870240]
 layout_mode = 2
@@ -87,12 +128,13 @@ text = "Geluid"
 
 [node name="SfxSlider" type="HSlider" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows/SfxRow" unique_id=1095766806]
 unique_name_in_owner = true
+script = ExtResource("8_volume")
 custom_minimum_size = Vector2(320, 56)
 layout_mode = 2
-focus_neighbor_top = NodePath("../../../../LessonsButton")
+focus_neighbor_top = NodePath("../../../../OtherChoices/LessonsButton")
 focus_neighbor_bottom = NodePath("../../BgmRow/BgmSlider")
 focus_next = NodePath("../../BgmRow/BgmSlider")
-focus_previous = NodePath("../../../../LessonsButton")
+focus_previous = NodePath("../../../../OtherChoices/LessonsButton")
 step = 5.0
 value = 80.0
 tick_count = 6
@@ -115,6 +157,7 @@ text = "Muziek"
 
 [node name="BgmSlider" type="HSlider" parent="CenterContainer/MarginContainer/Content/AudioPanel/AudioRows/BgmRow" unique_id=1865827561]
 unique_name_in_owner = true
+script = ExtResource("8_volume")
 custom_minimum_size = Vector2(320, 56)
 layout_mode = 2
 focus_neighbor_top = NodePath("../../SfxRow/SfxSlider")

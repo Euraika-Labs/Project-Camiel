@@ -153,21 +153,21 @@ Which phases cover which requirements.
 | PROGRESS-01 | Phase 3 | Verified: startup and progress probe |
 | PROGRESS-02 | Phase 3 | Verified: all six lesson IDs reloaded by fresh process; unchanged save hash |
 | ACCESS-01 | Phase 4 | Verified: 195 computed pairs, minimum 5.339:1; see docs/accessibility-report.md |
-| ACCESS-02 | Phase 4 | Verified: accessibility probe and native settings flow |
+| ACCESS-02 | Phase 4 | Verified. In alpha-v0.0.44 the setting immediately changes the theme and displays its on or off state. The browser displayed the on state again after returning to settings from the garden. |
 | CI-01 | Phase 4 | Verified: pinned engine and successful remote CI/exports |
 | CI-02 | Phase 4 | Verified: config/version, release_version.py and artifact names |
 | CI-03 | Phase 4 | Verified: remote headless gate and 16 fault-injection cases |
-| CI-04 | Phase 4 | Verified: Linux export/package; native Linux play untested |
+| CI-04 | Phase 4 | Verified in Debian 12.15 VM: packaged alpha-v0.0.42 through all six lessons with two restarts and unchanged progress after garden replay. Physical-device acceptance open. |
 | CI-05 | Phase 4 | Open: no tagged release publication executed; workflow tests only |
 | DOCS-01 | Phase 4 | Verified against merged 3D implementation; explicit acceptance limits |
 | DOCS-02 | Phase 4 | Verified: README agrees with proprietary LICENSE |
-| VOICE-01 | Phase 5 | Technical pass: voice/assets probes; human intelligibility open |
+| VOICE-01 | Phase 5 | Technical pass. The alpha-v0.0.44 title, menu and intro narration was captured in Chrome and the Linux build. With Firefox autoplay blocked, the welcome can play after activating the page and the full menu cue plays after choosing Play. Lesson guidance after pausing and touching a wrong shape was verified in alpha-v0.0.23. Human intelligibility remains open. |
 | VOICE-02 | Phase 5 | Technical pass: independent Voice bus; device listening open |
 | MOBILE-01 | Phase 6 | Technical pass: proportional input probe; physical touch open |
-| MOBILE-02 | Phase 6 | Technical pass: simultaneous input probe; physical touch open |
+| MOBILE-02 | Phase 6 | Technical pass. The alpha-v0.0.43 Web build accepted two simulated contacts for movement and jumping on HTTPS at 568 × 260. Physical touch remains open. |
 | MOBILE-03 | Phase 6 | Verified: shared controller attaches touch UI in intro and all six lessons |
 | WEB-01 | Phase 7 | Verified: local export and Chromium WebGL gameplay |
-| WEB-02 | Phase 7 | Partial: remote CI export passes; local build played, CI artifact not separately played |
+| WEB-02 | Phase 7 | Partial. The historical CI Web export passed and its archive expired. The current workflow checks the freshly packaged archive in Chrome before upload. The local alpha-v0.0.42 package boots and a damaged WebAssembly file is rejected. First GitHub run with the new check remains open. |
 | WEB-03 | Phase 7 | Verified: availability and evidence boundaries aligned |
 | DASH-01 | Phase 8 | Verified: actual Godot save imported; browser statistics checked |
 | DASH-02 | Phase 8 | Verified: HTTP tests and browser import match version-1 contract |
@@ -183,4 +183,4 @@ Which phases cover which requirements.
 
 ---
 *Requirements defined: 2026-09-11*
-*Last updated: 2026-09-19 — merged implementation, remote CI and bounded acceptance reconciled*
+*Last updated: 2026-11-27 — recorded alpha-v0.0.44 startup narration in Chrome, Firefox and the Linux build*

@@ -126,13 +126,21 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(json.loads(self.request('GET', '/api/progress')[2]), data)
 
     def test_origins_hosts_and_paths(self):
+        data = {'version': 1, 'entries': []}
+        upload_headers = {
+            'Content-Type': 'multipart/form-data; boundary=camiel-test',
+            'Content-Length': str(len(multipart(json.dumps(data).encode()))),
+        }
         for headers in [{'Host': 'evil.example'}, {'Origin': 'https://evil.example'},
                         {'Origin': 'null'}, {'Sec-Fetch-Site': 'cross-site'},
                         {'Sec-Fetch-Site': 'same-site'}]:
             self.assertEqual(self.request('GET', '/api/progress', headers=headers)[0], 403)
-            self.assertEqual(self.upload({'version': 1, 'entries': []}, headers=headers)[0], 403)
+            # The dashboard rejects the origin before reading the body. Wait for
+            # that response so sending the body does not race closing the socket.
+            status, _, _ = self.request('POST', '/api/progress/import', headers={**upload_headers, **headers})
+            self.assertEqual(status, 403)
         origin = f'http://127.0.0.1:{self.server.server_port}'
-        self.assertEqual(self.upload({'version': 1, 'entries': []}, headers={'Origin': origin})[0], 200)
+        self.assertEqual(self.upload(data, headers={'Origin': origin})[0], 200)
         for path in ['/../project.godot', '/%2e%2e/project.godot', '/server.py', '//etc/passwd']:
             self.assertEqual(self.request('GET', path)[0], 404)
 

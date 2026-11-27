@@ -11,11 +11,18 @@ extends Area3D
 
 signal finished
 
+@onready var _rim := $Mesh.mesh.material.duplicate() as StandardMaterial3D
+
 var _touched := false
 
 
 func _ready() -> void:
+	$Mesh.material_override = _rim
 	body_entered.connect(_on_body_entered)
+
+
+func set_guided(guided: bool) -> void:
+	_rim.emission_energy_multiplier = 0.6 if guided else 0.06
 
 
 func _on_body_entered(body: Node3D) -> void:

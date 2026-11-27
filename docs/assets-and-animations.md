@@ -2,7 +2,7 @@
 
 ## Camiel
 
-Het huidige model staat in `assets/characters/camiel/camiel.glb`, met importinstellingen in de bijbehorende `.glb.import`. Het is een voor dit project opgebouwd, textuurvrij glTF-model met materiaalvlakken en transformanimaties. De generator is `scripts/tools/build_camiel_model.py`; de referentie is Camiels gearchiveerde 2D-tekening. Het model is meegeleverd, dus Python of modelleersoftware is tijdens het spelen niet nodig.
+Het model staat in `assets/characters/camiel/camiel.glb`, met importinstellingen in de bijbehorende `.glb.import`. De generator `scripts/tools/build_camiel_model.py` maakt de vormen, animaties en één ingebedde kleurtextuur voor de driekleurige vacht en halsdoek. Camiels gearchiveerde 2D-tekening dient als referentie. Python is alleen nodig om het model opnieuw te genereren.
 
 ```bash
 python3 scripts/tools/build_camiel_model.py

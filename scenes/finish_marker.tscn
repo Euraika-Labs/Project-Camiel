@@ -7,15 +7,28 @@ height = 3.0
 radius = 0.6
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6kfse"]
-albedo_color = Color(0.45490196, 0.7764706, 0.6156863, 1)
+albedo_color = Color(0.32, 0.66, 0.55, 1)
 emission_enabled = true
-emission = Color(0.45490196, 0.7764706, 0.6156863, 1)
-emission_energy_multiplier = 1.5
+emission = Color(0.38, 0.77, 0.66, 1)
+emission_energy_multiplier = 0.06
+roughness = 0.8
 
 [sub_resource type="TorusMesh" id="TorusMesh_1v5qh"]
 material = SubResource("StandardMaterial3D_6kfse")
 inner_radius = 0.9
 outer_radius = 1.2
+
+[sub_resource type="StandardMaterial3D" id="Material_wood"]
+albedo_color = Color(0.55, 0.38, 0.26, 1)
+roughness = 0.94
+
+[sub_resource type="BoxMesh" id="Mesh_post"]
+material = SubResource("Material_wood")
+size = Vector3(0.22, 2.45, 0.27)
+
+[sub_resource type="BoxMesh" id="Mesh_beam"]
+material = SubResource("Material_wood")
+size = Vector3(2.92, 0.24, 0.37)
 
 [node name="FinishMarker" type="Area3D" unique_id=566999589]
 script = ExtResource("1_0dvil")
@@ -25,5 +38,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 shape = SubResource("CylinderShape3D_ob7jb")
 
 [node name="Mesh" type="MeshInstance3D" parent="." unique_id=888019258]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1.2, 0)
+position = Vector3(0, 0.075, 0)
+scale = Vector3(1, 0.52, 1)
 mesh = SubResource("TorusMesh_1v5qh")
+
+[node name="LeftPost" type="MeshInstance3D" parent="."]
+position = Vector3(-1.28, 1.225, -1.92)
+mesh = SubResource("Mesh_post")
+
+[node name="RightPost" type="MeshInstance3D" parent="."]
+position = Vector3(1.28, 1.225, -1.92)
+mesh = SubResource("Mesh_post")
+
+[node name="Beam" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.51, -1.92)
+mesh = SubResource("Mesh_beam")

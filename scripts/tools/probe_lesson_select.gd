@@ -19,6 +19,7 @@ const LESSON_SELECT_SCRIPT_PATH := "res://scripts/lesson_select.gd"
 const LESSON_SELECT_PATH := "res://scenes/lesson_select.tscn"
 const MAIN_MENU_PATH := "res://scenes/main_menu.tscn"
 const INTRO_LEVEL_PATH := "res://scenes/intro_level.tscn"
+const LESSON_CATALOG := preload("res://scripts/lesson_catalog.gd")
 
 ## How many lessons this milestone promises a child (LESSON-06). Asserted as a
 ## number rather than inferred from the table, because every other assertion in
@@ -205,8 +206,14 @@ func _case_main_menu_opens_lesson_select() -> void:
 	menu.queue_free()
 	await process_frame
 
-	# A fresh menu, because the first one's guard has already fired: the Start
-	# control must still request exactly one transition to the intro level.
+	# A fresh menu checks that visiting the lesson picker preserves the route
+	# offered by the primary button for the player's saved progress.
+	var tracker := root.get_node("ProgressTracker")
+	var completed: Dictionary = tracker.completed_lesson_ids()
+	var expected_target := INTRO_LEVEL_PATH
+	if tracker.has_completed_intro() or not completed.is_empty():
+		var next := LESSON_CATALOG.next_unfinished_index(completed)
+		expected_target = LESSON_CATALOG.LESSONS[next]["path"] if next >= 0 else LESSON_CATALOG.CELEBRATION_PATH
 	var fresh_menu: Control = await _open_screen(case_name, MAIN_MENU_PATH)
 	if _failed:
 		return
@@ -227,8 +234,8 @@ func _case_main_menu_opens_lesson_select() -> void:
 	if _transition_count != 1:
 		_fail(case_name, "the Start control fired transition_requested %d times, expected 1" % _transition_count)
 		return
-	if _transition_target != INTRO_LEVEL_PATH:
-		_fail(case_name, "the Start control now carries %s, expected %s -- inserting the new control must not change what Start does" % [_transition_target, INTRO_LEVEL_PATH])
+	if _transition_target != expected_target:
+		_fail(case_name, "the primary control requested %s, expected %s" % [_transition_target, expected_target])
 		return
 
 	fresh_menu.transition_requested.disconnect(_on_transition_requested_counted)
@@ -245,6 +252,8 @@ func _case_main_menu_opens_lesson_select() -> void:
 ## cycle running all the way around in both directions.
 func _case_lesson_table_drives_buttons() -> void:
 	var case_name := "lesson_table_drives_buttons"
+	var initial_size := root.size
+	root.size = Vector2i(800, 450)
 	var screen: Control = await _open_screen(case_name, LESSON_SELECT_PATH)
 	if _failed:
 		return
@@ -306,6 +315,13 @@ func _case_lesson_table_drives_buttons() -> void:
 		if child.icon_kind != String(entry.get("icon", "")):
 			_fail(case_name, "%s's icon kind is %s, expected %s" % [entry_id, child.icon_kind, entry.get("icon")])
 			return
+		var illustration := child.get_node_or_null("%Illustration") as TextureRect
+		if illustration == null or illustration.texture == null or illustration.texture.resource_path.get_file() != entry_id + ".webp":
+			_fail(case_name, "%s does not show its own lesson preview" % entry_id)
+			return
+		if child.accessibility_name != "%s, %s" % [entry["label"], entry["caption"]]:
+			_fail(case_name, "%s is missing the accessible lesson name" % entry_id)
+			return
 		var connections := child.get_signal_connection_list("pressed")
 		if connections.size() != 1:
 			_fail(case_name, "%s.pressed has %d connections, expected 1 (the screen's own handler)" % [entry_id, connections.size()])
@@ -334,26 +350,6 @@ func _case_lesson_table_drives_buttons() -> void:
 
 		buttons.append(child)
 
-	# The declared focus cycle, all the way around and back, wrapping at both
-	# ends (D-32). Read as a NodePath and resolved, the same way the shipped
-	# win-screen probe asserts its own focus order.
-	for i in buttons.size():
-		var button := buttons[i]
-		var expected_next := buttons[(i + 1) % buttons.size()]
-		var expected_previous := buttons[(i - 1 + buttons.size()) % buttons.size()]
-		if _resolve_neighbor(button, button.focus_neighbor_right) != expected_next:
-			_fail(case_name, "%s's rightward focus neighbour does not resolve to %s" % [button.name, expected_next.name])
-			return
-		if _resolve_neighbor(button, button.focus_neighbor_bottom) != expected_next:
-			_fail(case_name, "%s's downward focus neighbour does not resolve to %s" % [button.name, expected_next.name])
-			return
-		if _resolve_neighbor(button, button.focus_neighbor_left) != expected_previous:
-			_fail(case_name, "%s's leftward focus neighbour does not resolve to %s" % [button.name, expected_previous.name])
-			return
-		if _resolve_neighbor(button, button.focus_neighbor_top) != expected_previous:
-			_fail(case_name, "%s's upward focus neighbour does not resolve to %s" % [button.name, expected_previous.name])
-			return
-
 	if not buttons[0].has_focus():
 		_fail(case_name, "the first lesson button does not hold focus after the screen is ready")
 		return
@@ -365,7 +361,56 @@ func _case_lesson_table_drives_buttons() -> void:
 	if back_button.label_text != "Naar menu":
 		_fail(case_name, "%%BackButton's label reads %s, expected Naar menu" % back_button.label_text)
 		return
+	var first := buttons[0]
+	var second := buttons[1]
+	var lower := buttons[3]
+	var last: Button = buttons.back()
+	if _resolve_neighbor(first, first.focus_neighbor_right) != second or _resolve_neighbor(second, second.focus_neighbor_left) != first:
+		_fail(case_name, "horizontal arrows did not connect adjacent cards")
+		return
+	if _resolve_neighbor(first, first.focus_neighbor_bottom) != lower or _resolve_neighbor(lower, lower.focus_neighbor_top) != first:
+		_fail(case_name, "vertical arrows did not connect matching columns")
+		return
+	if _resolve_neighbor(lower, lower.focus_neighbor_bottom) != back_button:
+		_fail(case_name, "the menu button was unreachable from the bottom row")
+		return
+	var celebration: Button = screen.get_node("%CelebrationButton")
+	var after_back := celebration if celebration.visible else first
+	if _resolve_neighbor(last, last.focus_next) != back_button or _resolve_neighbor(back_button, back_button.focus_next) != after_back:
+		_fail(case_name, "the Tab cycle did not include both the lessons and the menu button")
+		return
+	if celebration.visible and _resolve_neighbor(celebration, celebration.focus_next) != first:
+		_fail(case_name, "the Tab cycle did not continue from the celebration to the first card")
+		return
 
+	root.size = Vector2i(320, 568)
+	for frame in 6:
+		await process_frame
+	var view := root.get_visible_rect()
+	if grid.columns != 2 or not view.encloses(grid.get_global_rect()) or not view.encloses(back_button.get_global_rect()):
+		_fail(case_name, "illustrated cards or the return button overflow the small portrait screen")
+		return
+	if _resolve_neighbor(first, first.focus_neighbor_bottom) != buttons[2]:
+		_fail(case_name, "portrait keyboard focus does not follow the two visible columns")
+		return
+	root.size = Vector2i(540, 540)
+	for frame in 6:
+		await process_frame
+	if grid.columns != 2 or not root.get_visible_rect().encloses(grid.get_global_rect()):
+		_fail(case_name, "the nearly square window should keep the two-column layout")
+		return
+	root.size = Vector2i(568, 260)
+	for frame in 6:
+		await process_frame
+	view = root.get_visible_rect()
+	if grid.columns != 3 or not view.encloses(grid.get_global_rect()) or not view.encloses(back_button.get_global_rect()):
+		_fail(case_name, "illustrated cards or the return button overflow the short landscape screen")
+		return
+	if _resolve_neighbor(first, first.focus_neighbor_bottom) != buttons[3]:
+		_fail(case_name, "landscape keyboard focus does not follow the three visible columns")
+		return
+	root.size = initial_size
+	await process_frame
 	screen.queue_free()
 	await process_frame
 

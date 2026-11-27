@@ -15,17 +15,23 @@ reverse proxy of publieke hosting). Er is geen toegang vanaf een ander apparaat.
 
 ## Het voortgangsbestand vinden
 
-Het spel schrijft `user://progress.json` via `scripts/progress_tracker.gd`.
-Voor de huidige projectnaam `Camiel alpha-v0.0.3` staat dit normaal in:
+De desktopversie bewaart lesresultaten in `user://progress.json`. Camiel gebruikt voor
+oudere en nieuwe saves dezelfde opslagmap per platform.
 
 - Windows: `%APPDATA%\Godot\app_userdata\Camiel alpha-v0.0.3\progress.json`
 - macOS: `~/Library/Application Support/Godot/app_userdata/Camiel alpha-v0.0.3/progress.json`
 - Linux: `~/.local/share/godot/app_userdata/Camiel alpha-v0.0.3/progress.json`
 
-De mapnaam volgt `application/config/name` in `project.godot`. Kopieer het bestand
-bij voorkeur nadat het spel afgesloten is. Het dashboard zoekt of wijzigt geen
-spelbestanden. Voor een webbuild is een expliciete export vanuit de webopslag nodig;
-dit dashboard leest de browseropslag van het spel niet automatisch.
+De mapnaam volgt `application/config/custom_user_dir_name` in `project.godot`. Kopieer het bestand
+bij voorkeur nadat het spel afgesloten is. Het dashboard gebruikt het bestand dat je zelf kiest.
+
+Maak voor de webversie vanaf alpha-v0.0.31 een `progress.json` via de ontwikkelaarstools
+in het tabblad van Camiel. Voer dit uit in de console en bewaar de uitvoer als bestand.
+
+```js
+const {version, entries} = JSON.parse(window.camielProgress.read())
+JSON.stringify({version, entries}, null, 2)
+```
 
 ## Werkelijk opslagformaat
 

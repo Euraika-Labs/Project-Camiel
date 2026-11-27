@@ -13,6 +13,7 @@
 script = ExtResource("1_nptbh")
 
 [node name="LessonRoom" type="Node3D" parent="." unique_id=1248342695 instance=ExtResource("2_7b4e1")]
+chapter = 1
 
 [node name="PlayerSpawn" type="Marker3D" parent="." unique_id=1271368917]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 4.5)
@@ -33,6 +34,7 @@ script = ExtResource("8_2stxa")
 task_id = "red"
 target_color = Color(0.86, 0.16, 0.16, 1)
 shape_kind = "box"
+painted = true
 
 [node name="BlueTarget" type="Area3D" parent="." unique_id=501464666 instance=ExtResource("7_et10w")]
 unique_name_in_owner = true
@@ -41,6 +43,7 @@ script = ExtResource("8_2stxa")
 task_id = "blue"
 target_color = Color(0.13, 0.35, 0.82, 1)
 shape_kind = "box"
+painted = true
 
 [node name="CountGroup" type="Node3D" parent="." unique_id=973363779]
 unique_name_in_owner = true
@@ -51,6 +54,7 @@ script = ExtResource("8_2stxa")
 task_id = "count_1"
 target_color = Color(0.92941177, 0.61960787, 0.3019608, 1)
 shape_kind = "sphere"
+painted = true
 
 [node name="Count2" type="Area3D" parent="CountGroup" unique_id=44241771 instance=ExtResource("7_et10w")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
@@ -58,6 +62,7 @@ script = ExtResource("8_2stxa")
 task_id = "count_2"
 target_color = Color(0.92941177, 0.61960787, 0.3019608, 1)
 shape_kind = "sphere"
+painted = true
 
 [node name="Count3" type="Area3D" parent="CountGroup" unique_id=1835820597 instance=ExtResource("7_et10w")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 0.5, 0)
@@ -65,3 +70,4 @@ script = ExtResource("8_2stxa")
 task_id = "count_3"
 target_color = Color(0.92941177, 0.61960787, 0.3019608, 1)
 shape_kind = "sphere"
+painted = true

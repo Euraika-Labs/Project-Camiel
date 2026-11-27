@@ -1,0 +1,151 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/garden_celebration.gd" id="2_celebration"]
+[ext_resource type="Script" path="res://scripts/ui/camiel_portrait.gd" id="3_portrait"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="4_button"]
+[ext_resource type="Script" path="res://scripts/ui/vector_icon.gd" id="5_icons"]
+[ext_resource type="Script" path="res://scripts/ui/party_confetti.gd" id="6_confetti"]
+
+[sub_resource type="Gradient" id="Gradient_cream"]
+colors = PackedColorArray(1, 0.97, 0.88, 1, 0.94, 0.90, 0.77, 1)
+
+[sub_resource type="GradientTexture2D" id="Texture_cream"]
+gradient = SubResource("Gradient_cream")
+width = 2
+height = 192
+fill_to = Vector2(0, 1)
+
+[node name="GardenCelebration" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+script = ExtResource("2_celebration")
+
+[node name="Background" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = SubResource("Texture_cream")
+expand_mode = 1
+
+[node name="PictureArea" type="Control" parent="."]
+anchor_right = 0.5
+anchor_bottom = 1.0
+mouse_filter = 2
+clip_contents = true
+
+[node name="CamielPortrait" type="SubViewportContainer" parent="PictureArea"]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+stretch = true
+script = ExtResource("3_portrait")
+celebrate = true
+
+[node name="PartyConfetti" type="Control" parent="PictureArea"]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("6_confetti")
+
+[node name="CheerButton" parent="PictureArea" instance=ExtResource("4_button")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(212, 90)
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -106.0
+offset_top = -110.0
+offset_right = 106.0
+offset_bottom = -20.0
+focus_neighbor_bottom = NodePath("../../ContentArea/Margin/Rows/Actions/LessonsButton")
+focus_next = NodePath("../../ContentArea/Margin/Rows/Actions/LessonsButton")
+focus_previous = NodePath("../../ContentArea/Margin/Rows/Actions/MenuButton")
+accessibility_name = "Vier mee met Camiel"
+label_text = "Vier mee"
+icon_kind = "paw"
+compact = true
+
+[node name="ContentArea" type="CenterContainer" parent="."]
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Margin" type="MarginContainer" parent="ContentArea"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 18
+
+[node name="Rows" type="VBoxContainer" parent="ContentArea/Margin"]
+custom_minimum_size = Vector2(498, 0)
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Heading" type="HBoxContainer" parent="ContentArea/Margin/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Medal" type="Control" parent="ContentArea/Margin/Rows/Heading"]
+custom_minimum_size = Vector2(114, 110)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+script = ExtResource("5_icons")
+icon_kind = "medal"
+
+[node name="Title" type="Label" parent="ContentArea/Margin/Rows/Heading"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 41
+text = "Alle zes lessen klaar!"
+autowrap_mode = 3
+
+[node name="LessonBadges" type="GridContainer" parent="ContentArea/Margin/Rows"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 9
+theme_override_constants/v_separation = 9
+columns = 3
+
+[node name="Actions" type="HBoxContainer" parent="ContentArea/Margin/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LessonsButton" parent="ContentArea/Margin/Rows/Actions" instance=ExtResource("4_button")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(206, 90)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_neighbor_left = NodePath("../MenuButton")
+focus_neighbor_top = NodePath("../../../../../PictureArea/CheerButton")
+focus_neighbor_right = NodePath("../MenuButton")
+focus_next = NodePath("../MenuButton")
+focus_previous = NodePath("../../../../../PictureArea/CheerButton")
+theme_type_variation = &"PrimaryButton"
+label_text = "Naar lessen"
+icon_kind = "lesson_shapes"
+compact = true
+
+[node name="MenuButton" parent="ContentArea/Margin/Rows/Actions" instance=ExtResource("4_button")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(206, 90)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_neighbor_left = NodePath("../LessonsButton")
+focus_neighbor_top = NodePath("../../../../../PictureArea/CheerButton")
+focus_neighbor_right = NodePath("../LessonsButton")
+focus_next = NodePath("../../../../../PictureArea/CheerButton")
+focus_previous = NodePath("../LessonsButton")
+label_text = "Naar menu"
+icon_kind = "home"
+compact = true

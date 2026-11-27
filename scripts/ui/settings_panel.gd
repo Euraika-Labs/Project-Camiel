@@ -1,67 +1,60 @@
-# Accessible settings overlay, created only from the main menu.
 extends CanvasLayer
+## Shared settings dialog for the main menu and the paused playground.
+
+var pause_game := false
+var _owns_pause := false
 
 
 func _ready() -> void:
-	layer = 20
-	var backdrop := ColorRect.new()
-	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	backdrop.color = Color(0, 0, 0, 0.65)
-	add_child(backdrop)
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-	var panel := PanelContainer.new()
-	panel.theme = load("res://assets/theme/ui_theme.tres")
-	center.add_child(panel)
-	var rows := VBoxContainer.new()
-	rows.custom_minimum_size = Vector2(500, 0)
-	rows.add_theme_constant_override("separation", 24)
-	panel.add_child(rows)
-	var title := Label.new()
-	title.text = "Instellingen"
-	title.theme_type_variation = "HeadingLabel"
-	rows.add_child(title)
-	var contrast := CheckButton.new()
-	contrast.text = "Hoog contrast"
-	contrast.custom_minimum_size.y = 64
-	contrast.button_pressed = Accessibility.high_contrast
-	contrast.toggled.connect(Accessibility.set_high_contrast)
-	rows.add_child(contrast)
-	var focus_controls: Array[Control] = [contrast]
-	var voice := get_tree().root.get_node_or_null("VoiceManager")
-	if voice != null:
-		var voice_label := Label.new()
-		voice_label.text = "Stem"
-		rows.add_child(voice_label)
-		var voice_volume := HSlider.new()
-		voice_volume.name = "VoiceVolume"
-		voice_volume.custom_minimum_size = Vector2(420, 64)
-		voice_volume.min_value = 0
-		voice_volume.max_value = 100
-		voice_volume.step = 5
-		voice_volume.value = voice.get_volume() * 100.0
-		voice_volume.value_changed.connect(func(value: float) -> void: voice.set_volume(value / 100.0))
-		rows.add_child(voice_volume)
-		focus_controls.append(voice_volume)
-	var close := Button.new()
-	close.text = "Terug"
-	close.custom_minimum_size.y = 64
-	close.pressed.connect(queue_free)
-	rows.add_child(close)
-	focus_controls.append(close)
-	for index in focus_controls.size():
-		var control := focus_controls[index]
-		var next := focus_controls[(index + 1) % focus_controls.size()]
-		var previous := focus_controls[(index - 1 + focus_controls.size()) % focus_controls.size()]
-		control.focus_next = control.get_path_to(next)
-		control.focus_previous = control.get_path_to(previous)
+	if pause_game:
+		_owns_pause = not get_tree().paused
+		get_tree().paused = true
+		%Title.text = "Pauze"
+		%CloseButton.label_text = "Verder spelen"
+
+	_bind_volume(%MusicVolume, %MusicValue, AudioManager.get_bgm_volume(), AudioManager.set_bgm_volume.bind(true))
+	_bind_volume(%EffectsVolume, %EffectsValue, AudioManager.get_sfx_volume(), AudioManager.set_sfx_volume.bind(true))
+	_bind_volume(%VoiceVolume, %VoiceValue, VoiceManager.get_volume(), VoiceManager.set_volume)
+	%Contrast.toggled.connect(Accessibility.set_high_contrast)
+	Accessibility.contrast_changed.connect(_refresh_contrast)
+	_refresh_contrast(Accessibility.high_contrast)
+	%CloseButton.pressed.connect(queue_free)
+
+	var controls: Array[Control] = [%MusicVolume, %EffectsVolume, %VoiceVolume, %Contrast, %CloseButton]
+	for index in controls.size():
+		var control := controls[index]
+		control.focus_next = control.get_path_to(controls[(index + 1) % controls.size()])
+		control.focus_previous = control.get_path_to(controls[posmod(index - 1, controls.size())])
 		control.focus_neighbor_bottom = control.focus_next
 		control.focus_neighbor_top = control.focus_previous
-	contrast.grab_focus()
+		control.focus_neighbor_left = NodePath(".")
+		control.focus_neighbor_right = NodePath(".")
+	if pause_game:
+		%CloseButton.grab_focus()
+	else:
+		%Contrast.grab_focus()
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
+func _refresh_contrast(enabled: bool) -> void:
+	%Contrast.set_pressed_no_signal(enabled)
+	%Contrast.text = "Hoog contrast (aan)" if enabled else "Hoog contrast (uit)"
+
+
+func _bind_volume(slider: HSlider, caption: Label, level: float, setter: Callable) -> void:
+	slider.set_value_no_signal(level * 100.0)
+	caption.text = "%d%%" % roundi(slider.value)
+	slider.value_changed.connect(func(value: float) -> void:
+		caption.text = "%d%%" % roundi(value)
+		setter.call(value / 100.0)
+	)
+
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") or (pause_game and event.is_action_pressed("pause_play")):
 		get_viewport().set_input_as_handled()
 		queue_free()
+
+
+func _exit_tree() -> void:
+	if _owns_pause:
+		get_tree().paused = false

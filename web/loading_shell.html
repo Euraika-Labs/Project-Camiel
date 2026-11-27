@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="nl">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="$GODOT_SPLASH_COLOR">
+	<title>$GODOT_PROJECT_NAME</title>
+	$GODOT_HEAD_INCLUDE
+	<style>
+		body {
+			margin: 0;
+			overflow: hidden;
+			background: $GODOT_SPLASH_COLOR;
+			color: #1f3a56;
+			font-family: system-ui, sans-serif;
+		}
+
+		#canvas {
+			position: fixed;
+			inset: 0;
+			display: block;
+			max-width: 100%;
+			max-height: 100%;
+			touch-action: none;
+		}
+
+		#canvas:focus {
+			outline: none;
+		}
+
+		#status {
+			position: fixed;
+			inset: 0;
+			display: grid;
+			place-items: center;
+			overflow: auto;
+			padding: 1.5rem;
+			background: linear-gradient(168deg, $GODOT_SPLASH_COLOR 50%, #e5edd8);
+			text-align: center;
+		}
+
+		.status-content {
+			display: grid;
+			justify-items: center;
+			gap: 0.8rem;
+			width: min(100%, 22rem);
+		}
+
+		#status-splash {
+			display: block;
+			width: clamp(5rem, 26vmin, 9.5rem);
+			height: auto;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: clamp(2.1rem, 7vmin, 3.2rem);
+			font-weight: 800;
+			line-height: 1.08;
+		}
+
+		p {
+			margin: 0;
+			line-height: 1.4;
+		}
+
+		#status-progress {
+			width: 90%;
+			height: 1rem;
+			accent-color: #234638;
+		}
+
+		#status-notice {
+			color: #683728;
+		}
+
+		#status-notice:empty {
+			position: absolute;
+		}
+
+		#status-retry {
+			min-height: 3rem;
+			padding: 0.6rem 1.3rem;
+			border: 1px solid #9a6429;
+			border-radius: 0.9rem;
+			background: #ffc766;
+			color: inherit;
+			font: inherit;
+			font-weight: 700;
+			cursor: pointer;
+		}
+
+		#status-retry:focus-visible {
+			outline: 3px solid #234638;
+			outline-offset: 3px;
+		}
+	</style>
+	<noscript><style>.requires-js { display: none; }</style></noscript>
+</head>
+<body>
+	<canvas id="canvas" inert>Deze browser ondersteunt het speelvenster van Camiel niet.</canvas>
+	<div id="status">
+		<div class="status-content">
+			<img id="status-splash" src="$GODOT_SPLASH" alt="" width="192" height="192">
+			<h1>$GODOT_PROJECT_NAME</h1>
+			<p class="requires-js" id="status-message">Even laden…</p>
+			<progress class="requires-js" id="status-progress" aria-labelledby="status-message"></progress>
+			<p id="status-notice" role="status"></p>
+			<button id="status-retry" type="button" hidden>Opnieuw proberen</button>
+			<noscript><p>Schakel JavaScript in om Camiel te spelen.</p></noscript>
+		</div>
+	</div>
+
+	<script src="$GODOT_URL"></script>
+	<script>
+		window.camielProgress = (() => {
+			const databaseName = "camiel-progress";
+			let channel = null;
+			try {
+				if (typeof BroadcastChannel === "function") channel = new BroadcastChannel(databaseName);
+			} catch {} // Saves can still use the database if tab notifications are unavailable.
+			const empty = {version: 1, revision: 0, entries: [], intro_complete: false};
+			let snapshot = empty;
+			let legacy = null;
+			const connection = new Promise((resolve) => {
+				const request = indexedDB.open(databaseName, 1);
+				request.onupgradeneeded = () => request.result.createObjectStore("state");
+				request.onerror = request.onblocked = () => resolve(null);
+				request.onsuccess = () => {
+					const db = request.result;
+					db.onversionchange = () => db.close();
+					resolve(db);
+				};
+			}).catch(() => null);
+
+			function remember(data) {
+				if (!data || data.revision <= snapshot.revision) return;
+				snapshot = data;
+				window.dispatchEvent(new Event("camiel-progress-changed"));
+			}
+
+			async function refresh() {
+				const db = await connection;
+				if (!db) return;
+				await new Promise((resolve) => {
+					const request = db.transaction("state").objectStore("state").get("progress");
+					request.onsuccess = () => {
+						remember(request.result);
+						resolve();
+					};
+					request.onerror = resolve;
+				}).catch(() => {});
+			}
+
+			function mergeLegacy(current) {
+				if (!legacy) return current;
+				// Old saves have no IDs. Preserve the count of each identical result.
+				const counts = new Map();
+				const key = entry => JSON.stringify(Object.entries(entry).sort());
+				for (const entry of current.entries) {
+					const id = key(entry);
+					counts.set(id, (counts.get(id) ?? 0) + 1);
+				}
+				const added = [];
+				for (const entry of legacy.entries) {
+					const id = key(entry);
+					const count = counts.get(id) ?? 0;
+					if (count > 0) counts.set(id, count - 1);
+					else added.push(entry);
+				}
+				const introComplete = current.intro_complete || legacy.intro_complete;
+				if (added.length === 0 && introComplete === current.intro_complete) return current;
+				return {...current, entries: [...current.entries, ...added], intro_complete: introComplete};
+			}
+
+			async function change(update) {
+				const db = await connection;
+				if (!db) return null;
+				return new Promise((resolve) => {
+					const transaction = db.transaction("state", "readwrite");
+					const store = transaction.objectStore("state");
+					const read = store.get("progress");
+					let before, after, written;
+					read.onsuccess = () => {
+						try {
+							const current = read.result ?? empty;
+							before = mergeLegacy(current);
+							after = update(before);
+							written = after !== current;
+							if (written) {
+								after = {...after, revision: current.revision + 1};
+								store.put(after, "progress");
+							}
+						} catch {
+							transaction.abort();
+						}
+					};
+					transaction.onabort = () => resolve(null);
+					transaction.oncomplete = () => {
+						remember(after);
+						resolve(before);
+						if (written) channel?.postMessage(after.revision);
+					};
+				}).catch(() => null);
+			}
+
+			channel?.addEventListener("message", refresh);
+			window.addEventListener("focus", refresh);
+			return {
+				refresh,
+				read: () => JSON.stringify(mergeLegacy(snapshot)),
+				import_legacy(text) {
+					legacy = JSON.parse(text);
+					change(current => current).then(before => {
+						if (before) legacy = null;
+					});
+				},
+				save(kind, text, done) {
+					const update = kind === "lesson"
+						? current => ({...current, entries: [...current.entries, JSON.parse(text)]})
+						: current => current.intro_complete ? current : {...current, intro_complete: true};
+					change(update).then(before => done(before ? JSON.stringify(before.entries) : null));
+				},
+			};
+		})();
+	</script>
+	<script>
+		const canvas = document.getElementById("canvas");
+		const statusOverlay = document.getElementById("status");
+		const statusMessage = document.getElementById("status-message");
+		const statusProgress = document.getElementById("status-progress");
+		const statusNotice = document.getElementById("status-notice");
+		const retryButton = document.getElementById("status-retry");
+
+		function showFailure(message, canRetry) {
+			statusMessage.hidden = true;
+			statusProgress.hidden = true;
+			statusNotice.textContent = message;
+			retryButton.hidden = !canRetry;
+		}
+
+		function updateProgress(current, total) {
+			const message = total > 0 && current >= total ? "De bostuin wordt klaargezet…" : "Even laden…";
+			if (statusMessage.textContent !== message) {
+				statusMessage.textContent = message;
+			}
+			if (total > 0 && current < total) {
+				statusProgress.max = total;
+				statusProgress.value = current;
+			} else {
+				statusProgress.removeAttribute("value");
+			}
+		}
+
+		function configureSoftwareCanvas() {
+			const context = document.createElement("canvas").getContext("webgl2");
+			const debug = context?.getExtension("WEBGL_debug_renderer_info");
+			const renderer = debug ? context.getParameter(debug.UNMASKED_RENDERER_WEBGL) : "";
+			context?.getExtension("WEBGL_lose_context")?.loseContext();
+			window.camielSoftwareRendering = /SwiftShader|llvmpipe/i.test(renderer);
+			if (!window.camielSoftwareRendering) return {};
+
+			// Keep the full play area and limit the drawing buffer in software.
+			canvas.style.width = "100%";
+			canvas.style.height = "100%";
+			function resize() {
+				const density = Math.min(window.devicePixelRatio || 1, 1);
+				const width = Math.max(1, Math.floor(canvas.clientWidth * density));
+				const height = Math.max(1, Math.floor(canvas.clientHeight * density));
+				if (canvas.width !== width) canvas.width = width;
+				if (canvas.height !== height) canvas.height = height;
+			}
+			window.addEventListener("resize", resize);
+			resize();
+			return {canvasResizePolicy: 0};
+		}
+
+		async function startCamiel() {
+			if (window.isSecureContext === false) {
+				showFailure("Open Camiel via een HTTPS-link. Op de computer met de webserver werkt ook het lokale startadres.", false);
+				return;
+			}
+			const missing = Engine.getMissingFeatures({threads: $GODOT_THREADS_ENABLED});
+			if (missing.length) {
+				console.error(missing.join("\n"));
+				showFailure("Deze browser kan Camiel niet openen. Gebruik een browser met WebGL 2.", false);
+				return;
+			}
+			// The Godot Web template uses SIMD. This module contains i8x16.splat.
+			const simdTest = Uint8Array.of(
+				0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0,
+				3, 2, 1, 0, 10, 9, 1, 7, 0, 65, 0, 253, 15, 26, 11
+			);
+			if (!WebAssembly.validate(simdTest)) {
+				showFailure("Deze browser kan Camiel niet openen. Werk je browser bij of probeer een andere browser.", false);
+				return;
+			}
+
+			const firstFrame = new Promise(resolve => {
+				window.addEventListener("camiel-first-frame", resolve, {once: true});
+			});
+			const engine = new Engine($GODOT_CONFIG);
+			let stallTimer = null;
+			let receivedBytes = 0;
+			function watchForStall() {
+				clearTimeout(stallTimer);
+				stallTimer = setTimeout(() => {
+					showFailure("Het laden duurt langer dan verwacht.", true);
+				}, 60000);
+			}
+			function onProgress(current, total) {
+				if (stallTimer === null) return;
+				if (current > receivedBytes) {
+					receivedBytes = current;
+					statusMessage.hidden = false;
+					statusProgress.hidden = false;
+					statusNotice.textContent = "";
+					retryButton.hidden = true;
+					watchForStall();
+				}
+				updateProgress(current, total);
+			}
+
+			watchForStall();
+			try {
+				window.camielProgress.refresh();
+				await engine.startGame({onProgress, ...configureSoftwareCanvas()});
+				await firstFrame;
+			} finally {
+				clearTimeout(stallTimer);
+				stallTimer = null;
+			}
+			statusOverlay.remove();
+			canvas.inert = false;
+			canvas.focus();
+		}
+
+		retryButton.addEventListener("click", () => window.location.reload());
+		startCamiel().catch(error => {
+			console.error(error);
+			showFailure("Het laden van Camiel is onderbroken.", true);
+		});
+	</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import io
 from pathlib import Path
 import subprocess
@@ -41,10 +42,27 @@ class ReleaseBuildTests(unittest.TestCase):
             read_version(self.project)
 
     def test_tag_must_match_checked_out_version(self):
+        self.project.write_text('[application]\nconfig/version="0.0.4"\nconfig/release_channel="alpha"\n')
         tool = Path(build_release.__file__).with_name("release_version.py")
         for tag, status in (("alpha-v0.0.4", 0), ("alpha-v0.0.3", 2)):
             result = subprocess.run([sys.executable, str(tool), "--project", str(self.project), "--tag", tag], capture_output=True)
             self.assertEqual(status, result.returncode)
+
+    def test_numeric_version_and_release_channel(self):
+        for setting, expected in (
+            ("", "v2.3.4"),
+            ('config/release_channel="stable"\n', "v2.3.4"),
+            ('config/release_channel="alpha"\n', "alpha-v2.3.4"),
+        ):
+            with self.subTest(setting=setting):
+                self.project.write_text('[application]\nconfig/version="2.3.4"\n' + setting)
+                self.assertEqual(expected, read_version(self.project))
+        for invalid in ('config/release_channel="beta"\n',
+                        'config/release_channel="alpha"\nconfig/release_channel="stable"\n'):
+            with self.subTest(invalid=invalid):
+                self.project.write_text('[application]\nconfig/version="2.3.4"\n' + invalid)
+                with self.assertRaises(ValueError):
+                    read_version(self.project)
 
     def test_linux_tar_contains_executable_and_sidecar_at_archive_root(self):
         binary = self.payload / (self.stem + ".x86_64")
@@ -122,7 +140,7 @@ class ReleaseBuildTests(unittest.TestCase):
                 if path.suffix == ".html":
                     for extension in (".js", ".wasm", ".pck"):
                         path.with_suffix(extension).write_bytes(b"web resource")
-        self.project.write_text('[application]\nconfig/version="v2.3.4"\n')
+        self.project.write_text('[application]\nconfig/version="2.3.4"\n')
         with patch.object(build_release.subprocess, "check_output", return_value="4.7.2.stable"), patch.object(build_release, "run_godot", side_effect=fake_engine):
             for target in build_release.TARGETS:
                 archive = build_release.build(target, "godot", self.root, self.root)
@@ -137,6 +155,50 @@ class ReleaseBuildTests(unittest.TestCase):
         with patch.object(build_release.subprocess, "check_output", return_value="4.6.2.stable"), patch.object(build_release, "run_godot") as run:
             with self.assertRaises(ValueError):
                 build_release.build("windows", "godot", self.root, self.root)
+            run.assert_not_called()
+
+    def test_windows_portable_pairs_the_verified_runtime_with_the_pack(self):
+        runtime = self.root / "Godot.exe"
+        runtime.write_bytes(b"test runtime")
+        godot_notices = self.root / "Godot-licenties.txt"
+        godot_notices.write_text("Godot notices")
+        (self.root / "LICENSE").write_text("Camiel license")
+        digest = hashlib.sha256(runtime.read_bytes()).hexdigest()
+
+        def fake_engine(engine, *args):
+            if "--export-pack" in args:
+                self.assertEqual(args[-2], "Windows Desktop")
+                Path(args[-1]).write_bytes(b"GDPC packaged game")
+
+        with (
+            patch.object(build_release, "WINDOWS_RUNTIME_SHA256", digest),
+            patch.object(build_release.subprocess, "check_output", return_value="4.7.2.stable"),
+            patch.object(build_release, "run_godot", side_effect=fake_engine),
+        ):
+            archive = build_release.build(
+                "windows-portable", "godot", self.root, self.root,
+                windows_runtime=runtime, godot_notices=godot_notices,
+            )
+        self.assertEqual(archive.name, self.stem + "-windows-portable.zip")
+        with zipfile.ZipFile(archive) as bundle:
+            self.assertEqual(bundle.read("Camiel spelen.exe"), runtime.read_bytes())
+            self.assertEqual(bundle.read("Camiel spelen.pck"), b"GDPC packaged game")
+            self.assertEqual(bundle.read("Godot-licenties.txt"), godot_notices.read_bytes())
+            self.assertEqual(bundle.read("Camiel-licentie.txt"), b"Camiel license")
+            self.assertIn(b"Camiel spelen.exe", bundle.read("START HIER.txt"))
+
+    def test_windows_portable_rejects_an_unrecognized_runtime_before_export(self):
+        runtime = self.root / "Godot.exe"
+        runtime.write_bytes(b"different runtime")
+        with (
+            patch.object(build_release.subprocess, "check_output", return_value="4.7.2.stable"),
+            patch.object(build_release, "run_godot") as run,
+        ):
+            with self.assertRaisesRegex(ValueError, "official Godot 4.7.2-stable"):
+                build_release.build(
+                    "windows-portable", "godot", self.root, self.root,
+                    windows_runtime=runtime, godot_notices=self.root / "Godot-licenties.txt",
+                )
             run.assert_not_called()
 
 

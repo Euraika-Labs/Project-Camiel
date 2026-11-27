@@ -15,6 +15,7 @@ const SFX_BUS := "SFX"
 const BGM_PATH := "res://assets/audio/bgm_ambient.ogg"
 const SFX_COLLECT_PATH := "res://assets/audio/sfx_collect.ogg"
 const SFX_FINISH_PATH := "res://assets/audio/sfx_finish.ogg"
+const VOLUME_SETTINGS_PATH := "user://audio.cfg"
 
 # ── Internal state ───────────────────────────────────────────────
 
@@ -43,11 +44,12 @@ func _ready() -> void:
 		return
 
 	_bgm_player = _get_or_create_player("BGM", MUSIC_BUS)
-	set_bgm_volume(0.6)
-	_start_default_music.call_deferred()
-
 	_sfx_player = _get_or_create_player("SFX", SFX_BUS)
-	set_sfx_volume(0.8)
+	var preferences := ConfigFile.new()
+	preferences.load(VOLUME_SETTINGS_PATH)
+	set_bgm_volume(_read_volume(preferences, "music", 0.6))
+	set_sfx_volume(_read_volume(preferences, "effects", 0.8))
+	_start_default_music.call_deferred()
 
 
 func _exit_tree() -> void:
@@ -99,8 +101,10 @@ func stop_music() -> void:
 
 
 ## Set the Music bus volume. Linear 0.0-1.0, clamped before conversion to dB.
-func set_bgm_volume(linear: float) -> void:
+func set_bgm_volume(linear: float, persist := false) -> void:
 	_apply_bus_volume(_music_bus_index, linear)
+	if persist and _music_bus_index >= 0:
+		_store_volume("music", clampf(linear, 0.0, 1.0))
 
 
 ## Read back the current Music bus volume as a linear 0.0-1.0 value.
@@ -146,8 +150,10 @@ func play_sfx(event: String, custom_path: String = "") -> void:
 
 
 ## Set the SFX bus volume. Linear 0.0-1.0, clamped before conversion to dB.
-func set_sfx_volume(linear: float) -> void:
+func set_sfx_volume(linear: float, persist := false) -> void:
 	_apply_bus_volume(_sfx_bus_index, linear)
+	if persist and _sfx_bus_index >= 0:
+		_store_volume("effects", clampf(linear, 0.0, 1.0))
 
 
 ## Read back the current SFX bus volume as a linear 0.0-1.0 value.
@@ -207,3 +213,24 @@ func _apply_bus_volume(bus_index: int, linear: float) -> void:
 		return
 
 	AudioServer.set_bus_volume_db(bus_index, linear_to_db(clampf(linear, 0.0, 1.0)))
+
+
+func _read_volume(config: ConfigFile, key: String, fallback: float) -> float:
+	var value: Variant = config.get_value("volume", key, fallback)
+	if (value is float or value is int) and is_finite(float(value)):
+		return clampf(float(value), 0.0, 1.0)
+	return fallback
+
+
+func _store_volume(key: String, value: float) -> void:
+	var config := ConfigFile.new()
+	config.load(VOLUME_SETTINGS_PATH)
+	config.set_value("volume", key, value)
+	var temp := VOLUME_SETTINGS_PATH + ".%d.tmp" % OS.get_process_id()
+	var error := config.save(temp)
+	if error == OK:
+		error = DirAccess.rename_absolute(ProjectSettings.globalize_path(temp), ProjectSettings.globalize_path(VOLUME_SETTINGS_PATH))
+	if error != OK:
+		if FileAccess.file_exists(temp):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(temp))
+		push_warning("[AudioManager] Volume kon niet worden bewaard: %s" % error_string(error))

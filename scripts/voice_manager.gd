@@ -31,6 +31,7 @@ func _ready() -> void:
 	_player = AudioStreamPlayer.new()
 	_player.name = "Narration"
 	_player.bus = VOICE_BUS
+	_player.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_player)
 	_player.finished.connect(_on_finished)
 	var config := ConfigFile.new()
@@ -47,21 +48,7 @@ func bind_scene(scene: Node, cue: String) -> void:
 	scene.tree_exiting.connect(_on_owner_exiting.bind(scene), CONNECT_ONE_SHOT)
 	if scene.has_signal("transition_requested"):
 		scene.connect("transition_requested", _on_transition)
-	_connect_feedback(scene)
 	_play_bound.call_deferred(scene, cue, _generation)
-
-
-func _connect_feedback(node: Node) -> void:
-	if node.has_signal("rejected"):
-		node.connect("rejected", _on_rejected)
-	for child: Node in node.get_children():
-		_connect_feedback(child)
-
-
-func _on_rejected() -> void:
-	# Holding a wrong target cannot repeatedly restart the same sentence.
-	if current_cue != "retry":
-		play("retry")
 
 
 func _play_bound(scene: Node, cue: String, generation: int) -> void:
