@@ -17,7 +17,7 @@ Pak het complete platformarchief uit; houd het uitvoerbestand en eventuele bijbe
 
 ## In de browser
 
-De lokale webbuild is in Chrome getest. De exportworkflow in deze werkversie controleert het webpakket in Chrome vóór upload. De eerste GitHub-run met die stap staat open. [Bouwbewijs](build-and-release.md#webpakket-controleren-vóór-upload)
+De lokale webbuild van alpha-v0.0.45 startte in Chrome met het nieuwe titelportret. De exportworkflow controleert het webpakket in Chrome vóór upload. [Bouwbewijs](build-and-release.md#webpakket-controleren-vóór-upload) · [PR-checks](https://github.com/Euraika-Labs/Project-Camiel/pull/13/checks)
 
 Pak de webbuild uit in `builds/web` en voer vanuit de repository uit:
 
